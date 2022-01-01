@@ -1,0 +1,30 @@
+#!/bin/sh
+#
+# Hooks to add custom options to the configure script.
+#
+
+plugin_usage()
+{
+    : # Do nothing
+    cat <<EOF
+    --with-nodjs=DIR           Path to Node.js installation directory.
+EOF
+}
+
+plugin_option()
+{
+    case "$1" in
+       --with-nodejs=*)
+           append_cache_entry NODEJS_ROOT_DIR PATH $optarg
+           return 0
+           ;;
+#        --with-foo=*)
+#            append_cache_entry FOO_DIR PATH $optarg
+#            return 0
+#            ;;
+
+        *)
+            return 1;
+            ;;
+    esac
+}

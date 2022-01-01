@@ -1,0 +1,96 @@
+#pragma once
+
+#include <filesystem>
+#include <unordered_map>
+#include <vector>
+
+#include <zeek/Event.h>
+#include <zeek/EventRegistry.h>
+#include <zeek/iosource/IOSource.h>
+#include <zeek/plugin/Plugin.h>
+
+#include "Nodejs.h"
+#include "ZeekJS.h"
+
+namespace plugin::Corelight_ZeekJS {
+
+/*
+ * Tiny layer between Nodejs::Instance and the zeek::iosource::IOSource
+ * world. Not sure how useful really, but at least it disconnects lifetime
+ * of the Node.js instance and the IOSource as the IOManager deletes the
+ * IOSources registered with it.
+ */
+class JsLoopIOSource : public zeek::iosource::IOSource {
+ public:
+  JsLoopIOSource(plugin::Nodejs::Instance* instance) : instance_(instance) {
+    SetClosed(false);
+  }
+
+  void Process() override { instance_->Process(); }
+
+  double GetNextTimeout() override {
+    // std::fprintf(stderr, "GetNextTimeout\n");
+    return instance_->GetNextTimeout();
+  }
+
+  const char* Tag() override { return instance_->Tag(); }
+
+  void UpdateTime() { instance_->UpdateTime(); }
+
+ private:
+  plugin::Nodejs::Instance* instance_ = nullptr;
+};
+
+class Plugin : public zeek::plugin::Plugin {
+ public:
+  void InitPreScript() override;
+  void InitPostScript() override;
+  void HookDrainEvents() override;
+  int HookLoadFile(const zeek::plugin::Plugin::LoadType,
+                   const std::string& file,
+                   const std::string& resolved) override;
+
+  void Done() override;
+
+  // Methods for use by the Node.js Instance.
+  //
+  // These do not know about Javascript / or V8 specifics.
+  bool RegisterJsEventHandler(const std::string& name,
+                              Js::EventHandler* js_eh,
+                              int priority);
+
+  bool RegisterJsHookHandler(const std::string& name,
+                             Js::HookHandler* js_eh,
+                             int priority);
+
+  // Invoke the given event with args.
+  bool Event(const std::string& name, const zeek::Args& args);
+
+  // Invoke the given function with args.
+  zeek::ValPtr Invoke(const std::string& name,
+                      zeek::Args& args,
+                      const std::string& file_name,
+                      int line_number);
+
+ protected:
+  zeek::plugin::Configuration Configure() override;
+
+  // Register the given Javascript handler into the the Zeek handler as function
+  // body.
+  bool RegisterAsScriptFuncBody(zeek::EventHandlerPtr zeek_eh,
+                                Js::EventHandler* js_eh,
+                                int priority);
+
+ private:
+  std::vector<std::filesystem::path> load_files;
+  plugin::Nodejs::Instance nodejs;
+  JsLoopIOSource* loop_io_source;
+
+  bool use_queue_event = false;
+  std::unordered_map<zeek::EventHandler*, std::vector<Js::EventHandler*> >
+      js_event_handlers;
+};
+
+extern Plugin plugin;
+
+}  // namespace plugin::Corelight_ZeekJS

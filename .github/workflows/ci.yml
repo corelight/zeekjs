@@ -1,0 +1,13 @@
+name: Check
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Check (clang-format, build, btest, clang-tidy)
+      run: docker build -t zeekjs-check -f docker/fedora.Dockerfile .

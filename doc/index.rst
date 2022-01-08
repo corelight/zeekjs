@@ -6,8 +6,8 @@
 ZeekJS
 ======
 
-ZeekJS is an experimental Zeek_ plugin to support Javascript as an
-alternative scripting language in Zeek.
+ZeekJS is an experimental `Zeek <https://zeek.org>`_ plugin to support
+JavaScript as an alternative scripting language in Zeek.
 
 .. code-block:: javascript
 
@@ -16,15 +16,16 @@ alternative scripting language in Zeek.
     });
 
 
-The plugin embeds Node.js_ and primarily deals with converting between
-Javascript and Zeek data types and registering Javascript functions as
-event or hook handlers within Zeek. It further installs Node's IO
+The plugin embeds `Node.js <https://nodejs.org>`_ and primarily deals with
+converting between JavaScript and Zeek data types and registering JavaScript
+functions as event or hook handlers within Zeek. It further installs Node's IO
 loop as an IO source in Zeek.
 
 Getting started
 ===============
 
-Compiling and running ZeekJS requires a Zeek installation and Node.js.
+Compiling and running ZeekJS requires a Zeek installation and Node.js
+available as a shared library.
 
 Zeek
 ----
@@ -37,11 +38,10 @@ latest feature release.
 Node.js
 -------
 
-If your operating system offers a way to install Node.js as a shared
-library and provides development headers as well, that makes things easy.
-
-For example, on Fedora 34 and 35 all that is needed is to install the
-``nodejs-devel`` and ``nodejs-lib`` packages.
+If your operating system offers a way to install a modern Node.js version
+as a shared library and includes development headers as well, that makes
+things easy. For example, on Fedora 34 and 35 all that is needed is to
+install the ``nodejs-devel`` and ``nodejs-lib`` packages.
 
 If you're not using Fedora, you'll probably need to compile Node.js yourself.
 
@@ -49,9 +49,10 @@ If you're not using Fedora, you'll probably need to compile Node.js yourself.
 Compiling Node.js from source
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Start by fetching the sources_ or cloning the Node.js repository_ and
-check out an appropriate tag of the release you want to build. Then,
-configure, compile and install it.
+Start by fetching a `source tarball <https://nodejs.org/en/download/>`_,
+or cloning the `Node.js repository <https://github.com/nodejs/node>`_ and
+check out the tag of the release you want to build. Then, configure, compile
+and install it.
 
 .. code::
 
@@ -73,12 +74,13 @@ around installing Node.js on Debian or other distributions.
 Compiling ZeekJS
 ----------------
 
-ZeekJS is a standard Zeek plugin, any existing documentation around Zeek
-plugins should apply to it as well.
+ZeekJS is a standard Zeek plugin. Existing documentation around building
+and installing Zeek plugins should apply to it as well.
 Ensure that ``zeek-config`` is in your path, then use ``./configure`` and
 ``make`` for building and installing.
 
-If Node.js is located in a non-standard location, use ``--with-nodejs=/path/to/nodejs``.
+If Node.js is installed in a non-standard location, use
+``--with-nodejs=/path/to/nodejs``.
 
 For example::
 
@@ -89,18 +91,18 @@ For example::
     $ make
     $ sudo make install
 
-If everything worked out the plugin is now available to Zeek:
+If everything worked out the plugin should be available available::
 
-.. code::
-
-   $ zeek -N Corelight::ZeekJS
+   $ zeek -NN Corelight::ZeekJS
    Corelight::ZeekJS - Experimental JavaScript support for Zeek (dynamic, version 0.1.0)
+       Implements LoadFile (priority 0)
+       Implements DrainEvents (priority 0)
 
 
 Hello, Zeek!
 ------------
 
-Verify ZeekJS is functional by running a Javascript file using Zeek::
+Verify ZeekJS is functional by running a JavaScript file using Zeek::
 
 
     $ cat << EOF > hello.js
@@ -112,6 +114,7 @@ Verify ZeekJS is functional by running a Javascript file using Zeek::
     $ zeek ./hello.js
     Hello, Zeek!
 
+
 Limitations
 ===========
 
@@ -121,9 +124,9 @@ Limitations
   functions in Zeek script.
 
 * No setter-access on Zeek objects. It's not possible to modify fields of Zeek
-  records from Javascript. The ``Setter()`` logic isn't (yet) implemented.
+  records from JavaScript. The ``Setter()`` logic isn't (yet) implemented.
 
-* No multi-index support for tables and sets. Javascript objects have string
+* No multi-index support for tables and sets. JavaScript objects have string
   properties only.
 
 
@@ -191,11 +194,3 @@ provides the following functions to interact with Zeek.
 .. autofunction:: event
 .. autofunction:: invoke
 .. autoattribute:: global_vars
-
-
-
-.. _Zeek: https://zeek.org
-.. _Node.js: https://nodejs.org
-.. _sources: https://nodejs.org/en/download/
-.. _repository: https://github.com/nodejs/node
-

@@ -4,7 +4,7 @@ Experimental JavaScript support for Zeek.
 
 ```
 $ cat hello.js
-zeek.on('zeek_init', () => {
+zeek.on('zeek_init', function() {
   console.log('Hello, Zeek!');
 });
 

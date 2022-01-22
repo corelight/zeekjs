@@ -7,15 +7,9 @@ new_connection [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 55767,
-          "proto": "udp"
-        },
+        "orig_p": 55767,
         "resp_h": "172.20.10.1",
-        "resp_p": {
-          "port": 53,
-          "proto": "udp"
-        }
+        "resp_p": 53
       },
       "orig": {
         "size": 42,
@@ -51,15 +45,9 @@ dns_message [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 55767,
-          "proto": "udp"
-        },
+        "orig_p": 55767,
         "resp_h": "172.20.10.1",
-        "resp_p": {
-          "port": 53,
-          "proto": "udp"
-        }
+        "resp_p": 53
       },
       "orig": {
         "size": 42,
@@ -124,15 +112,9 @@ dns_request [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 55767,
-          "proto": "udp"
-        },
+        "orig_p": 55767,
         "resp_h": "172.20.10.1",
-        "resp_p": {
-          "port": 53,
-          "proto": "udp"
-        }
+        "resp_p": 53
       },
       "orig": {
         "size": 42,
@@ -163,15 +145,9 @@ dns_request [
         "uid": "CHhAvVGS1DHFjwGM9",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 55767,
-            "proto": "udp"
-          },
+          "orig_p": 55767,
           "resp_h": "172.20.10.1",
-          "resp_p": {
-            "port": 53,
-            "proto": "udp"
-          }
+          "resp_p": 53
         },
         "proto": "udp",
         "trans_id": 43556,
@@ -190,15 +166,9 @@ dns_request [
           "uid": "CHhAvVGS1DHFjwGM9",
           "id": {
             "orig_h": "172.20.10.3",
-            "orig_p": {
-              "port": 55767,
-              "proto": "udp"
-            },
+            "orig_p": 55767,
             "resp_h": "172.20.10.1",
-            "resp_p": {
-              "port": 53,
-              "proto": "udp"
-            }
+            "resp_p": 53
           },
           "proto": "udp",
           "trans_id": 43556,
@@ -262,15 +232,9 @@ dns_message [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 55767,
-          "proto": "udp"
-        },
+        "orig_p": 55767,
         "resp_h": "172.20.10.1",
-        "resp_p": {
-          "port": 53,
-          "proto": "udp"
-        }
+        "resp_p": 53
       },
       "orig": {
         "size": 42,
@@ -303,15 +267,9 @@ dns_message [
         "uid": "CHhAvVGS1DHFjwGM9",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 55767,
-            "proto": "udp"
-          },
+          "orig_p": 55767,
           "resp_h": "172.20.10.1",
-          "resp_p": {
-            "port": 53,
-            "proto": "udp"
-          }
+          "resp_p": 53
         },
         "proto": "udp",
         "trans_id": 43556,
@@ -335,15 +293,9 @@ dns_message [
           "uid": "CHhAvVGS1DHFjwGM9",
           "id": {
             "orig_h": "172.20.10.3",
-            "orig_p": {
-              "port": 55767,
-              "proto": "udp"
-            },
+            "orig_p": 55767,
             "resp_h": "172.20.10.1",
-            "resp_p": {
-              "port": 53,
-              "proto": "udp"
-            }
+            "resp_p": 53
           },
           "proto": "udp",
           "trans_id": 43556,
@@ -402,15 +354,9 @@ new_connection [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 59588,
-          "proto": "tcp"
-        },
+        "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 80,
-          "proto": "tcp"
-        }
+        "resp_p": 80
       },
       "orig": {
         "size": 0,
@@ -446,15 +392,9 @@ http_request [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 59588,
-          "proto": "tcp"
-        },
+        "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 80,
-          "proto": "tcp"
-        }
+        "resp_p": 80
       },
       "orig": {
         "size": 77,
@@ -512,15 +452,9 @@ http_header [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 59588,
-          "proto": "tcp"
-        },
+        "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 80,
-          "proto": "tcp"
-        }
+        "resp_p": 80
       },
       "orig": {
         "size": 77,
@@ -554,15 +488,9 @@ http_header [
         "uid": "ClEkJM2Vm5giqnMf4h",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 59588,
-            "proto": "tcp"
-          },
+          "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 80,
-            "proto": "tcp"
-          }
+          "resp_p": 80
         },
         "trans_depth": 1,
         "method": "GET",
@@ -583,15 +511,9 @@ http_header [
             "uid": "ClEkJM2Vm5giqnMf4h",
             "id": {
               "orig_h": "172.20.10.3",
-              "orig_p": {
-                "port": 59588,
-                "proto": "tcp"
-              },
+              "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": {
-                "port": 80,
-                "proto": "tcp"
-              }
+              "resp_p": 80
             },
             "trans_depth": 1,
             "method": "GET",
@@ -640,15 +562,9 @@ http_header [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 59588,
-          "proto": "tcp"
-        },
+        "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 80,
-          "proto": "tcp"
-        }
+        "resp_p": 80
       },
       "orig": {
         "size": 77,
@@ -682,15 +598,9 @@ http_header [
         "uid": "ClEkJM2Vm5giqnMf4h",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 59588,
-            "proto": "tcp"
-          },
+          "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 80,
-            "proto": "tcp"
-          }
+          "resp_p": 80
         },
         "trans_depth": 1,
         "method": "GET",
@@ -712,15 +622,9 @@ http_header [
             "uid": "ClEkJM2Vm5giqnMf4h",
             "id": {
               "orig_h": "172.20.10.3",
-              "orig_p": {
-                "port": 59588,
-                "proto": "tcp"
-              },
+              "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": {
-                "port": 80,
-                "proto": "tcp"
-              }
+              "resp_p": 80
             },
             "trans_depth": 1,
             "method": "GET",
@@ -770,15 +674,9 @@ http_header [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 59588,
-          "proto": "tcp"
-        },
+        "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 80,
-          "proto": "tcp"
-        }
+        "resp_p": 80
       },
       "orig": {
         "size": 77,
@@ -812,15 +710,9 @@ http_header [
         "uid": "ClEkJM2Vm5giqnMf4h",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 59588,
-            "proto": "tcp"
-          },
+          "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 80,
-            "proto": "tcp"
-          }
+          "resp_p": 80
         },
         "trans_depth": 1,
         "method": "GET",
@@ -843,15 +735,9 @@ http_header [
             "uid": "ClEkJM2Vm5giqnMf4h",
             "id": {
               "orig_h": "172.20.10.3",
-              "orig_p": {
-                "port": 59588,
-                "proto": "tcp"
-              },
+              "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": {
-                "port": 80,
-                "proto": "tcp"
-              }
+              "resp_p": 80
             },
             "trans_depth": 1,
             "method": "GET",
@@ -907,15 +793,9 @@ get_file_handle [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 59588,
-          "proto": "tcp"
-        },
+        "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 80,
-          "proto": "tcp"
-        }
+        "resp_p": 80
       },
       "orig": {
         "size": 77,
@@ -949,15 +829,9 @@ get_file_handle [
         "uid": "ClEkJM2Vm5giqnMf4h",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 59588,
-            "proto": "tcp"
-          },
+          "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 80,
-            "proto": "tcp"
-          }
+          "resp_p": 80
         },
         "trans_depth": 1,
         "method": "GET",
@@ -979,15 +853,9 @@ get_file_handle [
             "uid": "ClEkJM2Vm5giqnMf4h",
             "id": {
               "orig_h": "172.20.10.3",
-              "orig_p": {
-                "port": 59588,
-                "proto": "tcp"
-              },
+              "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": {
-                "port": 80,
-                "proto": "tcp"
-              }
+              "resp_p": 80
             },
             "trans_depth": 1,
             "method": "GET",
@@ -1022,15 +890,9 @@ http_message_done [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 59588,
-          "proto": "tcp"
-        },
+        "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 80,
-          "proto": "tcp"
-        }
+        "resp_p": 80
       },
       "orig": {
         "size": 77,
@@ -1064,15 +926,9 @@ http_message_done [
         "uid": "ClEkJM2Vm5giqnMf4h",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 59588,
-            "proto": "tcp"
-          },
+          "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 80,
-            "proto": "tcp"
-          }
+          "resp_p": 80
         },
         "trans_depth": 1,
         "method": "GET",
@@ -1094,15 +950,9 @@ http_message_done [
             "uid": "ClEkJM2Vm5giqnMf4h",
             "id": {
               "orig_h": "172.20.10.3",
-              "orig_p": {
-                "port": 59588,
-                "proto": "tcp"
-              },
+              "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": {
-                "port": 80,
-                "proto": "tcp"
-              }
+              "resp_p": 80
             },
             "trans_depth": 1,
             "method": "GET",
@@ -1149,15 +999,9 @@ http_header [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 59588,
-          "proto": "tcp"
-        },
+        "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 80,
-          "proto": "tcp"
-        }
+        "resp_p": 80
       },
       "orig": {
         "size": 77,
@@ -1191,15 +1035,9 @@ http_header [
         "uid": "ClEkJM2Vm5giqnMf4h",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 59588,
-            "proto": "tcp"
-          },
+          "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 80,
-            "proto": "tcp"
-          }
+          "resp_p": 80
         },
         "trans_depth": 1,
         "method": "GET",
@@ -1225,15 +1063,9 @@ http_header [
             "uid": "ClEkJM2Vm5giqnMf4h",
             "id": {
               "orig_h": "172.20.10.3",
-              "orig_p": {
-                "port": 59588,
-                "proto": "tcp"
-              },
+              "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": {
-                "port": 80,
-                "proto": "tcp"
-              }
+              "resp_p": 80
             },
             "trans_depth": 1,
             "method": "GET",
@@ -1287,15 +1119,9 @@ http_header [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 59588,
-          "proto": "tcp"
-        },
+        "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 80,
-          "proto": "tcp"
-        }
+        "resp_p": 80
       },
       "orig": {
         "size": 77,
@@ -1329,15 +1155,9 @@ http_header [
         "uid": "ClEkJM2Vm5giqnMf4h",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 59588,
-            "proto": "tcp"
-          },
+          "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 80,
-            "proto": "tcp"
-          }
+          "resp_p": 80
         },
         "trans_depth": 1,
         "method": "GET",
@@ -1363,15 +1183,9 @@ http_header [
             "uid": "ClEkJM2Vm5giqnMf4h",
             "id": {
               "orig_h": "172.20.10.3",
-              "orig_p": {
-                "port": 59588,
-                "proto": "tcp"
-              },
+              "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": {
-                "port": 80,
-                "proto": "tcp"
-              }
+              "resp_p": 80
             },
             "trans_depth": 1,
             "method": "GET",
@@ -1425,15 +1239,9 @@ http_header [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 59588,
-          "proto": "tcp"
-        },
+        "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 80,
-          "proto": "tcp"
-        }
+        "resp_p": 80
       },
       "orig": {
         "size": 77,
@@ -1467,15 +1275,9 @@ http_header [
         "uid": "ClEkJM2Vm5giqnMf4h",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 59588,
-            "proto": "tcp"
-          },
+          "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 80,
-            "proto": "tcp"
-          }
+          "resp_p": 80
         },
         "trans_depth": 1,
         "method": "GET",
@@ -1501,15 +1303,9 @@ http_header [
             "uid": "ClEkJM2Vm5giqnMf4h",
             "id": {
               "orig_h": "172.20.10.3",
-              "orig_p": {
-                "port": 59588,
-                "proto": "tcp"
-              },
+              "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": {
-                "port": 80,
-                "proto": "tcp"
-              }
+              "resp_p": 80
             },
             "trans_depth": 1,
             "method": "GET",
@@ -1563,15 +1359,9 @@ http_header [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 59588,
-          "proto": "tcp"
-        },
+        "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 80,
-          "proto": "tcp"
-        }
+        "resp_p": 80
       },
       "orig": {
         "size": 77,
@@ -1605,15 +1395,9 @@ http_header [
         "uid": "ClEkJM2Vm5giqnMf4h",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 59588,
-            "proto": "tcp"
-          },
+          "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 80,
-            "proto": "tcp"
-          }
+          "resp_p": 80
         },
         "trans_depth": 1,
         "method": "GET",
@@ -1639,15 +1423,9 @@ http_header [
             "uid": "ClEkJM2Vm5giqnMf4h",
             "id": {
               "orig_h": "172.20.10.3",
-              "orig_p": {
-                "port": 59588,
-                "proto": "tcp"
-              },
+              "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": {
-                "port": 80,
-                "proto": "tcp"
-              }
+              "resp_p": 80
             },
             "trans_depth": 1,
             "method": "GET",
@@ -1701,15 +1479,9 @@ http_header [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 59588,
-          "proto": "tcp"
-        },
+        "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 80,
-          "proto": "tcp"
-        }
+        "resp_p": 80
       },
       "orig": {
         "size": 77,
@@ -1743,15 +1515,9 @@ http_header [
         "uid": "ClEkJM2Vm5giqnMf4h",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 59588,
-            "proto": "tcp"
-          },
+          "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 80,
-            "proto": "tcp"
-          }
+          "resp_p": 80
         },
         "trans_depth": 1,
         "method": "GET",
@@ -1777,15 +1543,9 @@ http_header [
             "uid": "ClEkJM2Vm5giqnMf4h",
             "id": {
               "orig_h": "172.20.10.3",
-              "orig_p": {
-                "port": 59588,
-                "proto": "tcp"
-              },
+              "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": {
-                "port": 80,
-                "proto": "tcp"
-              }
+              "resp_p": 80
             },
             "trans_depth": 1,
             "method": "GET",
@@ -1839,15 +1599,9 @@ http_header [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 59588,
-          "proto": "tcp"
-        },
+        "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 80,
-          "proto": "tcp"
-        }
+        "resp_p": 80
       },
       "orig": {
         "size": 77,
@@ -1881,15 +1635,9 @@ http_header [
         "uid": "ClEkJM2Vm5giqnMf4h",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 59588,
-            "proto": "tcp"
-          },
+          "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 80,
-            "proto": "tcp"
-          }
+          "resp_p": 80
         },
         "trans_depth": 1,
         "method": "GET",
@@ -1915,15 +1663,9 @@ http_header [
             "uid": "ClEkJM2Vm5giqnMf4h",
             "id": {
               "orig_h": "172.20.10.3",
-              "orig_p": {
-                "port": 59588,
-                "proto": "tcp"
-              },
+              "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": {
-                "port": 80,
-                "proto": "tcp"
-              }
+              "resp_p": 80
             },
             "trans_depth": 1,
             "method": "GET",
@@ -1977,15 +1719,9 @@ http_header [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 59588,
-          "proto": "tcp"
-        },
+        "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 80,
-          "proto": "tcp"
-        }
+        "resp_p": 80
       },
       "orig": {
         "size": 77,
@@ -2019,15 +1755,9 @@ http_header [
         "uid": "ClEkJM2Vm5giqnMf4h",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 59588,
-            "proto": "tcp"
-          },
+          "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 80,
-            "proto": "tcp"
-          }
+          "resp_p": 80
         },
         "trans_depth": 1,
         "method": "GET",
@@ -2053,15 +1783,9 @@ http_header [
             "uid": "ClEkJM2Vm5giqnMf4h",
             "id": {
               "orig_h": "172.20.10.3",
-              "orig_p": {
-                "port": 59588,
-                "proto": "tcp"
-              },
+              "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": {
-                "port": 80,
-                "proto": "tcp"
-              }
+              "resp_p": 80
             },
             "trans_depth": 1,
             "method": "GET",
@@ -2115,15 +1839,9 @@ http_header [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 59588,
-          "proto": "tcp"
-        },
+        "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 80,
-          "proto": "tcp"
-        }
+        "resp_p": 80
       },
       "orig": {
         "size": 77,
@@ -2157,15 +1875,9 @@ http_header [
         "uid": "ClEkJM2Vm5giqnMf4h",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 59588,
-            "proto": "tcp"
-          },
+          "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 80,
-            "proto": "tcp"
-          }
+          "resp_p": 80
         },
         "trans_depth": 1,
         "method": "GET",
@@ -2191,15 +1903,9 @@ http_header [
             "uid": "ClEkJM2Vm5giqnMf4h",
             "id": {
               "orig_h": "172.20.10.3",
-              "orig_p": {
-                "port": 59588,
-                "proto": "tcp"
-              },
+              "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": {
-                "port": 80,
-                "proto": "tcp"
-              }
+              "resp_p": 80
             },
             "trans_depth": 1,
             "method": "GET",
@@ -2253,15 +1959,9 @@ http_header [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 59588,
-          "proto": "tcp"
-        },
+        "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 80,
-          "proto": "tcp"
-        }
+        "resp_p": 80
       },
       "orig": {
         "size": 77,
@@ -2295,15 +1995,9 @@ http_header [
         "uid": "ClEkJM2Vm5giqnMf4h",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 59588,
-            "proto": "tcp"
-          },
+          "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 80,
-            "proto": "tcp"
-          }
+          "resp_p": 80
         },
         "trans_depth": 1,
         "method": "GET",
@@ -2329,15 +2023,9 @@ http_header [
             "uid": "ClEkJM2Vm5giqnMf4h",
             "id": {
               "orig_h": "172.20.10.3",
-              "orig_p": {
-                "port": 59588,
-                "proto": "tcp"
-              },
+              "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": {
-                "port": 80,
-                "proto": "tcp"
-              }
+              "resp_p": 80
             },
             "trans_depth": 1,
             "method": "GET",
@@ -2391,15 +2079,9 @@ http_header [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 59588,
-          "proto": "tcp"
-        },
+        "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 80,
-          "proto": "tcp"
-        }
+        "resp_p": 80
       },
       "orig": {
         "size": 77,
@@ -2433,15 +2115,9 @@ http_header [
         "uid": "ClEkJM2Vm5giqnMf4h",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 59588,
-            "proto": "tcp"
-          },
+          "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 80,
-            "proto": "tcp"
-          }
+          "resp_p": 80
         },
         "trans_depth": 1,
         "method": "GET",
@@ -2467,15 +2143,9 @@ http_header [
             "uid": "ClEkJM2Vm5giqnMf4h",
             "id": {
               "orig_h": "172.20.10.3",
-              "orig_p": {
-                "port": 59588,
-                "proto": "tcp"
-              },
+              "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": {
-                "port": 80,
-                "proto": "tcp"
-              }
+              "resp_p": 80
             },
             "trans_depth": 1,
             "method": "GET",
@@ -2529,15 +2199,9 @@ http_header [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 59588,
-          "proto": "tcp"
-        },
+        "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 80,
-          "proto": "tcp"
-        }
+        "resp_p": 80
       },
       "orig": {
         "size": 77,
@@ -2571,15 +2235,9 @@ http_header [
         "uid": "ClEkJM2Vm5giqnMf4h",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 59588,
-            "proto": "tcp"
-          },
+          "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 80,
-            "proto": "tcp"
-          }
+          "resp_p": 80
         },
         "trans_depth": 1,
         "method": "GET",
@@ -2605,15 +2263,9 @@ http_header [
             "uid": "ClEkJM2Vm5giqnMf4h",
             "id": {
               "orig_h": "172.20.10.3",
-              "orig_p": {
-                "port": 59588,
-                "proto": "tcp"
-              },
+              "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": {
-                "port": 80,
-                "proto": "tcp"
-              }
+              "resp_p": 80
             },
             "trans_depth": 1,
             "method": "GET",
@@ -2667,15 +2319,9 @@ http_header [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 59588,
-          "proto": "tcp"
-        },
+        "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 80,
-          "proto": "tcp"
-        }
+        "resp_p": 80
       },
       "orig": {
         "size": 77,
@@ -2709,15 +2355,9 @@ http_header [
         "uid": "ClEkJM2Vm5giqnMf4h",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 59588,
-            "proto": "tcp"
-          },
+          "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 80,
-            "proto": "tcp"
-          }
+          "resp_p": 80
         },
         "trans_depth": 1,
         "method": "GET",
@@ -2743,15 +2383,9 @@ http_header [
             "uid": "ClEkJM2Vm5giqnMf4h",
             "id": {
               "orig_h": "172.20.10.3",
-              "orig_p": {
-                "port": 59588,
-                "proto": "tcp"
-              },
+              "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": {
-                "port": 80,
-                "proto": "tcp"
-              }
+              "resp_p": 80
             },
             "trans_depth": 1,
             "method": "GET",
@@ -2805,15 +2439,9 @@ http_header [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 59588,
-          "proto": "tcp"
-        },
+        "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 80,
-          "proto": "tcp"
-        }
+        "resp_p": 80
       },
       "orig": {
         "size": 77,
@@ -2847,15 +2475,9 @@ http_header [
         "uid": "ClEkJM2Vm5giqnMf4h",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 59588,
-            "proto": "tcp"
-          },
+          "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 80,
-            "proto": "tcp"
-          }
+          "resp_p": 80
         },
         "trans_depth": 1,
         "method": "GET",
@@ -2881,15 +2503,9 @@ http_header [
             "uid": "ClEkJM2Vm5giqnMf4h",
             "id": {
               "orig_h": "172.20.10.3",
-              "orig_p": {
-                "port": 59588,
-                "proto": "tcp"
-              },
+              "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": {
-                "port": 80,
-                "proto": "tcp"
-              }
+              "resp_p": 80
             },
             "trans_depth": 1,
             "method": "GET",
@@ -2948,15 +2564,9 @@ get_file_handle [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 59588,
-          "proto": "tcp"
-        },
+        "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 80,
-          "proto": "tcp"
-        }
+        "resp_p": 80
       },
       "orig": {
         "size": 77,
@@ -2990,15 +2600,9 @@ get_file_handle [
         "uid": "ClEkJM2Vm5giqnMf4h",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 59588,
-            "proto": "tcp"
-          },
+          "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 80,
-            "proto": "tcp"
-          }
+          "resp_p": 80
         },
         "trans_depth": 1,
         "method": "GET",
@@ -3023,15 +2627,9 @@ get_file_handle [
             "uid": "ClEkJM2Vm5giqnMf4h",
             "id": {
               "orig_h": "172.20.10.3",
-              "orig_p": {
-                "port": 59588,
-                "proto": "tcp"
-              },
+              "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": {
-                "port": 80,
-                "proto": "tcp"
-              }
+              "resp_p": 80
             },
             "trans_depth": 1,
             "method": "GET",
@@ -3069,15 +2667,9 @@ http_message_done [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 59588,
-          "proto": "tcp"
-        },
+        "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 80,
-          "proto": "tcp"
-        }
+        "resp_p": 80
       },
       "orig": {
         "size": 77,
@@ -3111,15 +2703,9 @@ http_message_done [
         "uid": "ClEkJM2Vm5giqnMf4h",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 59588,
-            "proto": "tcp"
-          },
+          "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 80,
-            "proto": "tcp"
-          }
+          "resp_p": 80
         },
         "trans_depth": 1,
         "method": "GET",
@@ -3144,15 +2730,9 @@ http_message_done [
             "uid": "ClEkJM2Vm5giqnMf4h",
             "id": {
               "orig_h": "172.20.10.3",
-              "orig_p": {
-                "port": 59588,
-                "proto": "tcp"
-              },
+              "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": {
-                "port": 80,
-                "proto": "tcp"
-              }
+              "resp_p": 80
             },
             "trans_depth": 1,
             "method": "GET",
@@ -3202,15 +2782,9 @@ new_connection [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 45208,
-          "proto": "tcp"
-        },
+        "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 443,
-          "proto": "tcp"
-        }
+        "resp_p": 443
       },
       "orig": {
         "size": 0,
@@ -3246,15 +2820,9 @@ ssl_extension [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 45208,
-          "proto": "tcp"
-        },
+        "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 443,
-          "proto": "tcp"
-        }
+        "resp_p": 443
       },
       "orig": {
         "size": 517,
@@ -3286,15 +2854,9 @@ ssl_extension [
         "uid": "C4J4Th3PJpwUYZZ6gc",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 45208,
-            "proto": "tcp"
-          },
+          "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 443,
-            "proto": "tcp"
-          }
+          "resp_p": 443
         },
         "server_name": "corelight.com",
         "resumed": false,
@@ -3331,15 +2893,9 @@ ssl_extension [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 45208,
-          "proto": "tcp"
-        },
+        "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 443,
-          "proto": "tcp"
-        }
+        "resp_p": 443
       },
       "orig": {
         "size": 517,
@@ -3371,15 +2927,9 @@ ssl_extension [
         "uid": "C4J4Th3PJpwUYZZ6gc",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 45208,
-            "proto": "tcp"
-          },
+          "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 443,
-            "proto": "tcp"
-          }
+          "resp_p": 443
         },
         "server_name": "corelight.com",
         "resumed": false,
@@ -3416,15 +2966,9 @@ ssl_extension [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 45208,
-          "proto": "tcp"
-        },
+        "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 443,
-          "proto": "tcp"
-        }
+        "resp_p": 443
       },
       "orig": {
         "size": 517,
@@ -3456,15 +3000,9 @@ ssl_extension [
         "uid": "C4J4Th3PJpwUYZZ6gc",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 45208,
-            "proto": "tcp"
-          },
+          "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 443,
-            "proto": "tcp"
-          }
+          "resp_p": 443
         },
         "server_name": "corelight.com",
         "resumed": false,
@@ -3501,15 +3039,9 @@ ssl_extension [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 45208,
-          "proto": "tcp"
-        },
+        "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 443,
-          "proto": "tcp"
-        }
+        "resp_p": 443
       },
       "orig": {
         "size": 517,
@@ -3541,15 +3073,9 @@ ssl_extension [
         "uid": "C4J4Th3PJpwUYZZ6gc",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 45208,
-            "proto": "tcp"
-          },
+          "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 443,
-            "proto": "tcp"
-          }
+          "resp_p": 443
         },
         "server_name": "corelight.com",
         "resumed": false,
@@ -3586,15 +3112,9 @@ ssl_extension [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 45208,
-          "proto": "tcp"
-        },
+        "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 443,
-          "proto": "tcp"
-        }
+        "resp_p": 443
       },
       "orig": {
         "size": 517,
@@ -3626,15 +3146,9 @@ ssl_extension [
         "uid": "C4J4Th3PJpwUYZZ6gc",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 45208,
-            "proto": "tcp"
-          },
+          "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 443,
-            "proto": "tcp"
-          }
+          "resp_p": 443
         },
         "server_name": "corelight.com",
         "resumed": false,
@@ -3671,15 +3185,9 @@ ssl_extension [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 45208,
-          "proto": "tcp"
-        },
+        "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 443,
-          "proto": "tcp"
-        }
+        "resp_p": 443
       },
       "orig": {
         "size": 517,
@@ -3711,15 +3219,9 @@ ssl_extension [
         "uid": "C4J4Th3PJpwUYZZ6gc",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 45208,
-            "proto": "tcp"
-          },
+          "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 443,
-            "proto": "tcp"
-          }
+          "resp_p": 443
         },
         "server_name": "corelight.com",
         "resumed": false,
@@ -3756,15 +3258,9 @@ ssl_extension [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 45208,
-          "proto": "tcp"
-        },
+        "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 443,
-          "proto": "tcp"
-        }
+        "resp_p": 443
       },
       "orig": {
         "size": 517,
@@ -3796,15 +3292,9 @@ ssl_extension [
         "uid": "C4J4Th3PJpwUYZZ6gc",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 45208,
-            "proto": "tcp"
-          },
+          "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 443,
-            "proto": "tcp"
-          }
+          "resp_p": 443
         },
         "server_name": "corelight.com",
         "resumed": false,
@@ -3841,15 +3331,9 @@ ssl_extension [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 45208,
-          "proto": "tcp"
-        },
+        "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 443,
-          "proto": "tcp"
-        }
+        "resp_p": 443
       },
       "orig": {
         "size": 517,
@@ -3881,15 +3365,9 @@ ssl_extension [
         "uid": "C4J4Th3PJpwUYZZ6gc",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 45208,
-            "proto": "tcp"
-          },
+          "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 443,
-            "proto": "tcp"
-          }
+          "resp_p": 443
         },
         "server_name": "corelight.com",
         "resumed": false,
@@ -3926,15 +3404,9 @@ ssl_extension [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 45208,
-          "proto": "tcp"
-        },
+        "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 443,
-          "proto": "tcp"
-        }
+        "resp_p": 443
       },
       "orig": {
         "size": 517,
@@ -3966,15 +3438,9 @@ ssl_extension [
         "uid": "C4J4Th3PJpwUYZZ6gc",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 45208,
-            "proto": "tcp"
-          },
+          "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 443,
-            "proto": "tcp"
-          }
+          "resp_p": 443
         },
         "server_name": "corelight.com",
         "resumed": false,
@@ -4011,15 +3477,9 @@ ssl_extension [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 45208,
-          "proto": "tcp"
-        },
+        "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 443,
-          "proto": "tcp"
-        }
+        "resp_p": 443
       },
       "orig": {
         "size": 517,
@@ -4051,15 +3511,9 @@ ssl_extension [
         "uid": "C4J4Th3PJpwUYZZ6gc",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 45208,
-            "proto": "tcp"
-          },
+          "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 443,
-            "proto": "tcp"
-          }
+          "resp_p": 443
         },
         "server_name": "corelight.com",
         "resumed": false,
@@ -4096,15 +3550,9 @@ ssl_extension [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 45208,
-          "proto": "tcp"
-        },
+        "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 443,
-          "proto": "tcp"
-        }
+        "resp_p": 443
       },
       "orig": {
         "size": 517,
@@ -4136,15 +3584,9 @@ ssl_extension [
         "uid": "C4J4Th3PJpwUYZZ6gc",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 45208,
-            "proto": "tcp"
-          },
+          "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 443,
-            "proto": "tcp"
-          }
+          "resp_p": 443
         },
         "server_name": "corelight.com",
         "resumed": false,
@@ -4181,15 +3623,9 @@ ssl_extension [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 45208,
-          "proto": "tcp"
-        },
+        "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 443,
-          "proto": "tcp"
-        }
+        "resp_p": 443
       },
       "orig": {
         "size": 517,
@@ -4221,15 +3657,9 @@ ssl_extension [
         "uid": "C4J4Th3PJpwUYZZ6gc",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 45208,
-            "proto": "tcp"
-          },
+          "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 443,
-            "proto": "tcp"
-          }
+          "resp_p": 443
         },
         "server_name": "corelight.com",
         "resumed": false,
@@ -4266,15 +3696,9 @@ ssl_extension [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 45208,
-          "proto": "tcp"
-        },
+        "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 443,
-          "proto": "tcp"
-        }
+        "resp_p": 443
       },
       "orig": {
         "size": 517,
@@ -4306,15 +3730,9 @@ ssl_extension [
         "uid": "C4J4Th3PJpwUYZZ6gc",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 45208,
-            "proto": "tcp"
-          },
+          "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 443,
-            "proto": "tcp"
-          }
+          "resp_p": 443
         },
         "server_name": "corelight.com",
         "resumed": false,
@@ -4351,15 +3769,9 @@ ssl_plaintext_data [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 45208,
-          "proto": "tcp"
-        },
+        "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 443,
-          "proto": "tcp"
-        }
+        "resp_p": 443
       },
       "orig": {
         "size": 517,
@@ -4393,15 +3805,9 @@ ssl_plaintext_data [
         "uid": "C4J4Th3PJpwUYZZ6gc",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 45208,
-            "proto": "tcp"
-          },
+          "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 443,
-            "proto": "tcp"
-          }
+          "resp_p": 443
         },
         "server_name": "corelight.com",
         "session_id": "05628f4ff03bc85cef6bd6b1a01b9419063cf7fc3c5f10fc7b18cfc4b8190e09",
@@ -4445,15 +3851,9 @@ ssl_extension [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 45208,
-          "proto": "tcp"
-        },
+        "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 443,
-          "proto": "tcp"
-        }
+        "resp_p": 443
       },
       "orig": {
         "size": 517,
@@ -4487,15 +3887,9 @@ ssl_extension [
         "uid": "C4J4Th3PJpwUYZZ6gc",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 45208,
-            "proto": "tcp"
-          },
+          "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 443,
-            "proto": "tcp"
-          }
+          "resp_p": 443
         },
         "curve": "x25519",
         "server_name": "corelight.com",
@@ -4535,15 +3929,9 @@ ssl_extension [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 45208,
-          "proto": "tcp"
-        },
+        "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 443,
-          "proto": "tcp"
-        }
+        "resp_p": 443
       },
       "orig": {
         "size": 517,
@@ -4577,15 +3965,9 @@ ssl_extension [
         "uid": "C4J4Th3PJpwUYZZ6gc",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 45208,
-            "proto": "tcp"
-          },
+          "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 443,
-            "proto": "tcp"
-          }
+          "resp_p": 443
         },
         "version_num": 772,
         "version": "TLSv13",
@@ -4627,15 +4009,9 @@ ssl_plaintext_data [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 45208,
-          "proto": "tcp"
-        },
+        "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 443,
-          "proto": "tcp"
-        }
+        "resp_p": 443
       },
       "orig": {
         "size": 517,
@@ -4669,15 +4045,9 @@ ssl_plaintext_data [
         "uid": "C4J4Th3PJpwUYZZ6gc",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 45208,
-            "proto": "tcp"
-          },
+          "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 443,
-            "proto": "tcp"
-          }
+          "resp_p": 443
         },
         "version_num": 772,
         "version": "TLSv13",
@@ -4725,15 +4095,9 @@ ssl_plaintext_data [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 45208,
-          "proto": "tcp"
-        },
+        "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 443,
-          "proto": "tcp"
-        }
+        "resp_p": 443
       },
       "orig": {
         "size": 517,
@@ -4767,15 +4131,9 @@ ssl_plaintext_data [
         "uid": "C4J4Th3PJpwUYZZ6gc",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 45208,
-            "proto": "tcp"
-          },
+          "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 443,
-            "proto": "tcp"
-          }
+          "resp_p": 443
         },
         "version_num": 772,
         "version": "TLSv13",
@@ -4823,15 +4181,9 @@ ssl_plaintext_data [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 45208,
-          "proto": "tcp"
-        },
+        "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 443,
-          "proto": "tcp"
-        }
+        "resp_p": 443
       },
       "orig": {
         "size": 597,
@@ -4865,15 +4217,9 @@ ssl_plaintext_data [
         "uid": "C4J4Th3PJpwUYZZ6gc",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 45208,
-            "proto": "tcp"
-          },
+          "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 443,
-            "proto": "tcp"
-          }
+          "resp_p": 443
         },
         "version_num": 772,
         "version": "TLSv13",
@@ -4921,15 +4267,9 @@ ssl_established [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 45208,
-          "proto": "tcp"
-        },
+        "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 443,
-          "proto": "tcp"
-        }
+        "resp_p": 443
       },
       "orig": {
         "size": 597,
@@ -4963,15 +4303,9 @@ ssl_established [
         "uid": "C4J4Th3PJpwUYZZ6gc",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 45208,
-            "proto": "tcp"
-          },
+          "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 443,
-            "proto": "tcp"
-          }
+          "resp_p": 443
         },
         "version_num": 772,
         "version": "TLSv13",
@@ -4999,15 +4333,9 @@ connection_state_remove [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 55767,
-          "proto": "udp"
-        },
+        "orig_p": 55767,
         "resp_h": "172.20.10.1",
-        "resp_p": {
-          "port": 53,
-          "proto": "udp"
-        }
+        "resp_p": 53
       },
       "orig": {
         "size": 42,
@@ -5047,15 +4375,9 @@ connection_state_remove [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 45208,
-          "proto": "tcp"
-        },
+        "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 443,
-          "proto": "tcp"
-        }
+        "resp_p": 443
       },
       "orig": {
         "size": 842,
@@ -5089,15 +4411,9 @@ connection_state_remove [
         "uid": "C4J4Th3PJpwUYZZ6gc",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 45208,
-            "proto": "tcp"
-          },
+          "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 443,
-            "proto": "tcp"
-          }
+          "resp_p": 443
         },
         "version_num": 772,
         "version": "TLSv13",
@@ -5129,15 +4445,9 @@ get_file_handle [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 59588,
-          "proto": "tcp"
-        },
+        "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 80,
-          "proto": "tcp"
-        }
+        "resp_p": 80
       },
       "orig": {
         "size": 77,
@@ -5171,15 +4481,9 @@ get_file_handle [
         "uid": "ClEkJM2Vm5giqnMf4h",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 59588,
-            "proto": "tcp"
-          },
+          "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 80,
-            "proto": "tcp"
-          }
+          "resp_p": 80
         },
         "trans_depth": 1,
         "method": "GET",
@@ -5218,15 +4522,9 @@ connection_state_remove [
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
-        "orig_p": {
-          "port": 59588,
-          "proto": "tcp"
-        },
+        "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": {
-          "port": 80,
-          "proto": "tcp"
-        }
+        "resp_p": 80
       },
       "orig": {
         "size": 77,
@@ -5260,15 +4558,9 @@ connection_state_remove [
         "uid": "ClEkJM2Vm5giqnMf4h",
         "id": {
           "orig_h": "172.20.10.3",
-          "orig_p": {
-            "port": 59588,
-            "proto": "tcp"
-          },
+          "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": {
-            "port": 80,
-            "proto": "tcp"
-          }
+          "resp_p": 80
         },
         "trans_depth": 1,
         "method": "GET",

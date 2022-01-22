@@ -67,6 +67,7 @@ class ZeekValWrapper {
   v8::Global<v8::ObjectTemplate> table_template_;
   v8::Global<v8::String> port_str_;
   v8::Global<v8::String> proto_str_;
+  v8::Global<v8::String> toJSON_str_;
 };
 
 // Class holding Node.js and V8 state.

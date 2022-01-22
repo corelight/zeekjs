@@ -538,6 +538,7 @@ ZeekValWrapper::ZeekValWrapper(v8::Isolate* isolate) : isolate_(isolate) {
 
   port_str_.Reset(isolate, v8_str_intern("port"));
   proto_str_.Reset(isolate, v8_str_intern("proto"));
+  toJSON_str_.Reset(isolate, v8_str_intern("toJSON"));
 }
 
 v8::Local<v8::Value> ZeekValWrapper::Wrap(const zeek::ValPtr& vp) {
@@ -573,6 +574,21 @@ v8::Local<v8::Value> ZeekValWrapper::Wrap(const zeek::ValPtr& vp) {
       obj->Set(context, proto_str_.Get(isolate_),
                v8_str_intern(pvp->Protocol().c_str()))  // Should cache.
           .Check();
+
+      static v8::FunctionCallback toJSON_callback =
+          [](const v8::FunctionCallbackInfo<v8::Value>& info) -> void {
+        v8::Local<v8::Object> receiver = info.This();
+        v8::Isolate* isolate = info.GetIsolate();
+        v8::Local<v8::Context> context = isolate->GetCurrentContext();
+        v8::Local<v8::Value> port =
+            receiver->Get(context, ::v8_str_intern(isolate, "port")).ToLocalChecked();
+
+        info.GetReturnValue().Set(port);
+      };
+      auto toJSON_func = v8::Function::New(context, toJSON_callback).ToLocalChecked();
+
+      obj->Set(context, toJSON_str_.Get(isolate_), toJSON_func).Check();
+
       return obj;
     }
     case zeek::TYPE_RECORD: {

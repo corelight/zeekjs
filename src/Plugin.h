@@ -75,20 +75,16 @@ class Plugin : public zeek::plugin::Plugin {
  protected:
   zeek::plugin::Configuration Configure() override;
 
-  // Register the given Javascript handler into the the Zeek handler as function
-  // body.
+ private:
+  // Add the given Javascript event handler as new body
+  // into the given Zeek handler as function
   bool RegisterAsScriptFuncBody(zeek::EventHandlerPtr zeek_eh,
                                 Js::EventHandler* js_eh,
                                 int priority);
 
- private:
   std::vector<std::filesystem::path> load_files;
   plugin::Nodejs::Instance nodejs;
   JsLoopIOSource* loop_io_source;
-
-  bool use_queue_event = false;
-  std::unordered_map<zeek::EventHandler*, std::vector<Js::EventHandler*> >
-      js_event_handlers;
 };
 
 extern Plugin plugin;

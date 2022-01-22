@@ -4,15 +4,9 @@ DNS::log_dns: {
   "uid": "CHhAvVGS1DHFjwGM9",
   "id": {
     "orig_h": "172.20.10.3",
-    "orig_p": {
-      "port": 55767,
-      "proto": "udp"
-    },
+    "orig_p": 55767,
     "resp_h": "172.20.10.1",
-    "resp_p": {
-      "port": 53,
-      "proto": "udp"
-    }
+    "resp_p": 53
   },
   "proto": "udp",
   "trans_id": 43556,
@@ -48,15 +42,9 @@ HTTP::log_http: {
   "uid": "ClEkJM2Vm5giqnMf4h",
   "id": {
     "orig_h": "172.20.10.3",
-    "orig_p": {
-      "port": 59588,
-      "proto": "tcp"
-    },
+    "orig_p": 59588,
     "resp_h": "199.60.103.106",
-    "resp_p": {
-      "port": 80,
-      "proto": "tcp"
-    }
+    "resp_p": 80
   },
   "trans_depth": 1,
   "method": "GET",
@@ -79,15 +67,9 @@ SSL::log_ssl: {
   "uid": "C4J4Th3PJpwUYZZ6gc",
   "id": {
     "orig_h": "172.20.10.3",
-    "orig_p": {
-      "port": 45208,
-      "proto": "tcp"
-    },
+    "orig_p": 45208,
     "resp_h": "199.60.103.106",
-    "resp_p": {
-      "port": 443,
-      "proto": "tcp"
-    }
+    "resp_p": 443
   },
   "version_num": 772,
   "version": "TLSv13",
@@ -109,15 +91,9 @@ Conn::log_conn: {
   "uid": "CHhAvVGS1DHFjwGM9",
   "id": {
     "orig_h": "172.20.10.3",
-    "orig_p": {
-      "port": 55767,
-      "proto": "udp"
-    },
+    "orig_p": 55767,
     "resp_h": "172.20.10.1",
-    "resp_p": {
-      "port": 53,
-      "proto": "udp"
-    }
+    "resp_p": 53
   },
   "proto": "udp",
   "service": "dns",
@@ -137,15 +113,9 @@ Conn::log_conn: {
   "uid": "C4J4Th3PJpwUYZZ6gc",
   "id": {
     "orig_h": "172.20.10.3",
-    "orig_p": {
-      "port": 45208,
-      "proto": "tcp"
-    },
+    "orig_p": 45208,
     "resp_h": "199.60.103.106",
-    "resp_p": {
-      "port": 443,
-      "proto": "tcp"
-    }
+    "resp_p": 443
   },
   "proto": "tcp",
   "service": "ssl",
@@ -165,15 +135,9 @@ Conn::log_conn: {
   "uid": "ClEkJM2Vm5giqnMf4h",
   "id": {
     "orig_h": "172.20.10.3",
-    "orig_p": {
-      "port": 59588,
-      "proto": "tcp"
-    },
+    "orig_p": 59588,
     "resp_h": "199.60.103.106",
-    "resp_p": {
-      "port": 80,
-      "proto": "tcp"
-    }
+    "resp_p": 80
   },
   "proto": "tcp",
   "service": "http",

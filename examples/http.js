@@ -7,6 +7,11 @@
 //
 const http = require('http');
 
+// Serialize BitInt as strings.
+BigInt.prototype.toJSON = function() {
+  return this.toString();
+}
+
 var connections_total = 0;
 var most_recent_connections_limit = 5;
 var most_recent_connections = []

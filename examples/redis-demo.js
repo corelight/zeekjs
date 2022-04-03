@@ -1,6 +1,11 @@
 "use strict";
 const redis = require('redis');
 
+// Serialize BitInt as strings.
+BigInt.prototype.toJSON = function() {
+  return this.toString();
+}
+
 let client = redis.createClient();
 client.on("error", function(error) {
   console.log(`-- redis error ${error}`);

@@ -112,7 +112,30 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
       wrap_result.val = zeek::make_intrusive<zeek::AddrVal>(zeek::IPAddr(addr6));
       return wrap_result;
     }
+  } else if (type_tag == zeek::TYPE_SUBNET) {
+    v8::Local<v8::String> v8_str = v8_val->ToString(context).ToLocalChecked();
+    v8::String::Utf8Value utf8_value(isolate_, v8_str);
+    zeek::IPPrefix ip_prefix;
 
+    if (zeek::IPPrefix::ConvertString(*utf8_value, &ip_prefix)) {
+      wrap_result.val = zeek::make_intrusive<zeek::SubNetVal>(ip_prefix);
+      return wrap_result;
+    } else {
+      // Ad-hoc support for the bracketed IPv6 subnet notation as well.
+      // For example, [2607:f8b0::]/40.
+      if ((*utf8_value)[0] == '[') {
+        std::string cleaned = *utf8_value;
+        cleaned.erase(0, 1);
+        size_t loc = cleaned.find("]/");
+        if (loc != std::string::npos) {
+          cleaned.erase(loc, 1);
+          if (zeek::IPPrefix::ConvertString(cleaned.c_str(), &ip_prefix)) {
+            wrap_result.val = zeek::make_intrusive<zeek::SubNetVal>(ip_prefix);
+            return wrap_result;
+          }
+        }
+      }
+    }
   } else if (type_tag == zeek::TYPE_COUNT) {
     if (v8_val->IsNumber()) {
       v8::MaybeLocal<v8::Uint32> result = v8_val->ToUint32(context);
@@ -566,6 +589,8 @@ v8::Local<v8::Value> ZeekValWrapper::Wrap(const zeek::ValPtr& vp) {
       return v8_str(vp->AsString()->CheckString());
     case zeek::TYPE_ADDR:
       return v8_str(vp->AsAddr().AsString().c_str());
+    case zeek::TYPE_SUBNET:
+      return v8_str(vp->AsSubNet().AsString().c_str());
     case zeek::TYPE_PORT: {
       zeek::PortVal* pvp = vp->AsPortVal();
       v8::Local<v8::Object> obj = v8::Object::New(isolate_);

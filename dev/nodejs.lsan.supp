@@ -5,10 +5,11 @@ leak:PlatformWorkerThread
 leak:node::native_module::NativeModuleEnv::CompileFunction
 leak:v8::internal::GeneratedCode
 leak:v8::internal::Heap::GenerationalBarrierSlow
+leak:v8::internal::Heap::InsertIntoRememberedSetFromCode
 leak:v8::internal::Heap::PerformGarbageCollection
 leak:v8::internal::Object::SetDataProperty
 leak:v8::internal::OptimizedCompilationJob::FinalizeJob
 leak:v8::internal::Runtime_RegExpExec
 leak:v8::internal::TorqueGeneratedInterceptorInfo
 leak:v8::internal::UnoptimizedCompilationJob::FinalizeJob
-leak:v8::internal::Heap::InsertIntoRememberedSetFromCode
+leak:v8::internal::baseline::BaselineBatchCompiler::CompileBatch

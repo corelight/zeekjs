@@ -9,37 +9,11 @@
 #include <zeek/iosource/IOSource.h>
 #include <zeek/plugin/Plugin.h>
 
+#include "IOLoop.h"
 #include "Nodejs.h"
 #include "ZeekJS.h"
 
 namespace plugin::Corelight_ZeekJS {
-
-/*
- * Tiny layer between Nodejs::Instance and the zeek::iosource::IOSource
- * world. Not sure how useful really, but at least it disconnects lifetime
- * of the Node.js instance and the IOSource as the IOManager deletes the
- * IOSources registered with it.
- */
-class JsLoopIOSource : public zeek::iosource::IOSource {
- public:
-  JsLoopIOSource(plugin::Nodejs::Instance* instance) : instance_(instance) {
-    SetClosed(false);
-  }
-
-  void Process() override { instance_->Process(); }
-
-  double GetNextTimeout() override {
-    // std::fprintf(stderr, "GetNextTimeout\n");
-    return instance_->GetNextTimeout();
-  }
-
-  const char* Tag() override { return instance_->Tag(); }
-
-  void UpdateTime() { instance_->UpdateTime(); }
-
- private:
-  plugin::Nodejs::Instance* instance_ = nullptr;
-};
 
 class Plugin : public zeek::plugin::Plugin {
  public:
@@ -84,7 +58,6 @@ class Plugin : public zeek::plugin::Plugin {
 
   std::vector<std::filesystem::path> load_files;
   plugin::Nodejs::Instance nodejs;
-  JsLoopIOSource* loop_io_source;
 };
 
 extern Plugin plugin;

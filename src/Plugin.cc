@@ -1,4 +1,5 @@
 #include "Plugin.h"
+#include "IOLoop.h"
 #include "Nodejs.h"
 #include "ZeekCompat.h"
 #include "zeekjs.bif.h"
@@ -71,17 +72,26 @@ void Plugin::InitPostScript() {
     return;
   }
 
-  // Register Node as an IO source with the iosource mgr.
-  PLUGIN_DBG_LOG(plugin, "Registering IOSource.");
-  loop_io_source = new JsLoopIOSource(&nodejs);
+  // Register Node's loop as an IO source with the iosource mgr
+  auto loop_io_source = new plugin::Corelight_ZeekJS::IOLoop::LoopSource(&nodejs);
   zeek::iosource_mgr->Register(loop_io_source, true /*dont_count*/);
-  if (!zeek::iosource_mgr->RegisterFd(nodejs.GetLoopFd(), loop_io_source)) {
-    zeek::reporter->Error("Failed to register loop as IOSource");
+  if (!zeek::iosource_mgr->RegisterFd(loop_io_source->GetFd(), loop_io_source)) {
+    zeek::reporter->Error("Failed to register LoopSource");
     return;
   }
 
-  // Kick the loop once to get things started.
-  loop_io_source->Process();
+  // Another IO source allowing to kick Zeek's IO loop
+  auto pipe_io_source = new plugin::Corelight_ZeekJS::IOLoop::PipeSource(&nodejs);
+  zeek::iosource_mgr->Register(pipe_io_source, true /*dont_count*/);
+  if (!zeek::iosource_mgr->RegisterFd(pipe_io_source->GetFd(), pipe_io_source)) {
+    zeek::reporter->Error("Failed to register PipeSource");
+    return;
+  }
+
+  nodejs.SetZeekNotifier(pipe_io_source);
+
+  // Run the loop once to get things started.
+  nodejs.Process();
 }
 
 // Take over files ending with .js

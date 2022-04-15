@@ -6,6 +6,7 @@
 #include <node/v8.h>
 #include <uv.h>
 
+#include "IOLoop.h"
 #include "ZeekJS.h"
 
 // Prototypes for plugin hooks.
@@ -85,12 +86,15 @@ class Instance {
 
   void Done();
 
+  void SetZeekNotifier(plugin::Corelight_ZeekJS::IOLoop::PipeSource* n) {
+    zeek_notifier_ = n;
+  }
+
   // Called by the thin JsLoopIOSource
   int GetLoopFd();
   void Process();
   void UpdateTime();
   double GetNextTimeout();
-  const char* Tag() { return "NodejsLoop"; }
 
   //
   // Invoked from Javascript to register the given function as
@@ -150,6 +154,9 @@ class Instance {
 
   // Wrapping.
   std::unique_ptr<ZeekValWrapper> zeek_val_wrapper_;
+
+  // Allows kicking/notifying the Zeek IO loop.
+  plugin::Corelight_ZeekJS::IOLoop::PipeSource* zeek_notifier_;
 };
 
 class EventHandler : public plugin::Corelight_ZeekJS::Js::EventHandler {

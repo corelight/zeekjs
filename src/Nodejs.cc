@@ -1,4 +1,5 @@
 #include "Nodejs.h"
+#include "IOLoop.h"
 
 #include <filesystem>
 #include <memory>
@@ -1286,18 +1287,60 @@ void Instance::UpdateTime() {
   uv_update_time(&loop);
 }
 
-// for IOSource::GetNextTimeout
+// Implementation for GetNextTimeout() for the IOSource.
 double Instance::GetNextTimeout() {
   int alive = uv_loop_alive(&loop);
   double timeout = uv_backend_timeout(&loop);  // in ms
   // dprintf("Have timeout %f alive=%d", timeout, alive);
-  if (!alive || timeout < 0)
+  if (!alive || timeout < 0.0)
     return -1;
 
   return timeout / 1000;
 }
 
-// for IOSource::Process
+struct UvHandle {
+  void* h;
+  int fd;
+  int active;
+};
+inline bool operator==(const UvHandle& l, const UvHandle& r) {
+  return l.h == r.h && l.fd == r.fd && l.active == r.active;
+}
+
+// uv_walk() callback for collecting all handles with an FD
+// into a vector provided by arg (std::vector<UvHandle>*)
+static void collectUvHandles(uv_handle_t* h, void* arg) {
+  auto handles = static_cast<std::vector<UvHandle>*>(arg);
+
+  int fd = -1;
+  uv_fileno(h, &fd);
+  if (fd < 0)
+    return;
+
+#ifdef ZEEKJS_LOOP_DEBUG
+  uv_handle_type t = uv_handle_get_type(h);
+  const char* type_name = uv_handle_type_name(t);
+  dprintf("Adding h=%p type=%s fd=%d active=%d", h, type_name, fd, uv_is_active(h));
+#endif
+  handles->push_back({.h = h, .fd = fd, .active = uv_is_active(h)});
+};
+
+// Process the Javascript IO loop.
+//
+// This does a single uv_run() in NOWAIT mode followed by foreground
+// task flush.
+//
+// Some trickiness: If we detect that uv_run() or task flushing changed the
+// set of uv_handle_t instances registered with the loop (active or not) we
+// do another round or otherwise notify Zeek's IO loop to trigger another
+// Instance::Process() on the next loop iteration.
+//
+// The (understood) reason are TCP handles being connected: They won't show up
+// as active in the handle list when the connect() is in progress and they are
+// only registered with the IO loop on a subsequent uv__io_poll() round, so
+// the loop fd will not become ready/signaled when the TCP connection has
+// been established.
+//
 void Instance::Process() {
   v8::Isolate::Scope isolate_scope(GetIsolate());
   v8::HandleScope handle_scope(GetIsolate());
@@ -1306,15 +1349,32 @@ void Instance::Process() {
   v8::Context::Scope context_scope(context);
   v8::SealHandleScope seal(GetIsolate());
 
-  int more = 0;
+  // XXX: This is hard to understand.
+  int round = 0, more = 0, handles_changed;
+  std::vector<UvHandle> handles_before;
+  std::vector<UvHandle> handles_after;
+  while (round < 2) {
+    ++round;
+    handles_before.clear();
+    handles_after.clear();
+    handles_changed = 0;
 
-  // This looks funky, but doing only one uv_run() leads to blocking
-  // HTTP requests for the Node.js http server. No, havent' understood
-  // it properly :-(
-  do {
-    uv_run(&loop, UV_RUN_NOWAIT);
-    node_platform_->FlushForegroundTasks(GetIsolate());
+    uv_walk(&loop, collectUvHandles, &handles_before);
+
     uv_run(&loop, UV_RUN_NOWAIT);
     more = node_platform_->FlushForegroundTasks(GetIsolate());
-  } while (more);
+    if (more)
+      continue;
+
+    uv_walk(&loop, collectUvHandles, &handles_after);
+    handles_changed = handles_before != handles_after;
+    if (handles_changed)
+      continue;
+
+    assert(!more && !handles_changed);
+    return;
+  }
+
+  if (more || handles_changed)
+    zeek_notifier_->Notify();
 }

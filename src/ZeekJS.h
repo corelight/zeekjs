@@ -1,4 +1,9 @@
 #pragma once
+#include <chrono>
+using std::chrono::duration_cast;
+using std::chrono::microseconds;
+using std::chrono::seconds;
+using std::chrono::system_clock;
 
 #include <zeek/Event.h>
 #include <zeek/Stmt.h>
@@ -26,22 +31,24 @@ class HookHandler {
 };
 
 /* Poor man's logging */
-#define eprintf(...)                        \
-  do {                                      \
-    std::fprintf(stderr, "[ ERROR ] ");     \
-    std::fprintf(stderr, "%s: ", __func__); \
-    std::fprintf(stderr, __VA_ARGS__);      \
-    std::fprintf(stderr, "\n");             \
+#define eprintf(...)                                        \
+  do {                                                      \
+    auto __now = system_clock::now().time_since_epoch();    \
+    auto __us = duration_cast<microseconds>(__now).count(); \
+    std::fprintf(stderr, "[ ERROR ] %s: ", __func__);       \
+    std::fprintf(stderr, __VA_ARGS__);                      \
+    std::fprintf(stderr, "\n");                             \
   } while (0);
 
 // #define DEBUG 1
 #ifdef DEBUG
-#define dprintf(...)                        \
-  do {                                      \
-    std::fprintf(stderr, "[ DEBUG ] ");     \
-    std::fprintf(stderr, "%s: ", __func__); \
-    std::fprintf(stderr, __VA_ARGS__);      \
-    std::fprintf(stderr, "\n");             \
+#define dprintf(...)                                                       \
+  do {                                                                     \
+    auto __now = system_clock::now().time_since_epoch();                   \
+    auto __us = duration_cast<microseconds>(__now).count();                \
+    std::fprintf(stderr, "%lf [ DEBUG ] %s ", __us / 1000000.0, __func__); \
+    std::fprintf(stderr, __VA_ARGS__);                                     \
+    std::fprintf(stderr, "\n");                                            \
   } while (0);
 #else
 #define dprintf(...) \

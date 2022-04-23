@@ -3,10 +3,13 @@ leak:Heap::CollectGarbage
 leak:ObjectTemplate::NewInstance
 leak:PlatformWorkerThread
 leak:node::native_module::NativeModuleEnv::CompileFunction
+leak:v8::internal::ApiNatives::InstantiateFunction
+leak:v8::internal::Compiler::Compile
 leak:v8::internal::GeneratedCode
 leak:v8::internal::Heap::GenerationalBarrierSlow
 leak:v8::internal::Heap::InsertIntoRememberedSetFromCode
 leak:v8::internal::Heap::PerformGarbageCollection
+leak:v8::internal::JSFunction::EnsureFeedbackVector
 leak:v8::internal::Object::SetDataProperty
 leak:v8::internal::OptimizedCompilationJob::FinalizeJob
 leak:v8::internal::Runtime_RegExpExec

@@ -104,6 +104,12 @@ int Plugin::HookLoadFile(const zeek::plugin::Plugin::LoadType,
     return 1;
   }
 
+  if (file.find(".cjs", file.size() - 4) != std::string::npos) {
+    PLUGIN_DBG_LOG(plugin, "Hooked .cjs file=%s (%s)", file.c_str(), resolved.c_str());
+    load_files.emplace_back(resolved);
+    return 1;
+  }
+
   return -1;
 }
 

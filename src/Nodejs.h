@@ -78,7 +78,7 @@ class Instance {
 
   bool Init(plugin::Corelight_ZeekJS::Plugin* plugin,
             const std::string& main_script_source,
-            const std::vector<std::filesystem::path>& load_files,
+            const std::vector<std::filesystem::path>& files,
             size_t initial_heap_size_in_bytes,
             size_t maximum_heap_size_in_bytes,
             bool exit_on_uncaught_exceptions,
@@ -134,6 +134,13 @@ class Instance {
   friend class HookHandler;
 
  private:
+  void SetupZeekObject(v8::Local<v8::Context> context,
+                       v8::Isolate* isolate,
+                       const std::vector<std::filesystem::path>& files);
+  bool ExecuteAndWaitForInit(v8::Local<v8::Context> context,
+                             v8::Isolate* isolate,
+                             const std::string& main_script_source);
+
   std::optional<zeek::Args> v8_to_zeek_args(const zeek::FuncType* ft,
                                             v8::Local<v8::Array> v8_args);
 

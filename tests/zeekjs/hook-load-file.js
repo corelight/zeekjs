@@ -1,5 +1,5 @@
 # @TEST-DOC: Tests around HookLoadFile
-# @TEST-EXEC: zeek a js a.z a.ze .js a.js
+# @TEST-EXEC: zeek a js a.z a.ze a.js a.cjs
 # @TEST-EXEC: btest-diff .stdout
 @TEST-START-FILE a
 event zeek_init() &priority=0 {
@@ -37,14 +37,14 @@ event zeek_init() &priority=-5 {
 }
 @TEST-END-FILE
 
-@TEST-START-FILE .js
-zeek.on('zeek_init', { priority: -6 }, function() {
-  zeek.print('PASS: .js was loaded as Javascript file.');
-});
-@TEST-END-FILE
-
 @TEST-START-FILE a.js
 zeek.on('zeek_init', { priority: -7 }, function() {
   zeek.print('PASS: a.js was loaded as Javascript file.');
+});
+@TEST-END-FILE
+
+@TEST-START-FILE a.cjs
+zeek.on('zeek_init', { priority: -8 }, function() {
+  zeek.print('PASS: a.cjs was loaded as Javascript file.');
 });
 @TEST-END-FILE

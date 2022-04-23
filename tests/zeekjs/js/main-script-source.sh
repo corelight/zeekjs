@@ -1,5 +1,5 @@
 # @TEST-DOC: Test overriding the main script source
-# @TEST-EXEC: zeek ZeekJS::main_script_source="console.log('I know better how to bootstrap!');\nzeek.__zeekjs_files.forEach((x, i) => console.log(i + ' ' + x))\n;" mod1.js mod2.js
+# @TEST-EXEC: zeek ZeekJS::main_script_source="globalThis.zeekjs_init = () => { console.log('I know better how to bootstrap!'); zeek.__zeekjs_files.forEach((x, i) => console.log(i + ' ' + x)) };" mod1.js mod2.js
 # @TEST-EXEC: btest-diff .stdout
 
 @TEST-START-FILE mod1.js

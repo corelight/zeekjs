@@ -1097,6 +1097,146 @@ bool Instance::RegisterHookFunction(v8::Local<v8::String> v8_name,
   return true;
 }
 
+void Instance::SetupZeekObject(v8::Local<v8::Context> context,
+                               v8::Isolate* isolate,
+
+                               const std::vector<std::filesystem::path>& files) {
+  v8::Local<v8::ObjectTemplate> zeek_tmpl = v8::ObjectTemplate::New(GetIsolate());
+  zeek_tmpl->SetInternalFieldCount(1);
+  v8::Local<v8::Object> zeek_obj = zeek_tmpl->NewInstance(context).ToLocalChecked();
+  zeek_obj->SetInternalField(0, v8::External::New(GetIsolate(), this));
+
+  v8::Local<v8::String> on_str = v8_str_intern(GetIsolate(), "on");
+  v8::Local<v8::FunctionTemplate> zeek_on_tmpl =
+      v8::FunctionTemplate::New(GetIsolate(), ZeekOnCallback);
+  zeek_obj->Set(context, on_str, zeek_on_tmpl->GetFunction(context).ToLocalChecked())
+      .Check();
+
+  // TODO: Make this use the PrintStmt if possible.
+  v8::Local<v8::String> print_str = v8_str_intern(GetIsolate(), "print");
+  v8::Local<v8::FunctionTemplate> zeek_print_tmpl =
+      v8::FunctionTemplate::New(GetIsolate(), PrintCallback);
+  zeek_obj
+      ->Set(context, print_str, zeek_print_tmpl->GetFunction(context).ToLocalChecked())
+      .Check();
+
+  v8::Local<v8::String> event_str = v8_str_intern(GetIsolate(), "event");
+  v8::Local<v8::FunctionTemplate> zeek_event_tmpl =
+      v8::FunctionTemplate::New(GetIsolate(), ZeekEventCallback);
+  zeek_obj
+      ->Set(context, event_str, zeek_event_tmpl->GetFunction(context).ToLocalChecked())
+      .Check();
+
+  v8::Local<v8::String> hook_str = v8_str_intern(GetIsolate(), "hook");
+  v8::Local<v8::FunctionTemplate> zeek_hook_tmpl =
+      v8::FunctionTemplate::New(GetIsolate(), ZeekHookCallback);
+  zeek_obj
+      ->Set(context, hook_str, zeek_hook_tmpl->GetFunction(context).ToLocalChecked())
+      .Check();
+
+  // invoke
+  v8::Local<v8::String> invoke_str = v8_str_intern(GetIsolate(), "invoke");
+  v8::Local<v8::FunctionTemplate> zeek_invoke_tmpl =
+      v8::FunctionTemplate::New(GetIsolate(), ZeekInvokeCallback);
+  zeek_obj
+      ->Set(context, invoke_str,
+            zeek_invoke_tmpl->GetFunction(context).ToLocalChecked())
+      .Check();
+
+  // global_vars dictionary
+  v8::Local<v8::String> globals_str = v8_str_intern(GetIsolate(), "global_vars");
+  v8::Local<v8::ObjectTemplate> zeek_globals_tmpl =
+      v8::ObjectTemplate::New(GetIsolate());
+  zeek_globals_tmpl->SetInternalFieldCount(1);
+
+  v8::NamedPropertyHandlerConfiguration global_vars_conf = {nullptr};
+  global_vars_conf.getter = ZeekGlobalVarsGetter;
+  global_vars_conf.enumerator = ZeekGlobalVarsEnumerator;
+  zeek_globals_tmpl->SetHandler(global_vars_conf);
+
+  v8::Local<v8::Object> zeek_global_vars_obj =
+      zeek_globals_tmpl->NewInstance(context).ToLocalChecked();
+  zeek_global_vars_obj->SetInternalField(0, v8::External::New(GetIsolate(), this));
+  zeek_obj->Set(context, globals_str, zeek_global_vars_obj).Check();
+
+  // Files to be loaded by the bootstrapping script.
+  v8::Local<v8::String> zeekjs_files_str = v8_str(GetIsolate(), "__zeekjs_files");
+  v8::Local<v8::Array> array =
+      v8::Array::New(GetIsolate(), static_cast<int>(files.size()));
+  for (unsigned long i = 0; i < files.size(); i++) {
+    v8::Local<v8::String> v8_file = v8_str(GetIsolate(), files[i].c_str());
+    array->Set(context, i, v8_file).Check();
+  }
+  zeek_obj->Set(context, zeekjs_files_str, array).Check();
+
+  auto zeek_str = v8_str_intern(GetIsolate(), "zeek");
+  context->Global()->Set(context, zeek_str, zeek_obj).Check();
+}
+
+bool Instance::ExecuteAndWaitForInit(v8::Local<v8::Context> context,
+                                     v8::Isolate* isolate,
+                                     const std::string& main_script_source) {
+  // Oookay, go run the main script
+  v8::MaybeLocal<v8::Value> ret =
+      node::LoadEnvironment(node_environment_.get(), main_script_source.c_str());
+
+  if (ret.IsEmpty()) {
+    // TODO: Introspect the error a bit.
+    eprintf("Exception?\n");
+    return false;
+  }
+
+  // The main script is supposed to define an zeekjs_init() function
+  // in the global scope that we can then call.
+  const char* init_name = "zeekjs_init";
+  v8::Local<v8::String> v8_init_name = v8_str_intern(GetIsolate(), init_name);
+  v8::Local<v8::Value> init_val;
+
+  if (!context->Global()->Get(context, v8_init_name).ToLocal(&init_val)) {
+    eprintf("Failed to get %s function from main script", init_name);
+    return false;
+  }
+  if (!init_val->IsFunction()) {
+    v8::Local<v8::String> typeof_str = init_val->TypeOf(GetIsolate());
+    v8::String::Utf8Value typeof_utf8(isolate_, typeof_str);
+
+    eprintf("No %s found or not a function (%s)", init_name, *typeof_utf8);
+    return false;
+  }
+
+  // Call init
+  auto init_fun = v8::Local<v8::Function>::Cast(init_val);
+  v8::Local<v8::Value> result;
+  if (!init_fun->Call(context, context->Global(), 0, nullptr).ToLocal(&result)) {
+    eprintf("Error calling %s)", init_name);
+    return false;
+  }
+
+  v8::Local<v8::String> result_typeof_str = result->TypeOf(GetIsolate());
+  v8::String::Utf8Value result_typeof_utf8(isolate_, result_typeof_str);
+  dprintf("init() result=%s %d", *result_typeof_utf8, result->IsPromise());
+
+  // If we got back a Promise from zeekjs_init(), run the JS IO loop
+  // until it's not pending anymore.
+  if (result->IsPromise()) {
+    auto promise = v8::Local<v8::Promise>::Cast(result);
+    dprintf("%s returned promise, state=%d - running JS loop", init_name,
+            promise->State());
+    while (promise->State() == v8::Promise::PromiseState::kPending) {
+      uv_run(&loop, UV_RUN_DEFAULT);
+      node_platform_->FlushForegroundTasks(GetIsolate());
+      dprintf("uv_run() for promise - state=%d", promise->State());
+    }
+
+    if (promise->State() == v8::Promise::PromiseState::kRejected) {
+      eprintf("%s promise was rejected", init_name);
+      return false;
+    }
+  }
+
+  return true;
+}
+
 bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
                     const std::string& main_script_source,
                     const std::vector<std::filesystem::path>& files,
@@ -1203,88 +1343,9 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
 
   zeek_val_wrapper_ = std::make_unique<ZeekValWrapper>(GetIsolate());
 
-  // Setup the Zeek object
-  v8::Local<v8::ObjectTemplate> zeek_tmpl = v8::ObjectTemplate::New(GetIsolate());
-  zeek_tmpl->SetInternalFieldCount(1);
-  v8::Local<v8::Object> zeek_obj = zeek_tmpl->NewInstance(context).ToLocalChecked();
-  zeek_obj->SetInternalField(0, v8::External::New(GetIsolate(), this));
+  SetupZeekObject(context, GetIsolate(), files);
 
-  v8::Local<v8::String> on_str = v8_str_intern(GetIsolate(), "on");
-  v8::Local<v8::FunctionTemplate> zeek_on_tmpl =
-      v8::FunctionTemplate::New(GetIsolate(), ZeekOnCallback);
-  zeek_obj->Set(context, on_str, zeek_on_tmpl->GetFunction(context).ToLocalChecked())
-      .Check();
-
-  // TODO: Make this use the PrintStmt if possible.
-  v8::Local<v8::String> print_str = v8_str_intern(GetIsolate(), "print");
-  v8::Local<v8::FunctionTemplate> zeek_print_tmpl =
-      v8::FunctionTemplate::New(GetIsolate(), PrintCallback);
-  zeek_obj
-      ->Set(context, print_str, zeek_print_tmpl->GetFunction(context).ToLocalChecked())
-      .Check();
-
-  v8::Local<v8::String> event_str = v8_str_intern(GetIsolate(), "event");
-  v8::Local<v8::FunctionTemplate> zeek_event_tmpl =
-      v8::FunctionTemplate::New(GetIsolate(), ZeekEventCallback);
-  zeek_obj
-      ->Set(context, event_str, zeek_event_tmpl->GetFunction(context).ToLocalChecked())
-      .Check();
-
-  v8::Local<v8::String> hook_str = v8_str_intern(GetIsolate(), "hook");
-  v8::Local<v8::FunctionTemplate> zeek_hook_tmpl =
-      v8::FunctionTemplate::New(GetIsolate(), ZeekHookCallback);
-  zeek_obj
-      ->Set(context, hook_str, zeek_hook_tmpl->GetFunction(context).ToLocalChecked())
-      .Check();
-
-  // invoke
-  v8::Local<v8::String> invoke_str = v8_str_intern(GetIsolate(), "invoke");
-  v8::Local<v8::FunctionTemplate> zeek_invoke_tmpl =
-      v8::FunctionTemplate::New(GetIsolate(), ZeekInvokeCallback);
-  zeek_obj
-      ->Set(context, invoke_str,
-            zeek_invoke_tmpl->GetFunction(context).ToLocalChecked())
-      .Check();
-
-  // global_vars dictionary
-  v8::Local<v8::String> globals_str = v8_str_intern(GetIsolate(), "global_vars");
-  v8::Local<v8::ObjectTemplate> zeek_globals_tmpl =
-      v8::ObjectTemplate::New(GetIsolate());
-  zeek_globals_tmpl->SetInternalFieldCount(1);
-
-  v8::NamedPropertyHandlerConfiguration global_vars_conf = {nullptr};
-  global_vars_conf.getter = ZeekGlobalVarsGetter;
-  global_vars_conf.enumerator = ZeekGlobalVarsEnumerator;
-  zeek_globals_tmpl->SetHandler(global_vars_conf);
-
-  v8::Local<v8::Object> zeek_global_vars_obj =
-      zeek_globals_tmpl->NewInstance(context).ToLocalChecked();
-  zeek_global_vars_obj->SetInternalField(0, v8::External::New(GetIsolate(), this));
-  zeek_obj->Set(context, globals_str, zeek_global_vars_obj).Check();
-
-  // Files to be loaded by the bootstrapping script.
-  v8::Local<v8::String> zeekjs_files_str = v8_str(GetIsolate(), "__zeekjs_files");
-  v8::Local<v8::Array> array =
-      v8::Array::New(GetIsolate(), static_cast<int>(files.size()));
-  for (unsigned long i = 0; i < files.size(); i++) {
-    v8::Local<v8::String> v8_file = v8_str(GetIsolate(), files[i].c_str());
-    array->Set(context, i, v8_file).Check();
-  }
-  zeek_obj->Set(context, zeekjs_files_str, array).Check();
-
-  auto zeek_str = v8_str_intern(GetIsolate(), "zeek");
-  context->Global()->Set(context, zeek_str, zeek_obj).Check();
-
-  // Oookay, go run the bootstrap content.
-  v8::MaybeLocal<v8::Value> ret =
-      node::LoadEnvironment(node_environment_.get(), main_script_source.c_str());
-
-  if (ret.IsEmpty()) {
-    // TODO: Introspect the error a bit.
-    eprintf("Exception?\n");
-    return false;
-  }
-  return true;
+  return ExecuteAndWaitForInit(context, GetIsolate(), main_script_source);
 }
 
 void Instance::Done() {

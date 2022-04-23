@@ -10,9 +10,16 @@ export {
 	## https://docs.w3cub.com/node~14_lts/embedding
 	##
 	const main_script_source: string = cat(
-		"const publicRequire = require('module').createRequire(process.cwd() + '/');\n",
+		"const module = require('module')\n",
+		"const publicRequire = module.createRequire(process.cwd() + '/');\n",
 		"globalThis.require = publicRequire;\n\n",
-		"zeek.__zeekjs_files.forEach((fn) => { publicRequire(fn); })\n"
+		"globalThis.zeekjs_init = async () => {\n",
+		"  const m = new module();\n",
+		"  // Compile a new module that imports all .js files found using import().\n",
+		"  //\n",
+		"  // https://stackoverflow.com/a/17585470/9044112\n",
+		"  return m._compile('const ps = []; zeek.__zeekjs_files.forEach((fn) => { ps.push(import(fn)); }); return Promise.all(ps);', process.cwd() + '/');\n",
+		"};\n\n"
 	) &redef;
 
 	## Vector of filenames to compile/execute after the bootstrap file.

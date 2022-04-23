@@ -3,5 +3,5 @@ PASS: a was loaded as Zeek file.
 PASS: a.z was loaded as Zeek file.
 PASS: js was loaded as Zeek file.
 PASS: a.ze was loaded as Zeek file.
-PASS: .js was loaded as Javascript file.
 PASS: a.js was loaded as Javascript file.
+PASS: a.cjs was loaded as Javascript file.

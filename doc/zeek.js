@@ -8,7 +8,7 @@
  * Register a function as a Zeek event handler.
  *
  * @param {string} name - The Zeek event name. For example, zeek_init.
- * @param {number} [priority=0] - Optional priority.
+ * @param {object} [options] - Optional options. Only supported key is priority.
  * @param {function} handler - The function to call.
  *
  */
@@ -21,7 +21,7 @@ exports.on = function() { }
  * in a Zeek hook handler.
  *
  * @param {string} name - The name of the hook. For example, ``DNS::log_policy``.
- * @param {number} [priority=0] - Optional priority.
+ * @param {object} [options] - Optional options. Only supported key is priority.
  * @param {function} handler - The function to call.
  *
  */

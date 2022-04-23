@@ -12,7 +12,7 @@ BigInt.prototype.toJSON = function() {
   return parseInt(this);
 }
 
-zeek.hook('Log::log_stream_policy', -1000, function(rec, id) {
+zeek.hook('Log::log_stream_policy', { priority: -1000 }, function(rec, id) {
 
   // Skip packet_filter, it is not using network time.
   if (id.startsWith("PacketFilter"))

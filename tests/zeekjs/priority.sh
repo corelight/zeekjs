@@ -3,15 +3,15 @@
 # @TEST-EXEC: btest-diff .stdout
 
 @TEST-START-FILE priority.js
-zeek.on('zeek_init', -10, () => { zeek.print('[JS] zeek_init: -10'); })
-zeek.on('zeek_init', 10, () => { zeek.print('[JS] zeek_init: 10'); })
+zeek.on('zeek_init', { priority: -10 }, () => { zeek.print('[JS] zeek_init: -10'); })
+zeek.on('zeek_init', {priority: 10 }, () => { zeek.print('[JS] zeek_init: 10'); })
 zeek.on('zeek_init', () => { zeek.print('[JS] zeek_init: 0 (default)'); })
 
 zeek.on('dns_request', function(c, msg, query, qtype, qclass) {
   zeek.print(`[JS] dns_request: 0 (default) ${query}`);
 });
 
-zeek.on('dns_request', 10, function(c, msg, query, qtype, qclass) {
+zeek.on('dns_request', { priority: 10 }, function(c, msg, query, qtype, qclass) {
   zeek.print(`[JS] dns_request: 10 ${query}`);
 });
 @TEST-END-FILE

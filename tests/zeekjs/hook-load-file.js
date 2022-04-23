@@ -38,13 +38,13 @@ event zeek_init() &priority=-5 {
 @TEST-END-FILE
 
 @TEST-START-FILE .js
-zeek.on('zeek_init', -6, function() {
+zeek.on('zeek_init', { priority: -6 }, function() {
   zeek.print('PASS: .js was loaded as Javascript file.');
 });
 @TEST-END-FILE
 
 @TEST-START-FILE a.js
-zeek.on('zeek_init', -7, function() {
+zeek.on('zeek_init', { priority: -7 }, function() {
   zeek.print('PASS: a.js was loaded as Javascript file.');
 });
 @TEST-END-FILE

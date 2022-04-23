@@ -7,7 +7,7 @@ zeek.on('zeek_init', function() {
   console.log(`Hey, I am ${zeek.global_vars['Cluster::node']}`);
   console.log(`Cluster::nodes=${JSON.stringify(zeek.global_vars['Cluster::nodes'])}`);
 });
-zeek.on('zeek_init', -10, function() {
+zeek.on('zeek_init', { priority: -10 }, function() {
   zeek.invoke('terminate');
 });
 @TEST-END-FILE

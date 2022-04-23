@@ -3,8 +3,8 @@
 # @TEST-EXEC: btest-diff .stdout
 
 @TEST-START-FILE priority.js
-zeek.hook('DNS::log_policy', -10, () => { zeek.print('[JS] DNS::log_policy: -10'); })
-zeek.hook('DNS::log_policy', 10, () => { zeek.print('[JS] DNS::log_policy: 10'); })
+zeek.hook('DNS::log_policy', { priority: -10 }, () => { zeek.print('[JS] DNS::log_policy: -10'); })
+zeek.hook('DNS::log_policy', { priority: 10 }, () => { zeek.print('[JS] DNS::log_policy: 10'); })
 @TEST-END-FILE
 
 

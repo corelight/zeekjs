@@ -6,7 +6,7 @@ BigInt.prototype.toJSON = function() {
   return this.toString();
 }
 
-zeek.hook('Log::log_stream_policy', -1000, function(rec, log_id) {
+zeek.hook('Log::log_stream_policy', {priority: -1000}, function(rec, log_id) {
   // Conn::Info to Conn, PacketFilter::Info to PacketFilter
   if (log_id.includes('::'))
     [log_id] = log_id.split('::')

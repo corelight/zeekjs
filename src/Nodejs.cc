@@ -983,13 +983,16 @@ v8::Local<v8::Value> Instance::ZeekInvoke(v8::Local<v8::String> v8_name,
 }
 
 // Common arguments for zeek.on and zeek.hook.
+//
+// zeek.on(name [, options ], function)
+// zeek.hook(name [, options ], function)
 struct HandlerArgs {
   v8::Local<v8::Function> func;
   v8::Local<v8::String> name;
   int priority;
   bool error;
 
-  static HandlerArgs parse(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  static HandlerArgs Parse(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::Isolate* isolate = args.GetIsolate();
     HandlerArgs result = {.error = true};
 
@@ -999,7 +1002,7 @@ struct HandlerArgs {
     }
 
     if (!args[0]->IsString()) {
-      isolate->ThrowException(v8_str(isolate, "Expected first parameter as string"));
+      isolate->ThrowException(v8_str(isolate, "Expected string as first parameter"));
       return result;
     }
 
@@ -1011,13 +1014,26 @@ struct HandlerArgs {
     if (args.Length() == 2) {
       func_idx = 1;
     } else if (args.Length() == 3) {
+      // zeek.on(name, options, function) form.
       func_idx = 2;
-      if (!args[1]->IsNumber()) {
-        isolate->ThrowException(v8_str(isolate, "Expected priority to be a number"));
+      if (!args[1]->IsObject()) {
+        isolate->ThrowException(v8_str(isolate, "Expected options to be an object"));
         return result;
       }
-      auto v8_priority = v8::Local<v8::Int32>::Cast(args[1]);
-      result.priority = v8_priority->Value();
+
+      auto options = v8::Local<v8::Object>::Cast(args[1]);
+      v8::Local<v8::Name> v8_priority_key =
+          v8::Local<v8::Name>::New(isolate, v8_str_intern(isolate, "priority"));
+      v8::MaybeLocal<v8::Value> priority_maybe =
+          options->Get(isolate->GetCurrentContext(), v8_priority_key);
+      if (!priority_maybe.IsEmpty()) {
+        v8::Local<v8::Value> priority_val = priority_maybe.ToLocalChecked();
+        if (!priority_val->IsNumber()) {
+          isolate->ThrowException(v8_str(isolate, "options.priority is not a number"));
+          return result;
+        }
+        result.priority = v8::Local<v8::Int32>::Cast(priority_val)->Value();
+      }
     }
 
     if (!args[func_idx]->IsFunction()) {
@@ -1037,8 +1053,8 @@ void Instance::ZeekOnCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
   auto field = v8::Local<v8::External>::Cast(receiver->GetInternalField(0));
   auto instance = static_cast<Instance*>(field->Value());
 
-  HandlerArgs ha = HandlerArgs::parse(args);
-  if (ha.error)  // handlerArgs::parse will have thrown.
+  HandlerArgs ha = HandlerArgs::Parse(args);
+  if (ha.error)  // HandlerArgs::Parse will have thrown.
     return;
 
   if (!instance->RegisterEventFunction(ha.name, ha.func, ha.priority)) {
@@ -1052,8 +1068,8 @@ void Instance::ZeekHookCallback(const v8::FunctionCallbackInfo<v8::Value>& args)
   auto field = v8::Local<v8::External>::Cast(receiver->GetInternalField(0));
   auto instance = static_cast<Instance*>(field->Value());
 
-  HandlerArgs ha = HandlerArgs::parse(args);
-  if (ha.error)  // handlerArgs::parse will have thrown.
+  HandlerArgs ha = HandlerArgs::Parse(args);
+  if (ha.error)  // HandlerArgs::Parse will have thrown.
     return;
 
   if (!instance->RegisterHookFunction(ha.name, ha.func, ha.priority)) {

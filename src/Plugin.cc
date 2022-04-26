@@ -65,15 +65,17 @@ void Plugin::InitPostScript() {
   bool exit_on_uncaught_exceptions =
       zeek::id::find_val<zeek::Val>("ZeekJS::exit_on_uncaught_exceptions")->AsBool();
 
-  if (!nodejs.Init(&plugin, main_script_source, std_files, initial_heap_size_in_bytes,
-                   maximum_heap_size_in_bytes, exit_on_uncaught_exceptions,
-                   thread_pool_size)) {
+  nodejs = new plugin::Nodejs::Instance();
+
+  if (!nodejs->Init(&plugin, main_script_source, std_files, initial_heap_size_in_bytes,
+                    maximum_heap_size_in_bytes, exit_on_uncaught_exceptions,
+                    thread_pool_size)) {
     zeek::reporter->Error("Failed to initialize nodejs");
     return;
   }
 
   // Register Node's loop as an IO source with the iosource mgr
-  auto loop_io_source = new plugin::Corelight_ZeekJS::IOLoop::LoopSource(&nodejs);
+  auto loop_io_source = new plugin::Corelight_ZeekJS::IOLoop::LoopSource(nodejs);
   zeek::iosource_mgr->Register(loop_io_source, true /*dont_count*/);
   if (!zeek::iosource_mgr->RegisterFd(loop_io_source->GetFd(), loop_io_source)) {
     zeek::reporter->Error("Failed to register LoopSource");
@@ -81,17 +83,17 @@ void Plugin::InitPostScript() {
   }
 
   // Another IO source allowing to kick Zeek's IO loop
-  auto pipe_io_source = new plugin::Corelight_ZeekJS::IOLoop::PipeSource(&nodejs);
+  auto pipe_io_source = new plugin::Corelight_ZeekJS::IOLoop::PipeSource(nodejs);
   zeek::iosource_mgr->Register(pipe_io_source, true /*dont_count*/);
   if (!zeek::iosource_mgr->RegisterFd(pipe_io_source->GetFd(), pipe_io_source)) {
     zeek::reporter->Error("Failed to register PipeSource");
     return;
   }
 
-  nodejs.SetZeekNotifier(pipe_io_source);
+  nodejs->SetZeekNotifier(pipe_io_source);
 
   // Run the loop once to get things started.
-  nodejs.Process();
+  nodejs->Process();
 }
 
 // Take over files ending with .js
@@ -114,7 +116,8 @@ int Plugin::HookLoadFile(const zeek::plugin::Plugin::LoadType,
 }
 
 void Plugin::HookDrainEvents() {
-  nodejs.UpdateTime();
+  if (nodejs)
+    nodejs->UpdateTime();
 }
 
 namespace {
@@ -312,6 +315,9 @@ zeek::ValPtr Plugin::Invoke(const std::string& name,
 void Plugin::Done() {
   zeek::plugin::Plugin::Done();
   PLUGIN_DBG_LOG(plugin, "Done...");
-
-  nodejs.Done();
+  if (nodejs) {
+    nodejs->Done();
+    delete nodejs;
+    nodejs = nullptr;
+  }
 }

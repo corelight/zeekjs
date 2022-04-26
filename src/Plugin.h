@@ -57,7 +57,7 @@ class Plugin : public zeek::plugin::Plugin {
                                 int priority);
 
   std::vector<std::filesystem::path> load_files;
-  plugin::Nodejs::Instance nodejs;
+  plugin::Nodejs::Instance* nodejs;
 };
 
 extern Plugin plugin;

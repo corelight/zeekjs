@@ -147,6 +147,12 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
       wrap_result.val = zeek::val_mgr->Count(result.ToLocalChecked()->Uint64Value());
       return wrap_result;
     }
+  } else if (type_tag == zeek::TYPE_INT) {
+    if (v8_val->IsNumber()) {
+      v8::MaybeLocal<v8::Int32> result = v8_val->ToInt32(context);
+      wrap_result.val = zeek::val_mgr->Int(result.ToLocalChecked()->Value());
+      return wrap_result;
+    }
   } else if (type_tag == zeek::TYPE_DOUBLE) {
     if (v8_val->IsNumber()) {
       v8::Maybe<double> result = v8_val->NumberValue(context);
@@ -580,6 +586,9 @@ v8::Local<v8::Value> ZeekValWrapper::Wrap(const zeek::ValPtr& vp) {
       return v8::Boolean::New(isolate_, vp->CoerceToInt() ? true : false);
     case zeek::TYPE_COUNT:
       return v8::BigInt::NewFromUnsigned(isolate_, vp->AsCount());
+    case zeek::TYPE_INT:
+      // Grml, this may be lossy, but making it a bigint: annoying.
+      return v8::Number::New(isolate_, static_cast<double>(vp->AsInt()));
     case zeek::TYPE_DOUBLE:
       return v8::Number::New(isolate_, vp->AsDouble());
     case zeek::TYPE_INTERVAL:

@@ -43,8 +43,9 @@ const makeRequest = () => {
       ++counter;
       if (counter === 100) {
         zeek.invoke('terminate');
+      } else {
+        setTimeout(makeRequest, 13);
       }
-      setTimeout(makeRequest, 13);
     });
   });
   req.on('error', (err) => {

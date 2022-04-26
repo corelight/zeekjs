@@ -1225,7 +1225,6 @@ bool Instance::ExecuteAndWaitForInit(v8::Local<v8::Context> context,
     while (promise->State() == v8::Promise::PromiseState::kPending) {
       uv_run(&loop, UV_RUN_DEFAULT);
       node_platform_->FlushForegroundTasks(GetIsolate());
-      dprintf("uv_run() for promise - state=%d", promise->State());
     }
 
     if (promise->State() == v8::Promise::PromiseState::kRejected) {

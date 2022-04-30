@@ -14,8 +14,10 @@ zeek.hook('Log::log_stream_policy', {priority: -1000}, function(rec, log_id) {
   // CamelCase to snake_case: PacketFilter to packet_filter
   log_id = log_id.replace(/([a-z0-9])([A-Z])/g, '\$1_\$2').toLowerCase()
 
+  const log_rec = zeek.select_fields(rec, zeek.ATTR_LOG)
+
   // Write to the log file. Synchronous here for simplicity.
-  fs.appendFileSync(log_id + '.log', JSON.stringify(rec) + '\n')
+  fs.appendFileSync(log_id + '.log', JSON.stringify(log_rec) + '\n')
 
   // If you wanted to hand-off logs to a central Redis server.
   // redis_client.publish(log_id, JSON.stringify(copy));

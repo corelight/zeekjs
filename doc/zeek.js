@@ -71,3 +71,18 @@ exports.print = function() { }
  *     worker-01
  */
 exports.global_vars = {}
+
+/**
+ * Select properties with a given attribute.
+ *
+ * @param {object} rec - A object backed by a Zeek record.
+ * @param {number} mask - The attribute mask. Only ``zeek.ATTR_LOG`` supported.
+ *
+ * To select only &log attributes for JSON.stringify():
+ *
+ *     zeek.on('HTTP::log_http' (rec) => {
+ *       const log_rec = zeek.select_fields(rec, zeek.ATTR_LOG)
+ *       console.log(JSON.stringify(log_rec))
+ *     })
+ */
+exports.select_fields = {}

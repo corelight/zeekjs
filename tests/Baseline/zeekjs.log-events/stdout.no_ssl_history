@@ -31,11 +31,7 @@ DNS::log_dns: {
     77,
     77
   ],
-  "rejected": false,
-  "total_answers": 2,
-  "total_replies": 3,
-  "saw_query": true,
-  "saw_reply": true
+  "rejected": false
 }
 HTTP::log_http: {
   "ts": 1630238734.007674,
@@ -56,11 +52,7 @@ HTTP::log_http: {
   "response_body_len": 0,
   "status_code": 301,
   "status_msg": "Moved Permanently",
-  "tags": [],
-  "capture_password": false,
-  "range_request": false,
-  "orig_mime_depth": 1,
-  "resp_mime_depth": 1
+  "tags": []
 }
 SSL::log_ssl: {
   "ts": 1630238734.2097,
@@ -71,20 +63,12 @@ SSL::log_ssl: {
     "resp_h": "199.60.103.106",
     "resp_p": 443
   },
-  "version_num": 772,
   "version": "TLSv13",
   "cipher": "TLS_AES_256_GCM_SHA384",
   "curve": "x25519",
   "server_name": "corelight.com",
-  "session_id": "05628f4ff03bc85cef6bd6b1a01b9419063cf7fc3c5f10fc7b18cfc4b8190e09",
   "resumed": false,
-  "client_ticket_empty_session_seen": false,
-  "client_key_exchange_seen": false,
-  "client_psk_seen": false,
   "established": true,
-  "logged": true,
-  "server_depth": 0,
-  "client_depth": 0
 }
 Conn::log_conn: {
   "ts": 1630238733.951343,

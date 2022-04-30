@@ -13,17 +13,21 @@ BigInt.prototype.toJSON = function() {
 
 
 zeek.on('Conn::log_conn', function(rec) {
-  zeek.print(`Conn::log_conn: ${JSON.stringify(rec, null, 2)}`);
+  const log_rec = zeek.select_fields(rec, zeek.ATTR_LOG);
+  zeek.print(`Conn::log_conn: ${JSON.stringify(log_rec, null, 2)}`);
 });
 zeek.on('DNS::log_dns', function(rec) {
-  zeek.print(`DNS::log_dns: ${JSON.stringify(rec, null, 2)}`);
+  const log_rec = zeek.select_fields(rec, zeek.ATTR_LOG);
+  zeek.print(`DNS::log_dns: ${JSON.stringify(log_rec, null, 2)}`);
 });
 
 zeek.on('HTTP::log_http', function(rec) {
-  zeek.print(`HTTP::log_http: ${JSON.stringify(rec, null, 2)}`);
+  const log_rec = zeek.select_fields(rec, zeek.ATTR_LOG);
+  zeek.print(`HTTP::log_http: ${JSON.stringify(log_rec, null, 2)}`);
 });
 
 zeek.on('SSL::log_ssl', function(rec) {
-  zeek.print(`SSL::log_ssl: ${JSON.stringify(rec, null, 2)}`);
+  const log_rec = zeek.select_fields(rec, zeek.ATTR_LOG);
+  zeek.print(`SSL::log_ssl: ${JSON.stringify(log_rec, null, 2)}`);
 });
 @TEST-END-FILE

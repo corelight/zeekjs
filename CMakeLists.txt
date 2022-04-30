@@ -31,7 +31,7 @@ if ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (${CMAKE_CXX_COMPILER_VERSION} VE
      zeek_plugin_link_library(stdc++fs)
 endif()
 
-zeek_plugin_cc(src/Plugin.cc src/Nodejs.cc src/IOLoop.cc)
+zeek_plugin_cc(src/IOLoop.cc src/Nodejs.cc src/Plugin.cc src/Types.cc)
 zeek_plugin_bif(src/zeekjs.bif)
 zeek_plugin_dist_files(README CHANGES COPYING VERSION)
 zeek_plugin_end()

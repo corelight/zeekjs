@@ -277,9 +277,12 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
 
   } else if (type_tag == zeek::TYPE_TIME) {
     if (v8_val->IsNumber()) {
-      v8::Maybe<double> result = v8_val->NumberValue(context);
-      wrap_result.val =
-          plugin::Corelight_ZeekJS::compat::TimeVal_New(result.ToChecked());
+      double ts = v8_val->NumberValue(context).ToChecked();
+      wrap_result.val = plugin::Corelight_ZeekJS::compat::TimeVal_New(ts);
+      return wrap_result;
+    } else if (v8_val->IsDate()) {
+      double ts = v8::Local<v8::Date>::Cast(v8_val)->ValueOf() / 1000.0;
+      wrap_result.val = plugin::Corelight_ZeekJS::compat::TimeVal_New(ts);
       return wrap_result;
     }
 

@@ -15,15 +15,16 @@ zeek.hook('Log::log_stream_policy', {priority: -1000}, function(rec, log_id) {
   log_id = log_id.replace(/([a-z0-9])([A-Z])/g, '\$1_\$2').toLowerCase()
 
   const log_rec = zeek.select_fields(rec, zeek.ATTR_LOG)
+  const flat_rec = zeek.flatten(log_rec)
 
   // Write to the log file. Synchronous here for simplicity.
-  fs.appendFileSync(log_id + '.log', JSON.stringify(log_rec) + '\n')
+  fs.appendFileSync(log_id + '.log', JSON.stringify(flat_rec) + '\n')
 
   // If you wanted to hand-off logs to a central Redis server.
-  // redis_client.publish(log_id, JSON.stringify(copy));
+  // redis_client.publish(log_id, JSON.stringify(flat_rec))
 
   // Returning false from a hook handler is semantically the same as
   // break in Zeekscript. Not returning or returning anything else
   // has no effect in a hook handler.
-  return false;
-});
+  return false
+})

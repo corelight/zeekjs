@@ -178,7 +178,7 @@ when running, for example::
 
     $ zeek -r tests/Traces/dns-http-https.pcap ./log-bypass.js
     $ cat dns.log
-    {"ts":1630238733.951343,"uid":"CTnlMb4FxnHW2obuR3","id":{"orig_h":"172.20.10.3","orig_p":55767,"resp_h":"172.20.10.1","resp_p":53},"proto":"udp","trans_id":"43556","rtt":0.03791093826293945,"query":"corelight.com","qclass":"1","qclass_name":"C_INTERNET","qtype":"1","qtype_name":"A","rcode":"0","rcode_name":"NOERROR","AA":false,"TC":false,"RD":true,"RA":true,"Z":"0","answers":["199.60.103.106","199.60.103.6"],"TTLs":[77,77],"rejected":false,"total_answers":"2","total_replies":"3","saw_query":true,"saw_reply":true,"_log_id":"dns"}
+    {"ts":1630238733.951343,"uid":"CS00HK1MFHn2F03Px2","id.orig_h":"172.20.10.3","id.orig_p":55767,"id.resp_h":"172.20.10.1","id.resp_p":53,"proto":"udp","trans_id":"43556","rtt":0.03791093826293945,"query":"corelight.com","qclass":"1","qclass_name":"C_INTERNET","qtype":"1","qtype_name":"A","rcode":"0","rcode_name":"NOERROR","AA":false,"TC":false,"RD":true,"RA":true,"Z":"0","answers":["199.60.103.106","199.60.103.6"],"TTLs":[77,77],"rejected":false}
 
 
 
@@ -193,4 +193,6 @@ provides the following functions to interact with Zeek.
 .. autofunction:: hook
 .. autofunction:: event
 .. autofunction:: invoke
+.. autofunction:: select_fields
+.. autofunction:: flatten
 .. autoattribute:: global_vars

@@ -2,12 +2,10 @@
 DNS::log_dns: {
   "ts": 1630238733.951343,
   "uid": "CHhAvVGS1DHFjwGM9",
-  "id": {
-    "orig_h": "172.20.10.3",
-    "orig_p": 55767,
-    "resp_h": "172.20.10.1",
-    "resp_p": 53
-  },
+  "id.orig_h": "172.20.10.3",
+  "id.orig_p": 55767,
+  "id.resp_h": "172.20.10.1",
+  "id.resp_p": 53,
   "proto": "udp",
   "trans_id": 43556,
   "rtt": 0.03791093826293945,
@@ -36,12 +34,10 @@ DNS::log_dns: {
 HTTP::log_http: {
   "ts": 1630238734.007674,
   "uid": "ClEkJM2Vm5giqnMf4h",
-  "id": {
-    "orig_h": "172.20.10.3",
-    "orig_p": 59588,
-    "resp_h": "199.60.103.106",
-    "resp_p": 80
-  },
+  "id.orig_h": "172.20.10.3",
+  "id.orig_p": 59588,
+  "id.resp_h": "199.60.103.106",
+  "id.resp_p": 80,
   "trans_depth": 1,
   "method": "GET",
   "host": "corelight.com",
@@ -57,12 +53,10 @@ HTTP::log_http: {
 SSL::log_ssl: {
   "ts": 1630238734.2097,
   "uid": "C4J4Th3PJpwUYZZ6gc",
-  "id": {
-    "orig_h": "172.20.10.3",
-    "orig_p": 45208,
-    "resp_h": "199.60.103.106",
-    "resp_p": 443
-  },
+  "id.orig_h": "172.20.10.3",
+  "id.orig_p": 45208,
+  "id.resp_h": "199.60.103.106",
+  "id.resp_p": 443,
   "version": "TLSv13",
   "cipher": "TLS_AES_256_GCM_SHA384",
   "curve": "x25519",

@@ -19,7 +19,24 @@ export {
 		"  //\n",
 		"  // https://stackoverflow.com/a/17585470/9044112\n",
 		"  return m._compile('const ps = []; zeek.__zeekjs_files.forEach((fn) => { ps.push(import(fn)); }); return Promise.all(ps);', process.cwd() + '/');\n",
-		"};\n\n"
+		"};\n\n",
+		"// Helper for zeek record rendering.\n",
+		"zeek.flatten = (obj, prefix, res) => {\n",
+		"  res = res || {}\n",
+		"  for (const k in obj) {\n",
+		"    const nk = prefix ? `${prefix}.${k}` : k\n",
+		"    const v = obj[k]\n",
+		"\n",
+		"    // Recurse for objects, unless it's actually an array, or has a\n",
+		"    // custom toJSON() method (which is true for the port objects).\n",
+		"    if (v !== null && typeof(v) == 'object' && !Array.isArray(v) && !('toJSON' in v)) {\n",
+		"      zeek.flatten(v, nk, res)\n",
+		"    } else {\n",
+		"      res[nk] = v\n",
+		"    }\n",
+		"  }\n",
+		"  return res\n",
+		"}\n"
 	) &redef;
 
 	## Vector of filenames to compile/execute after the bootstrap file.

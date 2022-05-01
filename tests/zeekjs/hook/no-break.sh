@@ -24,6 +24,7 @@ zeek.hook('Log::log_stream_policy', { priority: -1000 }, function(rec, id) {
 
   name = name.replace(/([a-z])([A-Z])/g, '$1 $2')
   name = name.toLowerCase().trim(' ').split(' ').join('_');
+  rec = zeek.flatten(zeek.select_fields(rec, zeek.ATTR_LOG));
   console.log(`${name}: ${JSON.stringify(rec)}`);
 
   // No explicit return false: Do not break.

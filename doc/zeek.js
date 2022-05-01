@@ -7,7 +7,7 @@
 /**
  * Register a function as a Zeek event handler.
  *
- * @param {string} name - The Zeek event name. For example, zeek_init.
+ * @param {string} name - The Zeek event name. For example, ``zeek_init``.
  * @param {object} [options] - Optional options. Only supported key is priority.
  * @param {function} handler - The function to call.
  *
@@ -75,14 +75,31 @@ exports.global_vars = {}
 /**
  * Select properties with a given attribute.
  *
+ * To select only ``&log`` attributes for ``JSON.stringify()``::
+ *
+ *     zeek.on('HTTP::log_http' (rec) => {
+ *       console.log(JSON.stringify(zeek.select_fields(rec, zeek.ATTR_LOG)));
+ *     });
+ *
  * @param {object} rec - A object backed by a Zeek record.
  * @param {number} mask - The attribute mask. Only ``zeek.ATTR_LOG`` supported.
  *
- * To select only &log attributes for JSON.stringify():
+ */
+exports.select_fields = function() {}
+
+/**
+ * Flatten a Javascript object by concatenating keys with '.'
+ * similar or close to what Zeek does.
+ *
+ * To imitate the http.log::
  *
  *     zeek.on('HTTP::log_http' (rec) => {
- *       const log_rec = zeek.select_fields(rec, zeek.ATTR_LOG)
- *       console.log(JSON.stringify(log_rec))
- *     })
+ *       console.log(JSON.stringify(zeek.flatten(zeek.select_fields(rec, zeek.ATTR_LOG))));
+ *     });
+ *
+ * @param {object} rec - The object to flatten.
+ * @param {string} [prefix] - Key prefix, optional.
+ * @param {object} [res] - Result object, optional.
+ *
  */
-exports.select_fields = {}
+exports.flatten = function() {}

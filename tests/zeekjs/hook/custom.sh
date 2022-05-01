@@ -1,4 +1,4 @@
-# @TEST-DOC: Hook Log::log_stream_policy and return an explicit false to break (and stop creating http.log)
+# @TEST-DOC: Hooking in Javascript and propgation of "break / return false" to Zeek
 # @TEST-EXEC: zeek ./hook.zeek ./hook.js
 # @TEST-EXEC: btest-diff .stdout
 

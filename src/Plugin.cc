@@ -116,8 +116,14 @@ int Plugin::HookLoadFile(const zeek::plugin::Plugin::LoadType,
 }
 
 void Plugin::HookDrainEvents() {
-  if (nodejs)
+  if (nodejs) {
     nodejs->UpdateTime();
+    // If any callbacks into Javascript happened, run Process() once.
+    if (nodejs->WasJsCalled()) {
+      nodejs->Process();
+      nodejs->SetJsCalled(false);
+    }
+  }
 }
 
 namespace {

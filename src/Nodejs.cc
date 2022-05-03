@@ -96,6 +96,8 @@ static v8::Local<v8::Value> callFunction(v8::Isolate* isolate,
   //       https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_objects/Function/bind
   v8::Local<v8::Value> receiver = context->Global();
 
+  instance->SetJsCalled();
+
   v8::Local<v8::Value> result;
   std::vector<v8::Local<v8::Value>> v8_args;
 

@@ -45,6 +45,9 @@ class Instance {
   void UpdateTime();
   double GetNextTimeout();
 
+  void SetJsCalled(bool js_called = true) { js_called_ = js_called; };
+  bool WasJsCalled() { return js_called_; };
+
   //
   // Invoked from Javascript to register the given function as
   // an event handler.
@@ -114,6 +117,9 @@ class Instance {
 
   // Allows kicking/notifying the Zeek IO loop.
   plugin::Corelight_ZeekJS::IOLoop::PipeSource* zeek_notifier_;
+
+  // Marker for HookDrainEvents() whether instance->Process() should be called.
+  bool js_called_ = false;
 };
 
 class EventHandler : public plugin::Corelight_ZeekJS::Js::EventHandler {

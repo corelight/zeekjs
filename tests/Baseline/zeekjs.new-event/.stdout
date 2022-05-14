@@ -3,7 +3,6 @@ zeek_init []
 new_connection [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -41,7 +40,6 @@ new_connection [
 dns_message [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -77,12 +75,10 @@ dns_message [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": true
   },
   {
     "name": "msg",
-    "type_name": "dns_msg",
     "value": {
       "id": 43556,
       "opcode": 0,
@@ -101,14 +97,12 @@ dns_message [
   },
   {
     "name": "len",
-    "type_name": "count",
     "value": 42
   }
 ]
 dns_request [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -187,7 +181,6 @@ dns_request [
   },
   {
     "name": "msg",
-    "type_name": "dns_msg",
     "value": {
       "id": 43556,
       "opcode": 0,
@@ -206,29 +199,24 @@ dns_request [
   },
   {
     "name": "query",
-    "type_name": "string",
     "value": "corelight.com"
   },
   {
     "name": "qtype",
-    "type_name": "count",
     "value": 1
   },
   {
     "name": "qclass",
-    "type_name": "count",
     "value": 1
   },
   {
     "name": "original_query",
-    "type_name": "string",
     "value": "corelight.com"
   }
 ]
 dns_message [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -319,12 +307,10 @@ dns_message [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": false
   },
   {
     "name": "msg",
-    "type_name": "dns_msg",
     "value": {
       "id": 43556,
       "opcode": 0,
@@ -343,14 +329,12 @@ dns_message [
   },
   {
     "name": "len",
-    "type_name": "count",
     "value": 74
   }
 ]
 new_connection [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -388,7 +372,6 @@ new_connection [
 http_request [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -426,29 +409,24 @@ http_request [
   },
   {
     "name": "method",
-    "type_name": "string",
     "value": "GET"
   },
   {
     "name": "original_URI",
-    "type_name": "string",
     "value": "/"
   },
   {
     "name": "unescaped_URI",
-    "type_name": "string",
     "value": "/"
   },
   {
     "name": "version",
-    "type_name": "string",
     "value": "1.1"
   }
 ]
 http_header [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -536,29 +514,24 @@ http_header [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": true
   },
   {
     "name": "original_name",
-    "type_name": "string",
     "value": "Host"
   },
   {
     "name": "name",
-    "type_name": "string",
     "value": "HOST"
   },
   {
     "name": "value",
-    "type_name": "string",
     "value": "corelight.com"
   }
 ]
 http_header [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -648,29 +621,24 @@ http_header [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": true
   },
   {
     "name": "original_name",
-    "type_name": "string",
     "value": "User-Agent"
   },
   {
     "name": "name",
-    "type_name": "string",
     "value": "USER-AGENT"
   },
   {
     "name": "value",
-    "type_name": "string",
     "value": "curl/7.76.1"
   }
 ]
 http_header [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -762,34 +730,28 @@ http_header [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": true
   },
   {
     "name": "original_name",
-    "type_name": "string",
     "value": "Accept"
   },
   {
     "name": "name",
-    "type_name": "string",
     "value": "ACCEPT"
   },
   {
     "name": "value",
-    "type_name": "string",
     "value": "*/*"
   }
 ]
 get_file_handle [
   {
     "name": "tag",
-    "type_name": "enum",
     "value": "Analyzer::ANALYZER_HTTP"
   },
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -879,14 +841,12 @@ get_file_handle [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": true
   }
 ]
 http_message_done [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -976,12 +936,10 @@ http_message_done [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": true
   },
   {
     "name": "stat",
-    "type_name": "http_message_stat",
     "value": {
       "start": 1630238734.007674,
       "interrupted": false,
@@ -995,7 +953,6 @@ http_message_done [
 http_header [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -1093,29 +1050,24 @@ http_header [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": false
   },
   {
     "name": "original_name",
-    "type_name": "string",
     "value": "Date"
   },
   {
     "name": "name",
-    "type_name": "string",
     "value": "DATE"
   },
   {
     "name": "value",
-    "type_name": "string",
     "value": "Sun, 29 Aug 2021 12:05:34 GMT"
   }
 ]
 http_header [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -1213,29 +1165,24 @@ http_header [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": false
   },
   {
     "name": "original_name",
-    "type_name": "string",
     "value": "Connection"
   },
   {
     "name": "name",
-    "type_name": "string",
     "value": "CONNECTION"
   },
   {
     "name": "value",
-    "type_name": "string",
     "value": "keep-alive"
   }
 ]
 http_header [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -1333,29 +1280,24 @@ http_header [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": false
   },
   {
     "name": "original_name",
-    "type_name": "string",
     "value": "Location"
   },
   {
     "name": "name",
-    "type_name": "string",
     "value": "LOCATION"
   },
   {
     "name": "value",
-    "type_name": "string",
     "value": "https://corelight.com/"
   }
 ]
 http_header [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -1453,29 +1395,24 @@ http_header [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": false
   },
   {
     "name": "original_name",
-    "type_name": "string",
     "value": "Cache-Control"
   },
   {
     "name": "name",
-    "type_name": "string",
     "value": "CACHE-CONTROL"
   },
   {
     "name": "value",
-    "type_name": "string",
     "value": "s-maxage=3600,max-age=120"
   }
 ]
 http_header [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -1573,29 +1510,24 @@ http_header [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": false
   },
   {
     "name": "original_name",
-    "type_name": "string",
     "value": "Strict-Transport-Security"
   },
   {
     "name": "name",
-    "type_name": "string",
     "value": "STRICT-TRANSPORT-SECURITY"
   },
   {
     "name": "value",
-    "type_name": "string",
     "value": "max-age=31536000"
   }
 ]
 http_header [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -1693,29 +1625,24 @@ http_header [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": false
   },
   {
     "name": "original_name",
-    "type_name": "string",
     "value": "X-Hs-Https-Only"
   },
   {
     "name": "name",
-    "type_name": "string",
     "value": "X-HS-HTTPS-ONLY"
   },
   {
     "name": "value",
-    "type_name": "string",
     "value": "worker"
   }
 ]
 http_header [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -1813,29 +1740,24 @@ http_header [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": false
   },
   {
     "name": "original_name",
-    "type_name": "string",
     "value": "Report-To"
   },
   {
     "name": "name",
-    "type_name": "string",
     "value": "REPORT-TO"
   },
   {
     "name": "value",
-    "type_name": "string",
     "value": "{\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report\\/v3?s=xFhmAO%2F27odapXRIIu6Su0tyQnb7xRRnaW4KarFIktiowjABTmgW%2FQfTTT%2F9YAG%2F7Dn2wkvLMtwjRuXtOEKKvqF50TsGcxNxTI8WRQUUhv9YC%2BVdfCg6FfRKn%2FkCCz4%3D\"}],\"group\":\"cf-nel\",\"max_age\":604800}"
   }
 ]
 http_header [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -1933,29 +1855,24 @@ http_header [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": false
   },
   {
     "name": "original_name",
-    "type_name": "string",
     "value": "NEL"
   },
   {
     "name": "name",
-    "type_name": "string",
     "value": "NEL"
   },
   {
     "name": "value",
-    "type_name": "string",
     "value": "{\"success_fraction\":0,\"report_to\":\"cf-nel\",\"max_age\":604800}"
   }
 ]
 http_header [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -2053,29 +1970,24 @@ http_header [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": false
   },
   {
     "name": "original_name",
-    "type_name": "string",
     "value": "Set-Cookie"
   },
   {
     "name": "name",
-    "type_name": "string",
     "value": "SET-COOKIE"
   },
   {
     "name": "value",
-    "type_name": "string",
     "value": "__cfruid=e02ce062c7627d878b3dcf8f2ef9382980b7aa05-1630238734; path=/; domain=.corelight.com; HttpOnly"
   }
 ]
 http_header [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -2173,29 +2085,24 @@ http_header [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": false
   },
   {
     "name": "original_name",
-    "type_name": "string",
     "value": "Server"
   },
   {
     "name": "name",
-    "type_name": "string",
     "value": "SERVER"
   },
   {
     "name": "value",
-    "type_name": "string",
     "value": "cloudflare"
   }
 ]
 http_header [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -2293,29 +2200,24 @@ http_header [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": false
   },
   {
     "name": "original_name",
-    "type_name": "string",
     "value": "CF-RAY"
   },
   {
     "name": "name",
-    "type_name": "string",
     "value": "CF-RAY"
   },
   {
     "name": "value",
-    "type_name": "string",
     "value": "6865a5f7af83874d-DUS"
   }
 ]
 http_header [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -2413,29 +2315,24 @@ http_header [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": false
   },
   {
     "name": "original_name",
-    "type_name": "string",
     "value": "alt-svc"
   },
   {
     "name": "name",
-    "type_name": "string",
     "value": "ALT-SVC"
   },
   {
     "name": "value",
-    "type_name": "string",
     "value": "h3-27=\":443\"; ma=86400, h3-28=\":443\"; ma=86400, h3-29=\":443\"; ma=86400, h3=\":443\"; ma=86400"
   }
 ]
 http_header [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -2533,34 +2430,28 @@ http_header [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": false
   },
   {
     "name": "original_name",
-    "type_name": "string",
     "value": "Content-Length"
   },
   {
     "name": "name",
-    "type_name": "string",
     "value": "CONTENT-LENGTH"
   },
   {
     "name": "value",
-    "type_name": "string",
     "value": "0"
   }
 ]
 get_file_handle [
   {
     "name": "tag",
-    "type_name": "enum",
     "value": "Analyzer::ANALYZER_HTTP"
   },
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -2656,14 +2547,12 @@ get_file_handle [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": false
   }
 ]
 http_message_done [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -2759,12 +2648,10 @@ http_message_done [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": false
   },
   {
     "name": "stat",
-    "type_name": "http_message_stat",
     "value": {
       "start": 1630238734.183893,
       "interrupted": false,
@@ -2778,7 +2665,6 @@ http_message_done [
 new_connection [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -2816,7 +2702,6 @@ new_connection [
 ssl_extension [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -2873,24 +2758,20 @@ ssl_extension [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": true
   },
   {
     "name": "code",
-    "type_name": "count",
     "value": 0
   },
   {
     "name": "val",
-    "type_name": "string",
     "value": "<string-with-NUL>"
   }
 ]
 ssl_extension [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -2947,24 +2828,20 @@ ssl_extension [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": true
   },
   {
     "name": "code",
-    "type_name": "count",
     "value": 11
   },
   {
     "name": "val",
-    "type_name": "string",
     "value": "<string-with-NUL>"
   }
 ]
 ssl_extension [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -3021,24 +2898,20 @@ ssl_extension [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": true
   },
   {
     "name": "code",
-    "type_name": "count",
     "value": 10
   },
   {
     "name": "val",
-    "type_name": "string",
     "value": "<string-with-NUL>"
   }
 ]
 ssl_extension [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -3095,24 +2968,20 @@ ssl_extension [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": true
   },
   {
     "name": "code",
-    "type_name": "count",
     "value": 13172
   },
   {
     "name": "val",
-    "type_name": "string",
     "value": ""
   }
 ]
 ssl_extension [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -3169,24 +3038,20 @@ ssl_extension [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": true
   },
   {
     "name": "code",
-    "type_name": "count",
     "value": 16
   },
   {
     "name": "val",
-    "type_name": "string",
     "value": "<string-with-NUL>"
   }
 ]
 ssl_extension [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -3243,24 +3108,20 @@ ssl_extension [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": true
   },
   {
     "name": "code",
-    "type_name": "count",
     "value": 22
   },
   {
     "name": "val",
-    "type_name": "string",
     "value": ""
   }
 ]
 ssl_extension [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -3317,24 +3178,20 @@ ssl_extension [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": true
   },
   {
     "name": "code",
-    "type_name": "count",
     "value": 23
   },
   {
     "name": "val",
-    "type_name": "string",
     "value": ""
   }
 ]
 ssl_extension [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -3391,24 +3248,20 @@ ssl_extension [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": true
   },
   {
     "name": "code",
-    "type_name": "count",
     "value": 49
   },
   {
     "name": "val",
-    "type_name": "string",
     "value": ""
   }
 ]
 ssl_extension [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -3465,24 +3318,20 @@ ssl_extension [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": true
   },
   {
     "name": "code",
-    "type_name": "count",
     "value": 13
   },
   {
     "name": "val",
-    "type_name": "string",
     "value": "<string-with-NUL>"
   }
 ]
 ssl_extension [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -3539,24 +3388,20 @@ ssl_extension [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": true
   },
   {
     "name": "code",
-    "type_name": "count",
     "value": 43
   },
   {
     "name": "val",
-    "type_name": "string",
     "value": "\u0004\u0003\u0004\u0003\u0003"
   }
 ]
 ssl_extension [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -3613,24 +3458,20 @@ ssl_extension [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": true
   },
   {
     "name": "code",
-    "type_name": "count",
     "value": 45
   },
   {
     "name": "val",
-    "type_name": "string",
     "value": "\u0001\u0001"
   }
 ]
 ssl_extension [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -3687,24 +3528,20 @@ ssl_extension [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": true
   },
   {
     "name": "code",
-    "type_name": "count",
     "value": 51
   },
   {
     "name": "val",
-    "type_name": "string",
     "value": "<string-with-NUL>"
   }
 ]
 ssl_extension [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -3761,24 +3598,20 @@ ssl_extension [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": true
   },
   {
     "name": "code",
-    "type_name": "count",
     "value": 21
   },
   {
     "name": "val",
-    "type_name": "string",
     "value": "<string-with-NUL>"
   }
 ]
 ssl_plaintext_data [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -3839,29 +3672,24 @@ ssl_plaintext_data [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": true
   },
   {
     "name": "record_version",
-    "type_name": "count",
     "value": 769
   },
   {
     "name": "content_type",
-    "type_name": "count",
     "value": 22
   },
   {
     "name": "length",
-    "type_name": "count",
     "value": 512
   }
 ]
 ssl_extension [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -3923,24 +3751,20 @@ ssl_extension [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": false
   },
   {
     "name": "code",
-    "type_name": "count",
     "value": 51
   },
   {
     "name": "val",
-    "type_name": "string",
     "value": "<string-with-NUL>"
   }
 ]
 ssl_extension [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -4004,24 +3828,20 @@ ssl_extension [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": false
   },
   {
     "name": "code",
-    "type_name": "count",
     "value": 43
   },
   {
     "name": "val",
-    "type_name": "string",
     "value": "\u0003\u0004"
   }
 ]
 ssl_plaintext_data [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -4086,29 +3906,24 @@ ssl_plaintext_data [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": false
   },
   {
     "name": "record_version",
-    "type_name": "count",
     "value": 771
   },
   {
     "name": "content_type",
-    "type_name": "count",
     "value": 22
   },
   {
     "name": "length",
-    "type_name": "count",
     "value": 122
   }
 ]
 ssl_plaintext_data [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -4173,29 +3988,24 @@ ssl_plaintext_data [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": false
   },
   {
     "name": "record_version",
-    "type_name": "count",
     "value": 771
   },
   {
     "name": "content_type",
-    "type_name": "count",
     "value": 20
   },
   {
     "name": "length",
-    "type_name": "count",
     "value": 1
   }
 ]
 ssl_plaintext_data [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -4260,29 +4070,24 @@ ssl_plaintext_data [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": true
   },
   {
     "name": "record_version",
-    "type_name": "count",
     "value": 771
   },
   {
     "name": "content_type",
-    "type_name": "count",
     "value": 20
   },
   {
     "name": "length",
-    "type_name": "count",
     "value": 1
   }
 ]
 ssl_established [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -4349,7 +4154,6 @@ ssl_established [
 connection_state_remove [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -4391,7 +4195,6 @@ connection_state_remove [
 connection_state_remove [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -4457,12 +4260,10 @@ connection_state_remove [
 get_file_handle [
   {
     "name": "tag",
-    "type_name": "enum",
     "value": "Analyzer::ANALYZER_HTTP"
   },
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",
@@ -4532,14 +4333,12 @@ get_file_handle [
   },
   {
     "name": "is_orig",
-    "type_name": "bool",
     "value": true
   }
 ]
 connection_state_remove [
   {
     "name": "c",
-    "type_name": "connection",
     "value": {
       "id": {
         "orig_h": "172.20.10.3",

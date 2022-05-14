@@ -1,7 +1,7 @@
 # @TEST-DOC: Hook into new_event and record the output. Might require baseline frequent baseline updates.
 # Only run this tests if ssl_history exists to keep a single baseline.
 # @TEST-REQUIRES: zeek -e 'exit(|get_record_field_comments("SSL::Info$ssl_history")| > 0 ? 0 : 1)'
-# @TEST-EXEC: zeek -r $TRACES/dns-http-https.pcap ./new-event.js
+# @TEST-EXEC: zeek -r $TRACES/dns-http-https.pcap ./new-event.js | grep -v -F '"type_name"'
 # @TEST-EXEC: btest-diff .stdout
 
 @TEST-START-FILE new-event.js

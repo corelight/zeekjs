@@ -2865,6 +2865,7 @@ ssl_extension [
         "client_psk_seen": false,
         "established": false,
         "logged": false,
+        "ssl_history": "",
         "server_depth": 0,
         "client_depth": 0
       }
@@ -2938,6 +2939,7 @@ ssl_extension [
         "client_psk_seen": false,
         "established": false,
         "logged": false,
+        "ssl_history": "",
         "server_depth": 0,
         "client_depth": 0
       }
@@ -3011,6 +3013,7 @@ ssl_extension [
         "client_psk_seen": false,
         "established": false,
         "logged": false,
+        "ssl_history": "",
         "server_depth": 0,
         "client_depth": 0
       }
@@ -3084,6 +3087,7 @@ ssl_extension [
         "client_psk_seen": false,
         "established": false,
         "logged": false,
+        "ssl_history": "",
         "server_depth": 0,
         "client_depth": 0
       }
@@ -3157,6 +3161,7 @@ ssl_extension [
         "client_psk_seen": false,
         "established": false,
         "logged": false,
+        "ssl_history": "",
         "server_depth": 0,
         "client_depth": 0
       }
@@ -3230,6 +3235,7 @@ ssl_extension [
         "client_psk_seen": false,
         "established": false,
         "logged": false,
+        "ssl_history": "",
         "server_depth": 0,
         "client_depth": 0
       }
@@ -3303,6 +3309,7 @@ ssl_extension [
         "client_psk_seen": false,
         "established": false,
         "logged": false,
+        "ssl_history": "",
         "server_depth": 0,
         "client_depth": 0
       }
@@ -3376,6 +3383,7 @@ ssl_extension [
         "client_psk_seen": false,
         "established": false,
         "logged": false,
+        "ssl_history": "",
         "server_depth": 0,
         "client_depth": 0
       }
@@ -3449,6 +3457,7 @@ ssl_extension [
         "client_psk_seen": false,
         "established": false,
         "logged": false,
+        "ssl_history": "",
         "server_depth": 0,
         "client_depth": 0
       }
@@ -3522,6 +3531,7 @@ ssl_extension [
         "client_psk_seen": false,
         "established": false,
         "logged": false,
+        "ssl_history": "",
         "server_depth": 0,
         "client_depth": 0
       }
@@ -3595,6 +3605,7 @@ ssl_extension [
         "client_psk_seen": false,
         "established": false,
         "logged": false,
+        "ssl_history": "",
         "server_depth": 0,
         "client_depth": 0
       }
@@ -3668,6 +3679,7 @@ ssl_extension [
         "client_psk_seen": false,
         "established": false,
         "logged": false,
+        "ssl_history": "",
         "server_depth": 0,
         "client_depth": 0
       }
@@ -3741,6 +3753,7 @@ ssl_extension [
         "client_psk_seen": false,
         "established": false,
         "logged": false,
+        "ssl_history": "",
         "server_depth": 0,
         "client_depth": 0
       }
@@ -3818,6 +3831,7 @@ ssl_plaintext_data [
         "analyzer_id": 13,
         "established": false,
         "logged": false,
+        "ssl_history": "C",
         "server_depth": 0,
         "client_depth": 0
       }
@@ -3901,6 +3915,7 @@ ssl_extension [
         "analyzer_id": 13,
         "established": false,
         "logged": false,
+        "ssl_history": "C",
         "server_depth": 0,
         "client_depth": 0
       }
@@ -3981,6 +3996,7 @@ ssl_extension [
         "analyzer_id": 13,
         "established": false,
         "logged": false,
+        "ssl_history": "C",
         "server_depth": 0,
         "client_depth": 0
       }
@@ -4062,6 +4078,7 @@ ssl_plaintext_data [
         "analyzer_id": 13,
         "established": false,
         "logged": false,
+        "ssl_history": "Cs",
         "server_depth": 0,
         "client_depth": 0
       }
@@ -4148,6 +4165,7 @@ ssl_plaintext_data [
         "analyzer_id": 13,
         "established": false,
         "logged": false,
+        "ssl_history": "Csi",
         "server_depth": 0,
         "client_depth": 0
       }
@@ -4234,6 +4252,7 @@ ssl_plaintext_data [
         "analyzer_id": 13,
         "established": false,
         "logged": false,
+        "ssl_history": "CsiI",
         "server_depth": 0,
         "client_depth": 0
       }
@@ -4320,6 +4339,7 @@ ssl_established [
         "analyzer_id": 13,
         "established": false,
         "logged": false,
+        "ssl_history": "CsiI",
         "server_depth": 0,
         "client_depth": 0
       }
@@ -4427,6 +4447,7 @@ connection_state_remove [
         "client_psk_seen": false,
         "established": true,
         "logged": true,
+        "ssl_history": "CsiI",
         "server_depth": 0,
         "client_depth": 0
       }

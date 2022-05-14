@@ -63,6 +63,7 @@ SSL::log_ssl: {
   "server_name": "corelight.com",
   "resumed": false,
   "established": true,
+  "ssl_history": "CsiI"
 }
 Conn::log_conn: {
   "ts": 1630238733.951343,

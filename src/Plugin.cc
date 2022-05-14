@@ -75,8 +75,8 @@ void Plugin::InitPostScript() {
   }
 
   // Register Node's loop as an IO source with the iosource mgr
-  auto loop_io_source = new plugin::Corelight_ZeekJS::IOLoop::LoopSource(nodejs);
-  zeek::iosource_mgr->Register(loop_io_source, true /*dont_count*/);
+  loop_io_source = new plugin::Corelight_ZeekJS::IOLoop::LoopSource(nodejs);
+  zeek::iosource_mgr->Register(loop_io_source);
   if (!zeek::iosource_mgr->RegisterFd(loop_io_source->GetFd(), loop_io_source)) {
     zeek::reporter->Error("Failed to register LoopSource");
     return;
@@ -116,12 +116,22 @@ int Plugin::HookLoadFile(const zeek::plugin::Plugin::LoadType,
 }
 
 void Plugin::HookDrainEvents() {
+  static long int drains = 0;
+
   if (nodejs) {
     nodejs->UpdateTime();
     // If any callbacks into Javascript happened, run Process() once.
     if (nodejs->WasJsCalled()) {
       nodejs->Process();
       nodejs->SetJsCalled(false);
+    }
+
+    // Only disable the IOSource after the first drain so that
+    // at least the zeek_init callback have run, otherwise if
+    // there's no HTTP server or global timer running we would
+    // be removed by Zeek right away.
+    if (++drains > 1) {
+      loop_io_source->UpdateClosed(!nodejs->IsAlive());
     }
   }
 }

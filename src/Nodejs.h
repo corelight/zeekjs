@@ -44,6 +44,7 @@ class Instance {
   void Process();
   void UpdateTime();
   double GetNextTimeout();
+  bool IsAlive();
 
   void SetJsCalled(bool js_called = true) { js_called_ = js_called; };
   bool WasJsCalled() { return js_called_; };

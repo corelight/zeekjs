@@ -58,6 +58,7 @@ class Plugin : public zeek::plugin::Plugin {
 
   std::vector<std::filesystem::path> load_files;
   plugin::Nodejs::Instance* nodejs;
+  IOLoop::LoopSource* loop_io_source;
 };
 
 extern Plugin plugin;

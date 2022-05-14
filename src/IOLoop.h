@@ -32,6 +32,8 @@ class LoopSource : public zeek::iosource::IOSource {
 
   int GetFd();
 
+  void UpdateClosed(bool closed) { SetClosed(closed); }
+
  private:
   plugin::Nodejs::Instance* instance_ = nullptr;
 };

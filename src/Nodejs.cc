@@ -784,6 +784,10 @@ double Instance::GetNextTimeout() {
   return timeout / 1000;
 }
 
+bool Instance::IsAlive() {
+  return uv_loop_alive(&loop) == 1;
+}
+
 struct UvHandle {
   void* h;
   int fd;

@@ -4151,112 +4151,6 @@ ssl_established [
     }
   }
 ]
-connection_state_remove [
-  {
-    "name": "c",
-    "value": {
-      "id": {
-        "orig_h": "172.20.10.3",
-        "orig_p": 55767,
-        "resp_h": "172.20.10.1",
-        "resp_p": 53
-      },
-      "orig": {
-        "size": 42,
-        "state": 1,
-        "num_pkts": 1,
-        "num_bytes_ip": 70,
-        "flow_label": 0,
-        "l2_addr": "36:42:62:dd:97:73"
-      },
-      "resp": {
-        "size": 74,
-        "state": 1,
-        "num_pkts": 1,
-        "num_bytes_ip": 102,
-        "flow_label": 0,
-        "l2_addr": "36:42:62:dd:0a:64"
-      },
-      "start_time": 1630238733.951343,
-      "duration": 0.03791093826293945,
-      "service": [
-        "DNS"
-      ],
-      "history": "Dd",
-      "uid": "CHhAvVGS1DHFjwGM9",
-      "removal_hooks": null,
-      "extract_orig": false,
-      "extract_resp": false,
-      "dns_state": {},
-      "ftp_data_reuse": false
-    }
-  }
-]
-connection_state_remove [
-  {
-    "name": "c",
-    "value": {
-      "id": {
-        "orig_h": "172.20.10.3",
-        "orig_p": 45208,
-        "resp_h": "199.60.103.106",
-        "resp_p": 443
-      },
-      "orig": {
-        "size": 842,
-        "state": 5,
-        "num_pkts": 112,
-        "num_bytes_ip": 6674,
-        "flow_label": 0,
-        "l2_addr": "36:42:62:dd:97:73"
-      },
-      "resp": {
-        "size": 96230,
-        "state": 5,
-        "num_pkts": 137,
-        "num_bytes_ip": 103374,
-        "flow_label": 0,
-        "l2_addr": "36:42:62:dd:0a:64"
-      },
-      "start_time": 1630238734.184846,
-      "duration": 0.4085841178894043,
-      "service": [
-        "SSL"
-      ],
-      "history": "ShADdaFf",
-      "uid": "C4J4Th3PJpwUYZZ6gc",
-      "removal_hooks": null,
-      "extract_orig": false,
-      "extract_resp": false,
-      "ftp_data_reuse": false,
-      "ssl": {
-        "ts": 1630238734.2097,
-        "uid": "C4J4Th3PJpwUYZZ6gc",
-        "id": {
-          "orig_h": "172.20.10.3",
-          "orig_p": 45208,
-          "resp_h": "199.60.103.106",
-          "resp_p": 443
-        },
-        "version_num": 772,
-        "version": "TLSv13",
-        "cipher": "TLS_AES_256_GCM_SHA384",
-        "curve": "x25519",
-        "server_name": "corelight.com",
-        "session_id": "05628f4ff03bc85cef6bd6b1a01b9419063cf7fc3c5f10fc7b18cfc4b8190e09",
-        "resumed": false,
-        "client_ticket_empty_session_seen": false,
-        "client_key_exchange_seen": false,
-        "client_psk_seen": false,
-        "established": true,
-        "logged": true,
-        "ssl_history": "CsiI",
-        "server_depth": 0,
-        "client_depth": 0
-      }
-    }
-  }
-]
 get_file_handle [
   {
     "name": "tag",
@@ -4404,6 +4298,112 @@ connection_state_remove [
         "current_response": 1,
         "trans_depth": 1
       }
+    }
+  }
+]
+connection_state_remove [
+  {
+    "name": "c",
+    "value": {
+      "id": {
+        "orig_h": "172.20.10.3",
+        "orig_p": 45208,
+        "resp_h": "199.60.103.106",
+        "resp_p": 443
+      },
+      "orig": {
+        "size": 842,
+        "state": 5,
+        "num_pkts": 112,
+        "num_bytes_ip": 6674,
+        "flow_label": 0,
+        "l2_addr": "36:42:62:dd:97:73"
+      },
+      "resp": {
+        "size": 96230,
+        "state": 5,
+        "num_pkts": 137,
+        "num_bytes_ip": 103374,
+        "flow_label": 0,
+        "l2_addr": "36:42:62:dd:0a:64"
+      },
+      "start_time": 1630238734.184846,
+      "duration": 0.4085841178894043,
+      "service": [
+        "SSL"
+      ],
+      "history": "ShADdaFf",
+      "uid": "C4J4Th3PJpwUYZZ6gc",
+      "removal_hooks": null,
+      "extract_orig": false,
+      "extract_resp": false,
+      "ftp_data_reuse": false,
+      "ssl": {
+        "ts": 1630238734.2097,
+        "uid": "C4J4Th3PJpwUYZZ6gc",
+        "id": {
+          "orig_h": "172.20.10.3",
+          "orig_p": 45208,
+          "resp_h": "199.60.103.106",
+          "resp_p": 443
+        },
+        "version_num": 772,
+        "version": "TLSv13",
+        "cipher": "TLS_AES_256_GCM_SHA384",
+        "curve": "x25519",
+        "server_name": "corelight.com",
+        "session_id": "05628f4ff03bc85cef6bd6b1a01b9419063cf7fc3c5f10fc7b18cfc4b8190e09",
+        "resumed": false,
+        "client_ticket_empty_session_seen": false,
+        "client_key_exchange_seen": false,
+        "client_psk_seen": false,
+        "established": true,
+        "logged": true,
+        "ssl_history": "CsiI",
+        "server_depth": 0,
+        "client_depth": 0
+      }
+    }
+  }
+]
+connection_state_remove [
+  {
+    "name": "c",
+    "value": {
+      "id": {
+        "orig_h": "172.20.10.3",
+        "orig_p": 55767,
+        "resp_h": "172.20.10.1",
+        "resp_p": 53
+      },
+      "orig": {
+        "size": 42,
+        "state": 1,
+        "num_pkts": 1,
+        "num_bytes_ip": 70,
+        "flow_label": 0,
+        "l2_addr": "36:42:62:dd:97:73"
+      },
+      "resp": {
+        "size": 74,
+        "state": 1,
+        "num_pkts": 1,
+        "num_bytes_ip": 102,
+        "flow_label": 0,
+        "l2_addr": "36:42:62:dd:0a:64"
+      },
+      "start_time": 1630238733.951343,
+      "duration": 0.03791093826293945,
+      "service": [
+        "DNS"
+      ],
+      "history": "Dd",
+      "uid": "CHhAvVGS1DHFjwGM9",
+      "removal_hooks": null,
+      "extract_orig": false,
+      "extract_resp": false,
+      "dns_state": {},
+      "ftp_data_reuse": false
     }
   }
 ]

@@ -17,6 +17,10 @@ double LoopSource::GetNextTimeout() {
   return instance_->GetNextTimeout();
 }
 
+void LoopSource::Done() {
+  dprintf("LoopSource unregistered");
+}
+
 void LoopSource::UpdateTime() {
   instance_->UpdateTime();
 }

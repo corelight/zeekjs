@@ -10,11 +10,14 @@ BigInt.prototype.toJSON = function() {
 }
 
 
-zeek.on('zeek_done', function() {
+zeek.on('network_time_init', () => {
   let ts = zeek.invoke('network_time');
+  console.log(`network_time_init ts=${ts}`);
+});
+
+zeek.on('zeek_done', function() {
   let net_stats = zeek.invoke('get_net_stats');
   let event_stats = zeek.invoke('get_event_stats');
-  console.log(`ts=${ts}`);
   console.log(JSON.stringify(net_stats, null, 2));
   console.log(JSON.stringify(event_stats, null, 2));
 });

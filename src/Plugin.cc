@@ -9,6 +9,7 @@
 #include <zeek/Func.h>
 #include <zeek/ID.h>
 #include <zeek/iosource/Manager.h>
+#include <zeek/iosource/PktSrc.h>
 
 #include <filesystem>
 
@@ -116,24 +117,52 @@ int Plugin::HookLoadFile(const zeek::plugin::Plugin::LoadType,
 }
 
 void Plugin::HookDrainEvents() {
-  static long int drains = 0;
+  if (!nodejs)
+    return;
 
-  if (nodejs) {
-    nodejs->UpdateTime();
-    // If any callbacks into Javascript happened, run Process() once.
-    if (nodejs->WasJsCalled()) {
-      nodejs->Process();
-      nodejs->SetJsCalled(false);
-    }
+#ifdef DEBUG
+  dprintf(
+      "event_mgr: size=%d | iosource size=%d | "
+      "timer_mgr size=%d | nodejs alive=%d",
+      zeek::event_mgr.Size(), zeek::iosource_mgr->Size(),
+      zeek::detail::timer_mgr->Size(), nodejs->IsAlive());
+#endif
 
-    // Only disable the IOSource after the first drain so that
-    // at least the zeek_init callback have run, otherwise if
-    // there's no HTTP server or global timer running we would
-    // be removed by Zeek right away.
-    if (++drains > 1) {
-      loop_io_source->UpdateClosed(!nodejs->IsAlive());
-    }
+  nodejs->UpdateTime();
+
+  // If any callbacks into Javascript happened, run Process() once.
+  if (nodejs->WasJsCalled()) {
+    nodejs->Process();
+    nodejs->SetJsCalled(false);
+    return;
   }
+
+  // Decide if we should shutdown / unregister the Node.js uv_loop.
+  //
+  // Only do this if:
+  // 1) The uv_loop isn't alive anymore.
+  // 2) We're the last IO source registered and exit_only_after_terminate
+  //    wasn't set.
+  // 3) There is no open packet source anymore.
+  // 4) The event_mgr doesn't have any further work to do right now.
+  // 5) Calling into JS once more didn't change anything.
+  //
+  // What's a bit annoying is that we won't see shutdown expirations.
+  if (nodejs->IsAlive())
+    return;
+
+  if (zeek::iosource_mgr->Size() > 1 || zeek::BifConst::exit_only_after_terminate)
+    return;
+
+  // Active packet source?
+  auto ps = zeek::iosource_mgr->GetPktSrc();
+  if (ps && ps->IsOpen())
+    return;
+
+  if (zeek::event_mgr.Size() > 0)
+    return;
+
+  loop_io_source->UpdateClosed(true);
 }
 
 namespace {
@@ -332,6 +361,7 @@ void Plugin::Done() {
   zeek::plugin::Plugin::Done();
   PLUGIN_DBG_LOG(plugin, "Done...");
   if (nodejs) {
+    nodejs->Process();
     nodejs->Done();
     delete nodejs;
     nodejs = nullptr;

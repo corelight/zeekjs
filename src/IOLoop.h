@@ -27,6 +27,7 @@ class LoopSource : public zeek::iosource::IOSource {
   double GetNextTimeout() override;
 
   const char* Tag() override { return "LoopSource"; };
+  void Done() override;
 
   void UpdateTime();
 

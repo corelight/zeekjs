@@ -1,9 +1,11 @@
 #include "Nodejs.h"
 #include "IOLoop.h"
 
+#include <chrono>
 #include <filesystem>
 #include <memory>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include <node/node.h>
@@ -88,7 +90,7 @@ static v8::Local<v8::Value> callFunction(v8::Isolate* isolate,
                                          Instance* instance,
                                          v8::Local<v8::Function> func,
                                          const zeek::Args& args) {
-  auto context = v8::Local<v8::Context>::New(isolate, instance->GetContext());
+  v8::Local<v8::Context> context = isolate->GetCurrentContext();
   v8::Context::Scope context_scope(context);
 
   // TODO: Who's the receiver if the function is bound? Shouldn't it be
@@ -738,7 +740,7 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
 
   // This is the global context we have.
   v8::Local<v8::Context> context = v8::Context::New(GetIsolate(), nullptr, global);
-  context_.Reset(GetIsolate(), context);
+  context->Enter();
 
   v8::Context::Scope context_scope(context);
 
@@ -757,10 +759,47 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
   return ExecuteAndWaitForInit(context, GetIsolate(), main_script_source);
 }
 
+// Emit process 'beforeExit'
+void Instance::BeforeExit() {
+  v8::Isolate* isolate = GetIsolate();
+  v8::Isolate::Scope isolate_scope(isolate);
+  v8::HandleScope handle_scope(isolate);
+  v8::Context::Scope context_scope(isolate->GetCurrentContext());
+  v8::SealHandleScope seal(isolate);
+  node::EmitProcessBeforeExit(node_environment_.get()).Check();
+}
+
 void Instance::Done() {
-  dprintf("Done()");
+  using namespace std::chrono_literals;
+
   if (node_environment_) {
-    node::Stop(node_environment_.get());
+    // HACK: Add a small grace period waiting for the JavaScript IO loop
+    // to complete during shutdown. E.g. if you send out an HTTP request
+    // shortly before Zeek is shutting down, for example, using zeek -r <pcap>
+    // and pushing out HTTP requests for every log, this should allow to
+    // process any outstanding responses. On the flip-side, it will prolong
+    // the shutdown when things like active sockets or pipes exist. If a user
+    // closes/cleans them at zeek_done() time, that would speed-up shutdown.
+    //
+    // TODO: This should probably be configurable rather than 200msec
+    //       hard-coded...
+    for (int i = 0; i < 200; i++) {
+      Process();
+      if (!IsAlive()) {
+        dprintf("uv_loop not alive anymore on iteration %d", i);
+        break;
+      }
+      std::this_thread::sleep_for(1ms);
+    }
+    {
+      // Emit process 'exit' event
+      v8::Isolate* isolate = GetIsolate();
+      v8::Isolate::Scope isolate_scope(isolate);
+      v8::HandleScope handle_scope(isolate);
+      v8::Context::Scope context_scope(isolate->GetCurrentContext());
+      v8::SealHandleScope seal(isolate);
+      node::EmitProcessExit(node_environment_.get());
+    }
   }
 }
 
@@ -832,12 +871,11 @@ static void collectUvHandles(uv_handle_t* h, void* arg) {
 // been established.
 //
 void Instance::Process() {
-  v8::Isolate::Scope isolate_scope(GetIsolate());
-  v8::HandleScope handle_scope(GetIsolate());
-  v8::Local<v8::Context> context =
-      v8::Local<v8::Context>::New(GetIsolate(), GetContext());
-  v8::Context::Scope context_scope(context);
-  v8::SealHandleScope seal(GetIsolate());
+  v8::Isolate* isolate = GetIsolate();
+  v8::Isolate::Scope isolate_scope(isolate);
+  v8::HandleScope handle_scope(isolate);
+  v8::Context::Scope context_scope(isolate->GetCurrentContext());
+  v8::SealHandleScope seal(isolate);
 
   // XXX: This is hard to understand.
   int round = 0, more = 0, handles_changed;

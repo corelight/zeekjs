@@ -33,6 +33,7 @@ class Instance {
             bool exit_on_uncaught_exceptions,
             int thread_pool_size);
 
+  void BeforeExit();
   void Done();
 
   void SetZeekNotifier(plugin::Corelight_ZeekJS::IOLoop::PipeSource* n) {
@@ -77,8 +78,6 @@ class Instance {
   static void ZeekInvokeCallback(const v8::FunctionCallbackInfo<v8::Value>& args);
   static void ZeekSelectFieldsCallback(const v8::FunctionCallbackInfo<v8::Value>& args);
 
-  v8::Global<v8::Context>& GetContext() { return context_; };
-
   v8::Isolate* GetIsolate() { return isolate_; };
   v8::Local<v8::Value> Wrap(const zeek::ValPtr& vp, int attr_mask = 0) {
     return zeek_val_wrapper_.get()->Wrap(vp, attr_mask);
@@ -111,7 +110,6 @@ class Instance {
   uv_loop_t loop;
 
   v8::Isolate* isolate_;
-  v8::Global<v8::Context> context_;
 
   // Wrapping.
   std::unique_ptr<ZeekValWrapper> zeek_val_wrapper_;

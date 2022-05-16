@@ -8,6 +8,7 @@
 #include <zeek/Frame.h>
 #include <zeek/Func.h>
 #include <zeek/ID.h>
+#include <zeek/RunState.h>
 #include <zeek/iosource/Manager.h>
 #include <zeek/iosource/PktSrc.h>
 
@@ -77,7 +78,7 @@ void Plugin::InitPostScript() {
 
   // Register Node's loop as an IO source with the iosource mgr
   loop_io_source = new plugin::Corelight_ZeekJS::IOLoop::LoopSource(nodejs);
-  zeek::iosource_mgr->Register(loop_io_source);
+  zeek::iosource_mgr->Register(loop_io_source, false, false);
   if (!zeek::iosource_mgr->RegisterFd(loop_io_source->GetFd(), loop_io_source)) {
     zeek::reporter->Error("Failed to register LoopSource");
     return;
@@ -120,7 +121,7 @@ void Plugin::HookDrainEvents() {
   if (!nodejs)
     return;
 
-#ifdef DEBUG
+#ifdef ZEEKJS_LOOP_DEBUG
   dprintf(
       "event_mgr: size=%d | iosource size=%d | "
       "timer_mgr size=%d | nodejs alive=%d",
@@ -139,19 +140,29 @@ void Plugin::HookDrainEvents() {
 
   // Decide if we should shutdown / unregister the Node.js uv_loop.
   //
-  // Only do this if:
-  // 1) The uv_loop isn't alive anymore.
-  // 2) We're the last IO source registered and exit_only_after_terminate
-  //    wasn't set.
-  // 3) There is no open packet source anymore.
-  // 4) The event_mgr doesn't have any further work to do right now.
-  // 5) Calling into JS once more didn't change anything.
+  // Do it if Zeek is terminating, or if the following hold:
   //
-  // What's a bit annoying is that we won't see shutdown expirations.
+  // * the uv_loop isn't alive
+  // * exit_only_after_terminate was not set
+  // * the LoopSource is the last IO soruce
+  // * there is no live packet source anymore
+  // * the event_mgr does not seem to have to do anything
+  //
+  if (zeek::run_state::terminating) {
+    if (loop_io_source->IsOpen())
+      loop_io_source->UpdateClosed(true);
+
+    return;
+  }
+
+  if (zeek::BifConst::exit_only_after_terminate)
+    return;
+
   if (nodejs->IsAlive())
     return;
 
-  if (zeek::iosource_mgr->Size() > 1 || zeek::BifConst::exit_only_after_terminate)
+  // Other IO source existing?
+  if (zeek::iosource_mgr->Size() > 1)
     return;
 
   // Active packet source?
@@ -161,6 +172,15 @@ void Plugin::HookDrainEvents() {
 
   if (zeek::event_mgr.Size() > 0)
     return;
+
+  // Emit a beforeExit event that can be used by JavaScript to schedule more
+  // work and keep the IO loop going.
+  if (loop_io_source->IsOpen()) {
+    nodejs->BeforeExit();
+    if (nodejs->IsAlive()) {
+      return;
+    }
+  }
 
   loop_io_source->UpdateClosed(true);
 }
@@ -361,7 +381,6 @@ void Plugin::Done() {
   zeek::plugin::Plugin::Done();
   PLUGIN_DBG_LOG(plugin, "Done...");
   if (nodejs) {
-    nodejs->Process();
     nodejs->Done();
     delete nodejs;
     nodejs = nullptr;

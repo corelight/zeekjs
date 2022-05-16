@@ -1,7 +1,9 @@
 # @TEST-DOC: Run a http server receiving log records exported during pcap reading.
 # @TEST-REQUIRES: zeek -e 'global_ids()["Log::log_stream_policy"]'
 # @TEST-EXEC: bash %INPUT
-# @TEST-EXEC: btest-diff http-export.log
+# Sort the exporter log due to timing sensitivity
+# @TEST-EXEC: sort http-export.log > http-export.log.sorted
+# @TEST-EXEC: btest-diff http-export.log.sorted
 # @TEST-EXEC: grep -F 'HTTP REQUEST' .background/.stdout > http-server.log
 # @TEST-EXEC: btest-diff http-server.log
 set -ux
@@ -22,8 +24,9 @@ const http = require('http');
 var counter = 0;
 
 const server = http.createServer((req, resp) => {
-  console.log(`HTTP REQUEST [${counter}] ${req.method} ${req.url}`);
-  resp.end('Thanks!\n');
+  ++counter;
+  console.log(`[${counter}] HTTP REQUEST ${req.method} ${req.url}`);
+  resp.end(`Thanks for request number ${counter} to ${req.url}`);
 });
 
 server.listen(3000);
@@ -41,17 +44,19 @@ var counter = 0;
 function sendit(rec) {
   ++counter;
   const request_id = counter;
-  console.log(`SENDING [${request_id}] request ${rec._log_id}`);
+  console.log(`[${request_id}] 1 SENDING request for ${rec._log_id}`);
   const url = new URL(`http://localhost:3000/${rec._log_id}`);
   const options = {
     method: 'POST',
   };
 
   const req = http.request(url, options, (res) => {
-    res.on('end', () => { });
+    console.log(`[${request_id}] 2 RESULT ${res.statusCode}`);
+    res.on('data', (chunk) => { console.log(`[${request_id}] 3 DATA ${chunk}`); });
+    res.on('end', () => { console.log(`[${request_id}] 4 END`); });
   });
   req.on('error', (err) => {
-    console.error(`ERROR [${request_id}] ${err}`);
+    console.error(`[${request_id}] 0 ERROR ${err}`);
     process.exit(2);
   });
 

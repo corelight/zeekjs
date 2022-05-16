@@ -19,6 +19,9 @@ double LoopSource::GetNextTimeout() {
 
 void LoopSource::Done() {
   dprintf("LoopSource unregistered");
+
+  // We manage our own lifetime.
+  delete this;
 }
 
 void LoopSource::UpdateTime() {

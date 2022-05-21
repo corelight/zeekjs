@@ -77,8 +77,13 @@ class Instance {
   static void ZeekEventCallback(const v8::FunctionCallbackInfo<v8::Value>& args);
   static void ZeekInvokeCallback(const v8::FunctionCallbackInfo<v8::Value>& args);
   static void ZeekSelectFieldsCallback(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void AddZeekObject(v8::Local<v8::Object> exports,
+                            v8::Isolate* isolate,
+                            v8::Local<v8::Context> context,
+                            Instance* instance);
 
   v8::Isolate* GetIsolate() { return isolate_; };
+  const std::vector<std::filesystem::path>& GetFiles() { return files_; };
   v8::Local<v8::Value> Wrap(const zeek::ValPtr& vp, int attr_mask = 0) {
     return zeek_val_wrapper_.get()->Wrap(vp, attr_mask);
   }
@@ -87,15 +92,15 @@ class Instance {
   friend class HookHandler;
 
  private:
-  void SetupZeekObject(v8::Local<v8::Context> context,
-                       v8::Isolate* isolate,
-                       const std::vector<std::filesystem::path>& files);
   bool ExecuteAndWaitForInit(v8::Local<v8::Context> context,
                              v8::Isolate* isolate,
                              const std::string& main_script_source);
 
   std::optional<zeek::Args> v8_to_zeek_args(const zeek::FuncType* ft,
                                             v8::Local<v8::Array> v8_args);
+
+  // Files to be loaded
+  std::vector<std::filesystem::path> files_;
 
   // Back-referene for to register the callback handlers.
   plugin::Corelight_ZeekJS::Plugin* plugin_;

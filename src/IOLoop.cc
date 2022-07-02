@@ -1,6 +1,6 @@
 #include <stdexcept>
 
-// pipe2, O_CLOEXEC, ...
+// pipe(), O_CLOEXEC, ...
 #include <fcntl.h>
 #include <unistd.h>
 
@@ -33,8 +33,16 @@ int LoopSource::GetFd() {
 }
 
 PipeSource::PipeSource(plugin::Nodejs::Instance* instance) : instance_(instance) {
-  if (pipe2(notify_pipe_.data(), O_CLOEXEC | O_NONBLOCK)) {
+  if (pipe(notify_pipe_.data())) {
     throw std::runtime_error("Failed to create notify_pipe");
+  }
+  if (fcntl(notify_pipe_[0], F_SETFD, O_CLOEXEC) ||
+      fcntl(notify_pipe_[1], F_SETFD, O_CLOEXEC)) {
+    throw std::runtime_error("Failed to set pipe close-on-exec");
+  }
+  if (fcntl(notify_pipe_[0], F_SETFL, O_NONBLOCK) ||
+      fcntl(notify_pipe_[1], F_SETFL, O_NONBLOCK)) {
+    throw std::runtime_error("Failed to set pipe non-blocking");
   }
   SetClosed(false);
 }

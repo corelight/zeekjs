@@ -9,6 +9,7 @@
 #include <zeek/Func.h>
 #include <zeek/ID.h>
 #include <zeek/RunState.h>
+#include <zeek/Trigger.h>
 #include <zeek/iosource/Manager.h>
 #include <zeek/iosource/PktSrc.h>
 

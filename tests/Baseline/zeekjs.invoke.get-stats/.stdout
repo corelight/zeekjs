@@ -6,7 +6,7 @@ network_time_init ts=1630165473.690298
   "pkts_link": 0,
   "bytes_recvd": 10107
 }
-{
-  "queued": 42,
-  "dispatched": 40
-}
+queued in event_stats true
+dispatched in event_stats true
+queued >= 40 true
+dispatched >= 40 true

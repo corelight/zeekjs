@@ -299,7 +299,7 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
 
     std::string module_name = zeek::detail::extract_module_name(*utf8_value);
     std::string var_name = zeek::detail::extract_var_name(*utf8_value);
-    bro_int_t enum_int = enum_type->Lookup(module_name, var_name.c_str());
+    zeek_int_t enum_int = enum_type->Lookup(module_name, var_name.c_str());
     if (enum_int >= 0) {
       wrap_result.val = enum_type->GetEnumVal(enum_int);
     } else {

@@ -71,3 +71,9 @@ inline ::zeek::ValPtr Vector_val_at(::zeek::VectorVal* vvp, unsigned int index) 
 #define ZEEKJS_STMT_EXEC_CONST
 #define ZEEKJS_STMT_NEEDS_DUPLICATE 1
 #endif
+
+// Avoid warnings about bro_int_t in Zeek 5.1. Provide zeek_int_t here for
+// older version as well.
+#if ZEEK_VERSION_NUMBER < 50100
+using zeek_int_t = int64_t;
+#endif

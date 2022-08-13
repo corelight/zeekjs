@@ -2757,7 +2757,7 @@ ssl_extension [
     }
   },
   {
-    "name": "is_orig",
+    "name": "is_client",
     "value": true
   },
   {
@@ -2827,7 +2827,7 @@ ssl_extension [
     }
   },
   {
-    "name": "is_orig",
+    "name": "is_client",
     "value": true
   },
   {
@@ -2897,7 +2897,7 @@ ssl_extension [
     }
   },
   {
-    "name": "is_orig",
+    "name": "is_client",
     "value": true
   },
   {
@@ -2967,7 +2967,7 @@ ssl_extension [
     }
   },
   {
-    "name": "is_orig",
+    "name": "is_client",
     "value": true
   },
   {
@@ -3037,7 +3037,7 @@ ssl_extension [
     }
   },
   {
-    "name": "is_orig",
+    "name": "is_client",
     "value": true
   },
   {
@@ -3107,7 +3107,7 @@ ssl_extension [
     }
   },
   {
-    "name": "is_orig",
+    "name": "is_client",
     "value": true
   },
   {
@@ -3177,7 +3177,7 @@ ssl_extension [
     }
   },
   {
-    "name": "is_orig",
+    "name": "is_client",
     "value": true
   },
   {
@@ -3247,7 +3247,7 @@ ssl_extension [
     }
   },
   {
-    "name": "is_orig",
+    "name": "is_client",
     "value": true
   },
   {
@@ -3317,7 +3317,7 @@ ssl_extension [
     }
   },
   {
-    "name": "is_orig",
+    "name": "is_client",
     "value": true
   },
   {
@@ -3387,7 +3387,7 @@ ssl_extension [
     }
   },
   {
-    "name": "is_orig",
+    "name": "is_client",
     "value": true
   },
   {
@@ -3457,7 +3457,7 @@ ssl_extension [
     }
   },
   {
-    "name": "is_orig",
+    "name": "is_client",
     "value": true
   },
   {
@@ -3527,7 +3527,7 @@ ssl_extension [
     }
   },
   {
-    "name": "is_orig",
+    "name": "is_client",
     "value": true
   },
   {
@@ -3597,7 +3597,7 @@ ssl_extension [
     }
   },
   {
-    "name": "is_orig",
+    "name": "is_client",
     "value": true
   },
   {
@@ -3671,7 +3671,7 @@ ssl_plaintext_data [
     }
   },
   {
-    "name": "is_orig",
+    "name": "is_client",
     "value": true
   },
   {
@@ -3750,7 +3750,7 @@ ssl_extension [
     }
   },
   {
-    "name": "is_orig",
+    "name": "is_client",
     "value": false
   },
   {
@@ -3827,7 +3827,7 @@ ssl_extension [
     }
   },
   {
-    "name": "is_orig",
+    "name": "is_client",
     "value": false
   },
   {
@@ -3905,7 +3905,7 @@ ssl_plaintext_data [
     }
   },
   {
-    "name": "is_orig",
+    "name": "is_client",
     "value": false
   },
   {
@@ -3987,7 +3987,7 @@ ssl_plaintext_data [
     }
   },
   {
-    "name": "is_orig",
+    "name": "is_client",
     "value": false
   },
   {
@@ -4069,7 +4069,7 @@ ssl_plaintext_data [
     }
   },
   {
-    "name": "is_orig",
+    "name": "is_client",
     "value": true
   },
   {

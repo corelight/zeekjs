@@ -2766,7 +2766,7 @@ ssl_extension [
   },
   {
     "name": "val",
-    "value": "<string-with-NUL>"
+    "value": "\u0000\u0010\u0000\u0000\rcorelight.com"
   }
 ]
 ssl_extension [
@@ -2836,7 +2836,7 @@ ssl_extension [
   },
   {
     "name": "val",
-    "value": "<string-with-NUL>"
+    "value": "\u0003\u0000\u0001\u0002"
   }
 ]
 ssl_extension [
@@ -2906,7 +2906,7 @@ ssl_extension [
   },
   {
     "name": "val",
-    "value": "<string-with-NUL>"
+    "value": "\u0000\n\u0000\u001d\u0000\u0017\u0000\u001e\u0000\u0019\u0000\u0018"
   }
 ]
 ssl_extension [
@@ -3046,7 +3046,7 @@ ssl_extension [
   },
   {
     "name": "val",
-    "value": "<string-with-NUL>"
+    "value": "\u0000\f\u0002h2\bhttp/1.1"
   }
 ]
 ssl_extension [
@@ -3326,7 +3326,7 @@ ssl_extension [
   },
   {
     "name": "val",
-    "value": "<string-with-NUL>"
+    "value": "\u0000 \u0004\u0003\u0005\u0003\u0006\u0003\b\u0007\b\b\b\t\b\n\b\u000b\b\u0004\b\u0005\b\u0006\u0004\u0001\u0005\u0001\u0006\u0001\u0003\u0003\u0003\u0001"
   }
 ]
 ssl_extension [
@@ -3536,7 +3536,7 @@ ssl_extension [
   },
   {
     "name": "val",
-    "value": "<string-with-NUL>"
+    "value": "\u0000$\u0000\u001d\u0000 ²^6ÌÌ88eRIa\u001b2w»3ýmnãeë56½JP\r"
   }
 ]
 ssl_extension [
@@ -3606,7 +3606,7 @@ ssl_extension [
   },
   {
     "name": "val",
-    "value": "<string-with-NUL>"
+    "value": "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000"
   }
 ]
 ssl_plaintext_data [
@@ -3759,7 +3759,7 @@ ssl_extension [
   },
   {
     "name": "val",
-    "value": "<string-with-NUL>"
+    "value": "\u0000\u001d\u0000 Ï±Ýxsí²'ëïé½¯=°W^\u0019EóËãK\u001f×\u0001H\u0007 "
   }
 ]
 ssl_extension [

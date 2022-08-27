@@ -809,6 +809,7 @@ void Instance::Done() {
       }
       std::this_thread::sleep_for(1ms);
     }
+
     {
       // Emit process 'exit' event
       v8::Isolate* isolate = GetIsolate();
@@ -817,6 +818,14 @@ void Instance::Done() {
       v8::Context::Scope context_scope(isolate->GetCurrentContext());
       v8::SealHandleScope seal(isolate);
       node::EmitProcessExit(node_environment_.get());
+    }
+
+    // Do garbage collection at shutdown to trigger disposal
+    // of objects on the JS heap that reference native objects.
+    isolate_->MemoryPressureNotification(v8::MemoryPressureLevel::kModerate);
+    isolate_->IdleNotificationDeadline(1.0);
+    if (!isolate_->IdleNotificationDeadline(1.0)) {
+      dprintf("There was more garbage to be collected");
     }
   }
 }

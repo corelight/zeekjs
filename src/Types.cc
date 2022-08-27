@@ -9,14 +9,63 @@
 #include "zeek/ZeekString.h"
 #include "zeek/module_util.h"
 
-static v8::Local<v8::String> v8_str_intern(v8::Isolate* i, const char* s) {
+namespace {
+
+// Zeek allocated strings as external string resource to avoid copying strings into
+// the JS heap. The Zeek object "owning" the string is ref'ed/unref'ed to control
+// lifetime of the string. Used for StringVal and also field and enum names.
+class ExternalZeekStringResource : public v8::String::ExternalOneByteStringResource {
+ public:
+  ExternalZeekStringResource(zeek::Obj* obj, const char* data, size_t length)
+      : obj_(obj), data_(data), length_(length) {
+    Ref(obj_);
+  }
+  void Dispose() override {
+    dprintf("Disposing ExternalZeekString: %s obj_=%p", data_, obj_);
+    Unref(obj_);
+    data_ = nullptr;
+    length_ = 0;
+
+    // Calls delete *this
+    v8::String::ExternalOneByteStringResource::Dispose();
+  }
+
+  [[nodiscard]] const char* data() const override { return data_; }
+
+  [[nodiscard]] size_t length() const override { return length_; };
+
+ private:
+  zeek::Obj* obj_;
+  const char* data_;
+  size_t length_;
+};
+
+v8::Local<v8::String> v8_str_intern(v8::Isolate* i, const char* s) {
   return v8::String::NewFromUtf8(i, s, v8::NewStringType::kInternalized)
       .ToLocalChecked();
 }
 
-static v8::Local<v8::String> v8_str(v8::Isolate* i, const char* s) {
+v8::Local<v8::String> v8_str(v8::Isolate* i, const char* s) {
   return v8::String::NewFromUtf8(i, s).ToLocalChecked();
 }
+
+v8::Local<v8::String> v8_str_extern(v8::Isolate* i,
+                                    zeek::Obj* obj,
+                                    const char* data,
+                                    size_t length = 0) {
+#ifdef __clang_analyzer__
+  // clang-tidy thinks the StringResource object is never freed,
+  // hide the allocation from it.
+  return v8_str(i, data);
+#else
+  if (length == 0)
+    length = strlen(data);
+  auto res = new ExternalZeekStringResource(obj, data, length);
+  return v8::String::NewExternalOneByte(i, res).ToLocalChecked();
+#endif
+}
+
+}  // namespace
 
 ZeekValWrapper::ZeekValWrapper(v8::Isolate* isolate) : isolate_(isolate) {
   v8::Local<v8::ObjectTemplate> record_template = v8::ObjectTemplate::New(isolate_);
@@ -73,8 +122,11 @@ v8::Local<v8::Value> ZeekValWrapper::Wrap(const zeek::ValPtr& vp, int attr_mask)
       return v8::Number::New(isolate_, vp->AsInterval());
     case zeek::TYPE_TIME:
       return v8::Number::New(isolate_, vp->AsTime());
-    case zeek::TYPE_STRING:
-      return v8_str(vp->AsString()->CheckString());
+    case zeek::TYPE_STRING: {
+      auto sv = vp->AsStringVal();
+      auto data = reinterpret_cast<const char*>(sv->Bytes());
+      return v8_str_extern(isolate_, sv, data, sv->Len());
+    }
     case zeek::TYPE_ADDR:
       return v8_str(vp->AsAddr().AsString().c_str());
     case zeek::TYPE_SUBNET:
@@ -186,9 +238,10 @@ v8::Local<v8::Value> ZeekValWrapper::Wrap(const zeek::ValPtr& vp, int attr_mask)
       }
     }
     case zeek::TYPE_ENUM: {
-      zeek::EnumVal* eval = vp->AsEnumVal();
-      const char* name = vp->GetType()->AsEnumType()->Lookup(eval->AsEnum());
-      return v8_str_intern(name);
+      zeek::EnumVal* ev = vp->AsEnumVal();
+      zeek::EnumType* et = vp->GetType()->AsEnumType();
+      const char* name = et->Lookup(ev->AsEnum());
+      return v8_str_extern(isolate_, et, name);
     }
     case zeek::TYPE_LIST: {  // types (?)
       zeek::ListVal* lval = vp->AsListVal();
@@ -354,9 +407,9 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
     if (!v8_val->IsObject()) {
       wrap_result.error = "Expected Javascript object for record";
     } else {
-      zeek::RecordTypePtr rt = {zeek::NewRef{},
-                                type->AsRecordType()};  // Not sure this needs NewRef
-      zeek::RecordValPtr record_val = zeek::make_intrusive<zeek::RecordVal>(rt);
+      zeek::RecordType* rt = type->AsRecordType();
+      zeek::RecordTypePtr rtp = {zeek::NewRef{}, rt};  // Not sure this needs NewRef
+      zeek::RecordValPtr record_val = zeek::make_intrusive<zeek::RecordVal>(rtp);
       v8::Local<v8::Object> v8_obj = v8::Local<v8::Object>::Cast(v8_val);
 
       for (int i = 0; i < rt->NumFields() && wrap_result.ok; i++) {
@@ -367,7 +420,7 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
 
         dprintf("i=%d field_name=%s optional=%d", i, field_decl->id, is_optional);
 
-        v8::Local<v8::String> key = v8_str_intern(field_decl->id);
+        v8::Local<v8::String> key = v8_str_extern(isolate_, rt, field_decl->id);
 
         // If the v8_obj does not have this field and the field
         // itself isn't optional, bail out.
@@ -596,7 +649,8 @@ void ZeekValWrapper::ZeekRecordEnumerator(
         field_decl->GetAttr(zeek::detail::ATTR_LOG) == zeek::detail::Attr::nil) {
       continue;
     }
-    v8::Local<v8::String> field_name = ::v8_str_intern(isolate, field_decl->id);
+    v8::Local<v8::String> field_name =
+        ::v8_str_extern(isolate, rt, field_decl->id, strlen(field_decl->id));
     names.emplace_back(v8::Local<v8::Name>::Cast(field_name));
   }
 

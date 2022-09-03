@@ -43,3 +43,6 @@ check-clang-tidy: build-it
 # Run format, build, tests and clang-tidy within a container.
 check:
 	$(DOCKER) build -t zeekjs-check -f ./docker/fedora.Dockerfile .
+
+check-nightly:
+	$(DOCKER) build --build-arg STAMP=$(shell date +%Y-%m-%d) -t zeekjs-check-nightly -f ./docker/fedora-nightly.Dockerfile .

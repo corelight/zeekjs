@@ -6,6 +6,8 @@
 
 const int ZEEKJS_ATTR_LOG = 1;
 
+class ZeekValWrap;
+
 // Helper class for wrapping a zeek::ValPtr into a v8::Object.
 // creating Zeek
 class ZeekValWrapper {
@@ -50,6 +52,16 @@ class ZeekValWrapper {
   v8::Local<v8::String> v8_str_intern(const char* s);
   v8::Local<v8::String> v8_str(const char* s);
 
+  // Returns the v8::Local<v8::Private> to mark objects wrapping Zeek Vals.
+  v8::Local<v8::Private> GetWrapPrivateKey(v8::Isolate* isolate) const {
+    return wrap_private_key_.Get(isolate);
+  }
+
+  // Attempt to unwrap the given object if it is a ZeekValWrap.
+  //
+  // Returns true if unwrapping was successful in which case wrap is set.
+  bool Unwrap(v8::Isolate* isolate, v8::Local<v8::Object> obj, ZeekValWrap** wrap);
+
  private:
   v8::Isolate* isolate_;
   v8::Global<v8::ObjectTemplate> record_template_;
@@ -57,6 +69,10 @@ class ZeekValWrapper {
   v8::Global<v8::String> port_str_;
   v8::Global<v8::String> proto_str_;
   v8::Global<v8::String> toJSON_str_;
+  // v8::Objects that have a private property with this key
+  // are ZeekValWraps and we can Unwrap them directly. This
+  // is done much nicer in node with napi_type_tag_object().
+  v8::Global<v8::Private> wrap_private_key_;
 };
 
 // Wraps a zeek::ValPtr with enough info to continue wrapping.

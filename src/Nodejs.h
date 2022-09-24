@@ -85,7 +85,11 @@ class Instance {
   v8::Isolate* GetIsolate() { return isolate_; };
   const std::vector<std::filesystem::path>& GetFiles() { return files_; };
   v8::Local<v8::Value> Wrap(const zeek::ValPtr& vp, int attr_mask = 0) {
-    return zeek_val_wrapper_.get()->Wrap(vp, attr_mask);
+    return zeek_val_wrapper_->Wrap(vp, attr_mask);
+  }
+
+  bool Unwrap(v8::Local<v8::Object> obj, ZeekValWrap** wrap) {
+    return zeek_val_wrapper_->Unwrap(GetIsolate(), obj, wrap);
   }
 
   friend class EventHandler;

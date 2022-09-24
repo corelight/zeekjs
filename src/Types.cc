@@ -4,6 +4,7 @@
 #include "ZeekJS.h"
 
 #include "zeek/IPAddr.h"
+#include "zeek/IntrusivePtr.h"
 #include "zeek/Type.h"
 #include "zeek/Val.h"
 #include "zeek/ZeekString.h"
@@ -77,6 +78,9 @@ ZeekValWrapper::ZeekValWrapper(v8::Isolate* isolate) : isolate_(isolate) {
   record_template->SetHandler(record_conf);
 
   record_template_.Reset(isolate_, record_template);
+
+  wrap_private_key_.Reset(isolate,
+                          v8::Private::ForApi(isolate, v8_str("zeekjs::object::tag")));
 
   v8::Local<v8::ObjectTemplate> table_template = v8::ObjectTemplate::New(isolate_);
   table_template->SetInternalFieldCount(1);
@@ -259,17 +263,49 @@ v8::Local<v8::Value> ZeekValWrapper::Wrap(const zeek::ValPtr& vp, int attr_mask)
   }
 }
 
+bool ZeekValWrapper::Unwrap(v8::Isolate* isolate,
+                            v8::Local<v8::Object> obj,
+                            ZeekValWrap** wrap) {
+  v8::Local<v8::Context> context = isolate_->GetCurrentContext();
+  if (!obj->HasPrivate(context, GetWrapPrivateKey(isolate)).ToChecked())
+    return false;
+
+  *wrap = static_cast<ZeekValWrap*>(obj->GetAlignedPointerFromInternalField(0));
+
+  return true;
+}
+
 // Convert a Javascript value over to a zeek::ValPtr using the given type.
 //
 // TODO: Refactor.
 ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
                                                  const zeek::TypePtr& type) {
   ZeekValWrapper::Result wrap_result = {.ok = true};
-
   v8::Local<v8::Context> context = isolate_->GetCurrentContext();
   zeek::TypeTag type_tag = type->Tag();
+
   dprintf("type tag %d/%s val=%s", type_tag, zeek::type_name(type_tag),
           *v8::String::Utf8Value(isolate_, v8_val));
+
+  // Pass-through fast-path: If this is an object and it's backed by
+  // a ZeekValWrap of the same type, just thread it through directly.
+  if (v8_val->IsObject()) {
+    auto obj = v8::Local<v8::Object>::Cast(v8_val);
+    ZeekValWrap* zeek_val_wrap = nullptr;
+    if (Unwrap(isolate_, obj, &zeek_val_wrap)) {
+      zeek::Val* vp = zeek_val_wrap->GetVal();
+      if (vp->GetType()->Tag() == type_tag) {
+        wrap_result.val = {zeek::NewRef{}, vp};
+        return wrap_result;
+      }
+
+      // Give up if the tag disagreed.
+      wrap_result.ok = false;
+      wrap_result.error = zeek::util::fmt("ZeekValWrap pass-through bad tags: %d != %d",
+                                          vp->GetType()->Tag(), type_tag);
+      return wrap_result;
+    }
+  }
 
   if (type_tag == zeek::TYPE_ADDR) {
     v8::Local<v8::String> v8_str = v8_val->ToString(context).ToLocalChecked();
@@ -435,7 +471,8 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
     // fields from the provided Javascript object.
 
     if (!v8_val->IsObject()) {
-      wrap_result.error = "Expected Javascript object for record";
+      wrap_result.error = "Expected Javascript object for record of type ";
+      wrap_result.error += type->GetName();
     } else {
       zeek::RecordType* rt = type->AsRecordType();
       zeek::RecordTypePtr rtp = {zeek::NewRef{}, rt};  // Not sure this needs NewRef
@@ -726,6 +763,8 @@ ZeekValWrap::ZeekValWrap(v8::Isolate* isolate,
                          zeek::Val* vp,
                          int attr_mask)
     : wrapper_(wrapper), vp_(vp), attr_mask_(attr_mask) {
+  record_obj->SetPrivate(isolate->GetCurrentContext(),
+                         wrapper->GetWrapPrivateKey(isolate), v8::True(isolate));
   record_obj->SetAlignedPointerInInternalField(0, this);
   persistent_obj_.Reset(isolate, record_obj);
   persistent_obj_.SetWeak(this, ZeekValWrap_WeakCallback,

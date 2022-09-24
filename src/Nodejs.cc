@@ -250,8 +250,12 @@ void Instance::ZeekInvokeCallback(const v8::FunctionCallbackInfo<v8::Value>& arg
 void Instance::ZeekSelectFieldsCallback(
     const v8::FunctionCallbackInfo<v8::Value>& args) {
   v8::Isolate* isolate = args.GetIsolate();
-  // v8::Local<v8::Object> receiver = args.This();
-  // auto field = v8::Local<v8::External>::Cast(receiver->GetInternalField(0));
+
+  // The receiver of zeek.select_fields() is the global zeek object itself.
+  // We can get to the Instance object via the internal field.
+  v8::Local<v8::Object> receiver = args.This();
+  auto field = v8::Local<v8::External>::Cast(receiver->GetInternalField(0));
+  auto instance = static_cast<Instance*>(field->Value());
 
   if (args.Length() != 2) {
     isolate->ThrowException(v8_str(isolate, "Expected 2 args"));
@@ -268,10 +272,14 @@ void Instance::ZeekSelectFieldsCallback(
   }
 
   auto obj = v8::Local<v8::Object>::Cast(args[0]);
+
+  ZeekValWrap* wrap = nullptr;
+  if (!instance->Unwrap(obj, &wrap)) {
+    isolate->ThrowException(v8_str(isolate, "Obj does not wrap a Zeek value"));
+    return;
+  }
   int attr_mask = static_cast<int>(v8::Local<v8::Number>::Cast(args[1])->Value());
 
-  // This isn't exactly safe. We maybe should annotate the object somehow.
-  auto wrap = static_cast<ZeekValWrap*>(obj->GetAlignedPointerFromInternalField(0));
   // dprintf("select_fields() wrap=%p vp=%p attr_mask=%x", wrap, wrap->GetVal(),
   //        attr_mask);
   ZeekValWrap* new_wrap = ZeekValWrap::Make(isolate, wrap->GetWrapper(), obj,

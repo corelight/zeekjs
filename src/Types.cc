@@ -307,7 +307,10 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
     }
   }
 
-  if (type_tag == zeek::TYPE_ADDR) {
+  if (type_tag == zeek::TYPE_BOOL && v8_val->IsBoolean()) {
+    wrap_result.val = zeek::val_mgr->Bool(v8_val->IsTrue());
+    return wrap_result;
+  } else if (type_tag == zeek::TYPE_ADDR) {
     v8::Local<v8::String> v8_str = v8_val->ToString(context).ToLocalChecked();
     v8::String::Utf8Value utf8_value(isolate_, v8_str);
     in6_addr addr6;

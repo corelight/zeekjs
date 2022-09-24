@@ -304,6 +304,36 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
         }
       }
     }
+  } else if (type_tag == zeek::TYPE_PORT) {
+    // If this is an object, look for "port" and "proto" fields and interpret them.
+    // This allows forth and back conversion between Zeek and Javascript
+    if (v8_val->IsObject()) {
+      auto obj = v8::Local<v8::Object>::Cast(v8_val);
+      auto maybe_port = obj->Get(context, port_str_.Get(isolate_));
+      auto maybe_proto = obj->Get(context, proto_str_.Get(isolate_));
+
+      v8::Local<v8::Value> port_val = maybe_port.ToLocalChecked();
+      v8::Local<v8::Value> proto_val = maybe_proto.ToLocalChecked();
+      if (!port_val->IsNumber() || !proto_val->IsString()) {
+        wrap_result.ok = false;
+        wrap_result.error =
+            "Missing property or bad type for port (number) or proto (string)";
+        return wrap_result;
+      }
+
+      uint32_t port = port_val->ToUint32(context).ToLocalChecked()->Value();
+      v8::String::Utf8Value proto_utf8_value(isolate_, proto_val);
+      TransportProto proto = TRANSPORT_UNKNOWN;
+      if (!strcmp("tcp", *proto_utf8_value)) {
+        proto = TRANSPORT_TCP;
+      } else if (!strcmp("udp", *proto_utf8_value)) {
+        proto = TRANSPORT_UDP;
+      } else if (!strcmp("icmp", *proto_utf8_value)) {
+        proto = TRANSPORT_ICMP;
+      }
+      wrap_result.val = zeek::val_mgr->Port(port, proto);
+      return wrap_result;
+    }
   } else if (type_tag == zeek::TYPE_COUNT) {
     if (v8_val->IsNumber()) {
       v8::MaybeLocal<v8::Uint32> result = v8_val->ToUint32(context);

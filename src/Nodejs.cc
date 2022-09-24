@@ -1,6 +1,7 @@
 #include "Nodejs.h"
 #include "IOLoop.h"
 
+#include <algorithm>
 #include <chrono>
 #include <filesystem>
 #include <memory>
@@ -285,13 +286,24 @@ std::optional<zeek::Args> Instance::v8_to_zeek_args(const zeek::FuncType* ft,
   const zeek::RecordTypePtr& params = ft->Params();
   v8::Local<v8::Context> context = isolate_->GetCurrentContext();
 
-  if ((uint32_t)params->NumFields() != v8_args->Length()) {
-    std::string error = "Wrong number of parameters";
+  auto total_params = static_cast<uint32_t>(params->NumFields());
+  uint32_t required_params =
+      std::count_if(params->Types()->begin(), params->Types()->end(), [](auto pt) {
+        return pt->GetAttr(zeek::detail::ATTR_OPTIONAL) == zeek::detail::Attr::nil;
+      });
+
+  if ((uint32_t)v8_args->Length() < required_params ||
+      v8_args->Length() > total_params) {
+    std::string error = zeek::util::fmt(
+        "Wrong number of parameters. %d provided, %d required, %d total",
+        v8_args->Length(), required_params, total_params);
     isolate_->ThrowException(v8_str(isolate_, error.c_str()));
     return std::nullopt;
   }
 
-  for (uint32_t i = 0; i < v8_args->Length(); i++) {
+  // Convert all the v8_args to Zeek land...
+  uint32_t i = 0;
+  for (; i < v8_args->Length(); i++) {
     auto idx = static_cast<int>(i);
     zeek::TypePtr arg_type = params->GetFieldType(idx);
     v8::Local<v8::Value> v8_val = v8_args->Get(context, i).ToLocalChecked();
@@ -304,6 +316,10 @@ std::optional<zeek::Args> Instance::v8_to_zeek_args(const zeek::FuncType* ft,
 
     args.push_back(result.val);
   }
+
+  // ..any remaining optional/default parameters are filled with Zeek's defaults.
+  for (; i < total_params; i++)
+    args.push_back(params->FieldDefault(static_cast<int>(i)));
 
   return args;
 }

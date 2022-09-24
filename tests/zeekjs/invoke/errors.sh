@@ -16,11 +16,25 @@ zeek.on('zeek_init', () => {
   } catch (error) {
     zeek.print(`Caught it: ${error}`);
   }
+
   try {
     zeek.invoke('Test::test_add', [{"a": "b"}, {"a": "b"}]);
   } catch (error) {
     zeek.print(`Caught it: ${error}`);
   }
+
+  try {
+    zeek.invoke('Test::test_add', [1]);
+  } catch (error) {
+    zeek.print(`Caught it: ${error}`);
+  }
+
+  try {
+    zeek.invoke('Test::test_add', [1, 2, 3]);
+  } catch (error) {
+    zeek.print(`Caught it: ${error}`);
+  }
+
 });
 @TEST-END-FILE
 

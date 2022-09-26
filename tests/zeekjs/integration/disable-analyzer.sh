@@ -1,4 +1,5 @@
 # @TEST-DOC: Disable an analyzer from JS
+# @TEST-REQUIRES: zeek -e 'global_ids()["analyzer_confirmation"]'
 # @TEST-EXEC: zeek http.js -r $TRACES/http-pipelined-requests.pcap
 # @TEST-EXEC: btest-diff .stdout
 

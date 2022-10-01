@@ -12,10 +12,10 @@ RUN dnf install -y \
   which \
   clang-tools-extra
 
-RUN dnf config-manager --add-repo https://download.opensuse.org/repositories/security:zeek/Fedora_36/security:zeek.repo
-
 # Bust the cache
 ARG STAMP=1662210869
+
+RUN dnf config-manager --add-repo https://download.opensuse.org/repositories/security:zeek/Fedora_34/security:zeek.repo
 
 RUN dnf install -y \
   zeek-nightly-btest \

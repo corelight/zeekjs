@@ -8,6 +8,6 @@ Invoking Test::test_record: {"msg":"Hello!","reply":"Returning Hello!"}
 Invoking Test::test_vector_of_count: 6
 Invoking Test::test_vector_of_string: "ab"
 ZEEK: test_void: 'cookie'
-ZEEK: Got r=[msg=Hello!, reply=undefined]
+ZEEK: Got r=[msg=Hello!, reply=<uninitialized>]
 ZEEK: test_vector_of_count: Got v=[1, 2, 3]
 ZEEK: test_vector_of_count: Got v=[a, b]

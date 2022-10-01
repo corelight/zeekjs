@@ -44,6 +44,9 @@ class ZeekValWrapper {
   // Callbacks used for Zeek records.
   static void ZeekRecordGetter(v8::Local<v8::Name> property,
                                const v8::PropertyCallbackInfo<v8::Value>& info);
+  static void ZeekRecordSetter(v8::Local<v8::Name> property,
+                               v8::Local<v8::Value> v8_val,
+                               const v8::PropertyCallbackInfo<v8::Value>& info);
   static void ZeekRecordQuery(v8::Local<v8::Name> property,
                               const v8::PropertyCallbackInfo<v8::Integer>& info);
   static void ZeekRecordEnumerator(const v8::PropertyCallbackInfo<v8::Array>& info);

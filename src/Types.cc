@@ -73,6 +73,7 @@ ZeekValWrapper::ZeekValWrapper(v8::Isolate* isolate) : isolate_(isolate) {
   record_template->SetInternalFieldCount(1);
   v8::NamedPropertyHandlerConfiguration record_conf = {nullptr};
   record_conf.getter = ZeekRecordGetter;
+  record_conf.setter = ZeekRecordSetter;
   record_conf.enumerator = ZeekRecordEnumerator;
   record_conf.query = ZeekRecordQuery;
   record_template->SetHandler(record_conf);
@@ -409,10 +410,14 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
     }
 
   } else if (type_tag == zeek::TYPE_STRING) {
-    v8::Local<v8::String> v8_str = v8_val->ToString(context).ToLocalChecked();
-    v8::String::Utf8Value utf8_value(isolate_, v8_str);
-    wrap_result.val = zeek::make_intrusive<zeek::StringVal>(*utf8_value);
-    return wrap_result;
+    if (v8_val->IsString()) {
+      // TODO/XXX: Don't do UTF8 encoding here, just treat it as binary blob.
+      // Look at WriteOneByte(), but need to allocate a buffer.
+      v8::Local<v8::String> v8_string = v8::Local<v8::String>::Cast(v8_val);
+      v8::String::Utf8Value utf8_value(isolate_, v8_string);
+      wrap_result.val = zeek::make_intrusive<zeek::StringVal>(*utf8_value);
+      return wrap_result;
+    }
 
   } else if (type_tag == zeek::TYPE_ENUM) {
     zeek::EnumType* enum_type = type->AsEnumType();
@@ -495,11 +500,10 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
         // If the v8_obj does not have this field and the field
         // itself isn't optional, bail out.
 
-        v8::MaybeLocal<v8::Value> maybe_value = v8_obj->Get(context, key);
-        v8::Local<v8::Value> v8_field_value;
+        v8::Local<v8::Value> v8_field_value =
+            v8_obj->Get(context, key).ToLocalChecked();
 
-        if (!maybe_value.ToLocal(&v8_field_value)) {
-          // No value, but optional, move on to the next field.
+        if (v8_field_value->IsUndefined()) {
           if (is_optional)
             continue;
 
@@ -615,16 +619,30 @@ void ZeekValWrapper::ZeekTableIndexGetter(
   zeek::TableTypePtr ttype = tval->GetType<zeek::TableType>();
   std::vector<zeek::TypePtr> itypes = ttype->GetIndexTypes();
   if (itypes.size() != 1) {
-    eprintf("Unexpected number of index types: %lu", itypes.size());
+    v8::Local<v8::Value> error = v8::Exception::TypeError(::v8_str(
+        isolate,
+        zeek::util::fmt("unexpected number of index types: %lu", itypes.size())));
+    isolate->ThrowException(error);
     return;
   }
 
   zeek::TypePtr index_type = itypes[0];
-  v8::Local<v8::Number> v8_index = v8::Uint32::NewFromUnsigned(isolate, index);
+  v8::Local<v8::Value> v8_index = v8::Uint32::NewFromUnsigned(isolate, index);
+
+  // Special case: If the underlying Zeek table has TYPE_STRING entries, convert
+  // the index to a string as ToZeekVal() won't do that anymore.
+  if (index_type->Tag() == zeek::TYPE_STRING)
+    v8_index = v8_index->ToString(isolate->GetCurrentContext()).ToLocalChecked();
+
   ZeekValWrapper::Result index_result =
       wrap->GetWrapper()->ToZeekVal(v8_index, index_type);
-  if (!index_result.ok)
+  if (!index_result.ok) {
+    v8::Local<v8::Value> error = v8::Exception::TypeError(
+        ::v8_str(isolate, zeek::util::fmt("Unable to convert index %d to %s", index,
+                                          index_type->GetName().c_str())));
+    isolate->ThrowException(error);
     return;
+  }
 
   zeek::ValPtr val = tval->Find(index_result.val);
   if (!val) {
@@ -695,6 +713,49 @@ void ZeekValWrapper::ZeekRecordGetter(v8::Local<v8::Name> property,
     zeek::ValPtr vp = rval->GetFieldOrDefault(*arg);
     info.GetReturnValue().Set(wrap->GetWrapper()->Wrap(vp, wrap->GetAttrMask()));
   }
+}
+
+// Callback for for setting properties on a record.
+void ZeekValWrapper::ZeekRecordSetter(v8::Local<v8::Name> property,
+                                      v8::Local<v8::Value> v8_val,
+                                      const v8::PropertyCallbackInfo<v8::Value>& info) {
+  v8::Isolate* isolate = info.GetIsolate();
+  v8::Local<v8::Object> receiver = info.This();
+  auto wrap =
+      static_cast<ZeekValWrap*>(receiver->GetAlignedPointerFromInternalField(0));
+  auto rval = static_cast<zeek::RecordVal*>(wrap->GetVal());
+  zeek::RecordType* rt = rval->GetType()->AsRecordType();
+
+  v8::String::Utf8Value arg(isolate, property);
+  int field_offset = *arg ? rt->FieldOffset(*arg) : -1;
+  if (field_offset < 0) {
+    v8::Local<v8::Value> error = v8::Exception::TypeError(
+        ::v8_str(isolate, zeek::util::fmt("field %s does not exist in record type %s",
+                                          *arg, rt->GetName().c_str())));
+    isolate->ThrowException(error);
+    return;
+  }
+
+  zeek::TypePtr field_type = rt->GetFieldType(field_offset);
+
+#ifdef DEBUG
+  v8::Local<v8::String> typeof_str = v8_val->TypeOf(isolate);
+  v8::String::Utf8Value typeof_utf8(isolate, typeof_str);
+  v8::String::Utf8Value val_utf8(isolate, v8_val);
+  dprintf("In setter for %s (%s) %s (%s)", *arg, zeek::type_name(field_type->Tag()),
+          *val_utf8, *typeof_utf8);
+#endif
+
+  Result wrap_result = wrap->GetWrapper()->ToZeekVal(v8_val, rt->GetFieldType(*arg));
+  if (!wrap_result.ok) {
+    v8::Local<v8::Value> error =
+        v8::Exception::TypeError(::v8_str(isolate, wrap_result.error.c_str()));
+    isolate->ThrowException(error);
+    return;
+  }
+
+  rval->Assign(field_offset, wrap_result.val);
+  info.GetReturnValue().Set(v8_val);
 }
 
 // Callback for enumerating the properties of a record.

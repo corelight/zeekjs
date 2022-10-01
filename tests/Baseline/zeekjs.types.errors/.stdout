@@ -6,7 +6,7 @@ Caught it: Wrong number of parameters. 0 provided, 1 required, 1 total
 Too many arguments
 Caught it: Wrong number of parameters. 3 provided, 1 required, 1 total
 Missing ts key in object
-Caught it: Not able to convert js value '[object Object]' of type object to zeek type record (Error for field ts: Not able to convert js value 'undefined' of type undefined to zeek type time)
+Caught it: Not able to convert js value '[object Object]' of type object to zeek type record (Missing property ts)
 ts can not be converted to timestamp
 Caught it: Not able to convert js value '[object Object]' of type object to zeek type record (Error for field ts: Not able to convert js value 'not a timestamp' of type string to zeek type time)
 can not convert to count

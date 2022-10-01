@@ -6,12 +6,18 @@ Caught it: Wrong number of parameters. 0 provided, 1 required, 1 total
 Too many arguments
 Caught it: Wrong number of parameters. 3 provided, 1 required, 1 total
 Missing ts key in object
-Caught it: Not able to convert js value '[object Object]' of type object to zeek type record (Missing property ts)
+Caught it: Unable to convert JS value '[object Object]' of type object to Zeek type record (missing property ts for record type EventReceiver::MyRecord)
 ts can not be converted to timestamp
-Caught it: Not able to convert js value '[object Object]' of type object to zeek type record (Error for field ts: Not able to convert js value 'not a timestamp' of type string to zeek type time)
+Caught it: Unable to convert JS value '[object Object]' of type object to Zeek type record (Error for field ts: Unable to convert JS value 'not a timestamp' of type string to Zeek type time)
 can not convert to count
-Caught it: Not able to convert js value 'scramble' of type string to zeek type count
+Caught it: Unable to convert JS value 'scramble' of type string to Zeek type count
 pass an object instead of an array
-Caught it: Expected Javascript array for type vector
+Caught it: Expected JS type array for Zeek type vector
 pass a string instead of an array
-Caught it: Expected Javascript array for type vector
+Caught it: Expected JS type array for Zeek type vector
+pass a string inside an array instead of a count
+Caught it: Error with array element at index 0: Unable to convert JS value 'scramble' of type string to Zeek type count
+pass an object inside an array instead of a count
+Caught it: Error with array element at index 0: Unable to convert JS value '[object Object]' of type object to Zeek type count
+pass an object as second element inside an array instead of a count
+Caught it: Error with array element at index 1: Unable to convert JS value '[object Object]' of type object to Zeek type count

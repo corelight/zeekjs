@@ -88,12 +88,14 @@ ZeekValWrapper::ZeekValWrapper(v8::Isolate* isolate) : isolate_(isolate) {
 
   v8::NamedPropertyHandlerConfiguration table_conf = {nullptr};
   table_conf.getter = ZeekTableGetter;
+  table_conf.setter = ZeekTableSetter;
   table_conf.enumerator = ZeekTableEnumerator;
   table_template->SetHandler(table_conf);
 
   // This is insane
   v8::IndexedPropertyHandlerConfiguration table_indexed_conf = {nullptr};
   table_indexed_conf.getter = ZeekTableIndexGetter;
+  table_indexed_conf.setter = ZeekTableIndexSetter;
   table_template->SetHandler(table_indexed_conf);
 
   table_template_.Reset(isolate, table_template);
@@ -285,8 +287,12 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
   v8::Local<v8::Context> context = isolate_->GetCurrentContext();
   zeek::TypeTag type_tag = type->Tag();
 
-  dprintf("type tag %d/%s val=%s", type_tag, zeek::type_name(type_tag),
-          *v8::String::Utf8Value(isolate_, v8_val));
+#ifdef DEBUG
+  v8::Local<v8::String> typeof_str = v8_val->TypeOf(isolate_);
+  v8::String::Utf8Value typeof_utf8(isolate_, typeof_str);
+  dprintf("type tag %d/%s val=%s (%s)", type_tag, zeek::type_name(type_tag),
+          *v8::String::Utf8Value(isolate_, v8_val), *typeof_utf8);
+#endif
 
   // Pass-through fast-path: If this is an object and it's backed by
   // a ZeekValWrap of the same type, just thread it through directly.
@@ -438,13 +444,10 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
     return wrap_result;
 
   } else if (type_tag == zeek::TYPE_VECTOR) {
-    dprintf("Dealing with a vector");
     if (!v8_val->IsArray()) {
       wrap_result.ok = false;
-      wrap_result.error = "Expected Javascript array for type vector";
+      wrap_result.error = "Expected JS type array for Zeek type vector";
     } else {
-      dprintf("Converting to Zeek vector");
-
       v8::Local<v8::Array> v8_array = v8::Local<v8::Array>::Cast(v8_val);
       std::vector<zeek::ValPtr> vals(v8_array->Length());
 
@@ -456,7 +459,9 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
             ToZeekVal(v8_element_value, type->Yield());
         if (!element_result.ok) {
           wrap_result.ok = false;
-          wrap_result.error += "Error converting element: " + element_result.error;
+          wrap_result.error +=
+              zeek::util::fmt("Error with array element at index %u: %s", i,
+                              element_result.error.c_str());
           return wrap_result;
         }
 
@@ -508,7 +513,8 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
             continue;
 
           wrap_result.ok = false;
-          wrap_result.error = std::string("Missing property ") + field_decl->id;
+          wrap_result.error = std::string("missing property ") + field_decl->id;
+          wrap_result.error += " for record type " + rt->GetName();
           break;
         }
 
@@ -544,10 +550,9 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
   v8::Local<v8::String> v8_typeof_str = v8_val->TypeOf(isolate_);
   v8::String::Utf8Value utf8_type(isolate_, v8_typeof_str);
 
-  std::string error = "Not able to convert js value '";
-  error = "Not able to convert js value '";
+  std::string error = "Unable to convert JS value '";
   error += *utf8_value + std::string("' of type ") + *utf8_type +
-           std::string(" to zeek type ");
+           std::string(" to Zeek type ");
   error += zeek::type_name(type_tag);
   if (!wrap_result.error.empty()) {
     error += " (";
@@ -580,7 +585,10 @@ void ZeekValWrapper::ZeekTableGetter(v8::Local<v8::Name> property,
           *arg);
 
   if (itypes.size() != 1) {
-    eprintf("Unexpected number of index types: %lu", itypes.size());
+    v8::Local<v8::Value> error = v8::Exception::TypeError(::v8_str(
+        isolate,
+        zeek::util::fmt("Unexpected number of index types: %lu", itypes.size())));
+    isolate->ThrowException(error);
     return;
   }
 
@@ -598,6 +606,54 @@ void ZeekValWrapper::ZeekTableGetter(v8::Local<v8::Name> property,
           itypes.size(), *arg);
 
   info.GetReturnValue().Set(wrap->GetWrapper()->Wrap(found_val));
+}
+
+void ZeekValWrapper::ZeekTableSetter(v8::Local<v8::Name> property,
+                                     v8::Local<v8::Value> v8_val,
+                                     const v8::PropertyCallbackInfo<v8::Value>& info) {
+  v8::Isolate* isolate = info.GetIsolate();
+  v8::Local<v8::Object> receiver = info.This();
+  auto wrap =
+      static_cast<ZeekValWrap*>(receiver->GetAlignedPointerFromInternalField(0));
+  auto tval = static_cast<zeek::TableVal*>(wrap->GetVal());
+
+  zeek::TableTypePtr ttype = tval->GetType<zeek::TableType>();
+  std::vector<zeek::TypePtr> itypes = ttype->GetIndexTypes();
+  v8::String::Utf8Value property_utf8(isolate, property);
+  dprintf("tval=%p ttype=%p itypes=%lu property=%s", tval, ttype.get(), itypes.size(),
+          *property_utf8);
+
+  if (itypes.size() != 1) {
+    v8::Local<v8::Value> error = v8::Exception::TypeError(::v8_str(
+        isolate,
+        zeek::util::fmt("Unexpected number of index types: %lu", itypes.size())));
+    isolate->ThrowException(error);
+    return;
+  }
+
+  zeek::TypePtr index_type = itypes[0];
+  ZeekValWrapper::Result property_wrap_result =
+      wrap->GetWrapper()->ToZeekVal(property, index_type);
+  if (!property_wrap_result.ok) {
+    v8::Local<v8::Value> error = v8::Exception::TypeError(::v8_str(
+        isolate, zeek::util::fmt("Bad index: %s", property_wrap_result.error.c_str())));
+    isolate->ThrowException(error);
+    return;
+  }
+
+  ZeekValWrapper::Result value_wrap_result =
+      wrap->GetWrapper()->ToZeekVal(v8_val, ttype->Yield());
+  if (!value_wrap_result.ok) {
+    v8::Local<v8::Value> error = v8::Exception::TypeError(::v8_str(
+        isolate, zeek::util::fmt("Bad value: %s", value_wrap_result.error.c_str())));
+    isolate->ThrowException(error);
+    return;
+  }
+
+  // Broker forward is on...
+  tval->Assign(property_wrap_result.val, value_wrap_result.val);
+
+  info.GetReturnValue().Set(v8_val);
 }
 
 // This is slightly insane - when the Enumerator returns a Name that's
@@ -621,13 +677,13 @@ void ZeekValWrapper::ZeekTableIndexGetter(
   if (itypes.size() != 1) {
     v8::Local<v8::Value> error = v8::Exception::TypeError(::v8_str(
         isolate,
-        zeek::util::fmt("unexpected number of index types: %lu", itypes.size())));
+        zeek::util::fmt("Unexpected number of index types: %lu", itypes.size())));
     isolate->ThrowException(error);
     return;
   }
 
   zeek::TypePtr index_type = itypes[0];
-  v8::Local<v8::Value> v8_index = v8::Uint32::NewFromUnsigned(isolate, index);
+  v8::Local<v8::Value> v8_index = v8::Integer::NewFromUnsigned(isolate, index);
 
   // Special case: If the underlying Zeek table has TYPE_STRING entries, convert
   // the index to a string as ToZeekVal() won't do that anymore.
@@ -638,8 +694,8 @@ void ZeekValWrapper::ZeekTableIndexGetter(
       wrap->GetWrapper()->ToZeekVal(v8_index, index_type);
   if (!index_result.ok) {
     v8::Local<v8::Value> error = v8::Exception::TypeError(
-        ::v8_str(isolate, zeek::util::fmt("Unable to convert index %d to %s", index,
-                                          index_type->GetName().c_str())));
+        ::v8_str(isolate, zeek::util::fmt("unable to convert index %d to %s", index,
+                                          zeek::type_name(index_type->Tag()))));
     isolate->ThrowException(error);
     return;
   }
@@ -650,6 +706,62 @@ void ZeekValWrapper::ZeekTableIndexGetter(
     return;
   }
   info.GetReturnValue().Set(wrap->GetWrapper()->Wrap(val));
+}
+
+void ZeekValWrapper::ZeekTableIndexSetter(
+    uint32_t index,
+    v8::Local<v8::Value> v8_val,
+    const v8::PropertyCallbackInfo<v8::Value>& info) {
+  v8::Isolate* isolate = info.GetIsolate();
+  v8::Local<v8::Object> receiver = info.This();
+  auto wrap =
+      static_cast<ZeekValWrap*>(receiver->GetAlignedPointerFromInternalField(0));
+  auto tval = static_cast<zeek::TableVal*>(wrap->GetVal());
+
+  dprintf("tval=%p index=%d", tval, index);
+
+  zeek::TableTypePtr ttype = tval->GetType<zeek::TableType>();
+  std::vector<zeek::TypePtr> itypes = ttype->GetIndexTypes();
+  if (itypes.size() != 1) {
+    v8::Local<v8::Value> error = v8::Exception::TypeError(::v8_str(
+        isolate,
+        zeek::util::fmt("Unexpected number of index types: %lu", itypes.size())));
+    isolate->ThrowException(error);
+    return;
+  }
+
+  zeek::TypePtr index_type = itypes[0];
+  v8::Local<v8::Value> v8_index = v8::Integer::NewFromUnsigned(isolate, index);
+
+  // Special case: If the underlying Zeek table has TYPE_STRING entries, convert
+  // the index to a string as ToZeekVal() won't do that anymore. Otherwise assume
+  // the Integer an be converted to whatever is in the table (count or int).
+  if (index_type->Tag() == zeek::TYPE_STRING)
+    v8_index = v8_index->ToString(isolate->GetCurrentContext()).ToLocalChecked();
+
+  ZeekValWrapper::Result index_wrap_result =
+      wrap->GetWrapper()->ToZeekVal(v8_index, index_type);
+  if (!index_wrap_result.ok) {
+    v8::Local<v8::Value> error = v8::Exception::TypeError(
+        ::v8_str(isolate, zeek::util::fmt("unable to convert index %d to %s", index,
+                                          zeek::type_name(index_type->Tag()))));
+    isolate->ThrowException(error);
+    return;
+  }
+
+  ZeekValWrapper::Result value_wrap_result =
+      wrap->GetWrapper()->ToZeekVal(v8_val, ttype->Yield());
+  if (!value_wrap_result.ok) {
+    v8::Local<v8::Value> error = v8::Exception::TypeError(::v8_str(
+        isolate, zeek::util::fmt("Bad value: %s", value_wrap_result.error.c_str())));
+    isolate->ThrowException(error);
+    return;
+  }
+
+  // Broker forward is on...
+  tval->Assign(index_wrap_result.val, value_wrap_result.val);
+
+  info.GetReturnValue().Set(v8_val);
 }
 
 void ZeekValWrapper::ZeekTableEnumerator(

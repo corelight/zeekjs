@@ -37,7 +37,13 @@ class ZeekValWrapper {
   // Callbacks used for Zeek tables.
   static void ZeekTableGetter(v8::Local<v8::Name> property,
                               const v8::PropertyCallbackInfo<v8::Value>& info);
+  static void ZeekTableSetter(v8::Local<v8::Name> property,
+                              v8::Local<v8::Value> v8_val,
+                              const v8::PropertyCallbackInfo<v8::Value>& info);
   static void ZeekTableIndexGetter(uint32_t index,
+                                   const v8::PropertyCallbackInfo<v8::Value>& info);
+  static void ZeekTableIndexSetter(uint32_t index,
+                                   v8::Local<v8::Value> v8_val,
                                    const v8::PropertyCallbackInfo<v8::Value>& info);
   static void ZeekTableEnumerator(const v8::PropertyCallbackInfo<v8::Array>& info);
 

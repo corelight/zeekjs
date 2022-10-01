@@ -61,6 +61,27 @@ zeek.on('zeek_init', () => {
     zeek.print(`Caught it: ${error}`)
   }
 
+  zeek.print('pass a string inside an array instead of a count');
+  try {
+    zeek.event('EventReceiver::event3', [['scramble']]);
+  } catch (error) {
+    zeek.print(`Caught it: ${error}`)
+  }
+
+  zeek.print('pass an object inside an array instead of a count');
+  try {
+    zeek.event('EventReceiver::event3', [[{scramble: 'scramble'}]]);
+  } catch (error) {
+    zeek.print(`Caught it: ${error}`)
+  }
+
+  zeek.print('pass an object as second element inside an array instead of a count');
+  try {
+    zeek.event('EventReceiver::event3', [[1, {scramble: 'scramble'}]]);
+  } catch (error) {
+    zeek.print(`Caught it: ${error}`)
+  }
+
 });
 @TEST-END-FILE
 

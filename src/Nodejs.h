@@ -68,6 +68,9 @@ class Instance {
   v8::Local<v8::Value> ZeekInvoke(v8::Local<v8::String> v8_name,
                                   v8::Local<v8::Array> v8_args);
 
+  v8::MaybeLocal<v8::Value> ZeekAs(v8::Local<v8::String> v8_name,
+                                   v8::Local<v8::Value> v8_arg);
+
   // Callbacks attached to the zeek object.
   static void PrintCallback(const v8::FunctionCallbackInfo<v8::Value>& args);
   static void ZeekGet(v8::Local<v8::Name> name,
@@ -76,6 +79,7 @@ class Instance {
   static void ZeekHookCallback(const v8::FunctionCallbackInfo<v8::Value>& args);
   static void ZeekEventCallback(const v8::FunctionCallbackInfo<v8::Value>& args);
   static void ZeekInvokeCallback(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void ZeekAsCallback(const v8::FunctionCallbackInfo<v8::Value>& args);
   static void ZeekSelectFieldsCallback(const v8::FunctionCallbackInfo<v8::Value>& args);
   static void AddZeekObject(v8::Local<v8::Object> exports,
                             v8::Isolate* isolate,
@@ -87,7 +91,9 @@ class Instance {
   v8::Local<v8::Value> Wrap(const zeek::ValPtr& vp, int attr_mask = 0) {
     return zeek_val_wrapper_->Wrap(vp, attr_mask);
   }
-
+  v8::Local<v8::Value> WrapAsObject(const zeek::ValPtr& vp, int attr_mask = 0) {
+    return zeek_val_wrapper_->WrapAsObject(vp, attr_mask);
+  }
   bool Unwrap(v8::Local<v8::Object> obj, ZeekValWrap** wrap) {
     return zeek_val_wrapper_->Unwrap(GetIsolate(), obj, wrap);
   }

@@ -9,7 +9,6 @@ const int ZEEKJS_ATTR_LOG = 1;
 class ZeekValWrap;
 
 // Helper class for wrapping a zeek::ValPtr into a v8::Object.
-// creating Zeek
 class ZeekValWrapper {
  public:
   ZeekValWrapper(v8::Isolate* isolate);
@@ -20,6 +19,9 @@ class ZeekValWrapper {
   // uses below callbacks.
   //
   v8::Local<v8::Value> Wrap(const zeek::ValPtr& vp, int attr_mask = 0);
+
+  // Wrap any zeek::ValPtr as object rather than converting to primitive types.
+  v8::Local<v8::Object> WrapAsObject(const zeek::ValPtr& vp, int attr_mask = 0);
 
   struct Result {
     bool ok;

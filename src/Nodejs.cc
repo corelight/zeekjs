@@ -242,6 +242,41 @@ void Instance::ZeekInvokeCallback(const v8::FunctionCallbackInfo<v8::Value>& arg
 }
 
 //
+// Callback for zeek.as
+//
+// zeek.as(typename, data)
+//
+void Instance::ZeekAsCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  v8::Isolate* isolate = args.GetIsolate();
+
+  // The receiver of zeek.select_fields() is the global zeek object itself.
+  // We can get to the Instance object via the internal field.
+  v8::Local<v8::Object> receiver = args.This();
+  auto field = v8::Local<v8::External>::Cast(receiver->GetInternalField(0));
+  auto instance = static_cast<Instance*>(field->Value());
+
+  if (args.Length() != 2) {
+    isolate->ThrowException(v8_str(isolate, "Expected 2 args"));
+    return;
+  }
+
+  if (!args[0]->IsString()) {
+    isolate->ThrowException(
+        v8::Exception::TypeError(v8_str(isolate, "Expected string as first argument")));
+    return;
+  }
+
+  v8::MaybeLocal<v8::Value> maybe_value =
+      instance->ZeekAs(v8::Local<v8::String>::Cast(args[0]), args[1]);
+
+  // instance->ZeekAs() should have thrown something.
+  if (maybe_value.IsEmpty())
+    return;
+
+  args.GetReturnValue().Set(maybe_value.ToLocalChecked());
+}
+
+//
 // Callback for zeek.select_fields
 //
 // zeek.select_fields(obj, attr_mask)
@@ -399,6 +434,49 @@ v8::Local<v8::Value> Instance::ZeekInvoke(v8::Local<v8::String> v8_name,
   dprintf("invoke for %s returned: %s", *name_str, type_name.c_str());
 #endif
   return zeek_val_wrapper_->Wrap(ret);
+}
+
+namespace {
+// Uhm, uhm, uhm... the base types don't have identifiers and
+// I haven't found a nice lookup table to get access to them.
+zeek::TypePtr try_name_to_basetype(const std::string& name) {
+  for (int i = 0; i <= zeek::TYPE_ERROR; i++) {
+    auto tag = static_cast<zeek::TypeTag>(i);
+    if (name == zeek::type_name(tag)) {
+      return zeek::base_type(tag);
+      break;
+    }
+  }
+  return nullptr;
+}
+}  // namespace
+
+v8::MaybeLocal<v8::Value> Instance::ZeekAs(v8::Local<v8::String> v8_name,
+                                           v8::Local<v8::Value> v8_arg) {
+  std::string name = *v8::String::Utf8Value(isolate_, v8_name);
+  const zeek::detail::IDPtr& id = zeek::id::find(name);
+
+  zeek::TypePtr as_type;
+
+  if (!id)
+    as_type = try_name_to_basetype(name);
+  else
+    as_type = id->GetType();
+
+  if (!as_type) {
+    isolate_->ThrowException(
+        v8_str(isolate_, zeek::util::fmt("'%s' is not a Zeek type", name.c_str())));
+    return {};
+  }
+
+  ZeekValWrapper::Result result = zeek_val_wrapper_->ToZeekVal(v8_arg, as_type);
+  if (!result.ok) {
+    isolate_->ThrowException(
+        v8::Exception::TypeError(v8_str(isolate_, result.error.c_str())));
+    return {};
+  }
+
+  return {WrapAsObject(result.val)};
 }
 
 // Common arguments for zeek.on and zeek.hook.
@@ -563,6 +641,13 @@ void Instance::AddZeekObject(v8::Local<v8::Object> exports,
   zeek_obj
       ->Set(context, invoke_str,
             zeek_invoke_tmpl->GetFunction(context).ToLocalChecked())
+      .Check();
+
+  // as
+  v8::Local<v8::String> as_str = v8_str_intern(isolate, "as");
+  v8::Local<v8::FunctionTemplate> zeek_as_tmpl =
+      v8::FunctionTemplate::New(isolate, ZeekAsCallback);
+  zeek_obj->Set(context, as_str, zeek_as_tmpl->GetFunction(context).ToLocalChecked())
       .Check();
 
   // select_fields

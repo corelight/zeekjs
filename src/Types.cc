@@ -105,6 +105,15 @@ ZeekValWrapper::ZeekValWrapper(v8::Isolate* isolate) : isolate_(isolate) {
   toJSON_str_.Reset(isolate, v8_str_intern("toJSON"));
 }
 
+v8::Local<v8::Object> ZeekValWrapper::WrapAsObject(const zeek::ValPtr& vp,
+                                                   int attr_mask) {
+  v8::Local<v8::Context> context = isolate_->GetCurrentContext();
+  v8::Local<v8::ObjectTemplate> tmpl = record_template_.Get(isolate_);
+  v8::Local<v8::Object> obj = tmpl->NewInstance(context).ToLocalChecked();
+  ZeekValWrap* wrap = ZeekValWrap::Make(isolate_, this, obj, vp->Ref(), attr_mask);
+  return wrap->GetHandle(isolate_);
+}
+
 v8::Local<v8::Value> ZeekValWrapper::Wrap(const zeek::ValPtr& vp, int attr_mask) {
   v8::Local<v8::Context> context = isolate_->GetCurrentContext();
 
@@ -164,10 +173,7 @@ v8::Local<v8::Value> ZeekValWrapper::Wrap(const zeek::ValPtr& vp, int attr_mask)
       return obj;
     }
     case zeek::TYPE_RECORD: {
-      v8::Local<v8::ObjectTemplate> tmpl = record_template_.Get(isolate_);
-      v8::Local<v8::Object> obj = tmpl->NewInstance(context).ToLocalChecked();
-      ZeekValWrap* wrap = ZeekValWrap::Make(isolate_, this, obj, vp->Ref(), attr_mask);
-      return wrap->GetHandle(isolate_);
+      return WrapAsObject(vp, attr_mask);
     }
 
     case zeek::TYPE_VECTOR: {
@@ -301,7 +307,7 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
     ZeekValWrap* zeek_val_wrap = nullptr;
     if (Unwrap(isolate_, obj, &zeek_val_wrap)) {
       zeek::Val* vp = zeek_val_wrap->GetVal();
-      if (vp->GetType()->Tag() == type_tag) {
+      if (type_tag == zeek::TYPE_ANY || vp->GetType()->Tag() == type_tag) {
         wrap_result.val = {zeek::NewRef{}, vp};
         return wrap_result;
       }
@@ -570,6 +576,9 @@ void ZeekValWrapper::ZeekTableGetter(v8::Local<v8::Name> property,
   v8::Local<v8::Object> receiver = info.This();
   auto wrap =
       static_cast<ZeekValWrap*>(receiver->GetAlignedPointerFromInternalField(0));
+  if (wrap->GetVal()->GetType()->Tag() != zeek::TYPE_TABLE)
+    return;
+
   auto tval = static_cast<zeek::TableVal*>(wrap->GetVal());
 
   v8::String::Utf8Value arg(isolate, property);
@@ -817,6 +826,9 @@ void ZeekValWrapper::ZeekRecordGetter(v8::Local<v8::Name> property,
   v8::Local<v8::Object> receiver = info.This();
   auto wrap =
       static_cast<ZeekValWrap*>(receiver->GetAlignedPointerFromInternalField(0));
+  if (wrap->GetVal()->GetType()->Tag() != zeek::TYPE_RECORD)
+    return;
+
   auto rval = static_cast<zeek::RecordVal*>(wrap->GetVal());
 
   v8::String::Utf8Value arg(isolate, property);

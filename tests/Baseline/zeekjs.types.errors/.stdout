@@ -6,9 +6,9 @@ Caught it: Wrong number of parameters. 0 provided, 1 required, 1 total
 Too many arguments
 Caught it: Wrong number of parameters. 3 provided, 1 required, 1 total
 Missing ts key in object
-Caught it: Unable to convert JS value '[object Object]' of type object to Zeek type record (missing property ts for record type EventReceiver::MyRecord)
+Caught it: missing property ts for record type EventReceiver::MyRecord
 ts can not be converted to timestamp
-Caught it: Unable to convert JS value '[object Object]' of type object to Zeek type record (Error for field ts: Unable to convert JS value 'not a timestamp' of type string to Zeek type time)
+Caught it: Error for field ts: Unable to convert JS value 'not a timestamp' of type string to Zeek type time
 can not convert to count
 Caught it: Unable to convert JS value 'scramble' of type string to Zeek type count
 pass an object instead of an array

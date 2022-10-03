@@ -95,6 +95,12 @@ zeek.hook('zeek_init', function() {
   } catch (error) {
     console.log(`Caught: ${error}`);
   }
+
+  try {
+    zeek.invoke('test_triple_string_table', [{x: 'x'}]);
+  } catch (error) {
+    console.log(`Caught: ${error}`);
+  }
 });
 @TEST-END-FILE
 
@@ -105,6 +111,10 @@ export {
     string_field_optional: string &optional;
   };
 
+  type triple_string_table: table[string, string] of string;
+
+  global test_triple_string_table: function(t: triple_string_table);
+
   global s2c_t: table[string] of count;
   global s2r_t: table[string] of MyRecord;
   global a2s_t: table[addr] of string;
@@ -112,6 +122,10 @@ export {
   global sn2a_t: table[subnet] of addr;
   global s2vr_t: table[string] of vector of MyRecord;
   global ss2c_t: table[string, string] of count;
+}
+
+function test_triple_string_table(t: triple_string_table) {
+  print fmt("test_string_string_table %s %s", |t|, t);
 }
 
 event zeek_done() {

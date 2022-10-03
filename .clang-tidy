@@ -9,6 +9,7 @@ Checks: '-*,
 
          -modernize-use-trailing-return-type,
          -bugprone-easily-swappable-parameters,
+         -clang-diagnostic-unused-command-line-argument,
          '
 
 WarningsAsErrors: '*'

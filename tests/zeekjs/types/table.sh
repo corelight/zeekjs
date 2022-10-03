@@ -38,7 +38,18 @@ zeek.hook('zeek_init', function() {
   ];
   s2vr_t['records2'] = [{string_field: 'rec2-1'}];
 
+  // Convert an object to a Zeek table
+  let string_tbl_obj = {
+    field1: 'string field1',
+    field2: 'string field2'
+  };
+  zeek.invoke('test_string_table', [string_tbl_obj]);
 
+  let addr_tbl_obj = {
+    '192.168.0.1': '192.168.0.1',
+    '10.0.0.23': '10.0.0.23',
+  };
+  zeek.invoke('test_string_table', [addr_tbl_obj]);
 });
 @TEST-END-FILE
 
@@ -49,12 +60,23 @@ export {
     string_field_optional: string &optional;
   };
 
+  global test_string_table: function(t: table[string] of string);
+  global test_addr_table: function(t: table[addr] of addr);
+
   global s2c_t: table[string] of count;
   global s2r_t: table[string] of MyRecord;
   global a2s_t: table[addr] of string;
   global c2c_t: table[count] of count;
   global sn2a_t: table[subnet] of addr;
   global s2vr_t: table[string] of vector of MyRecord;
+}
+
+function test_string_table(t: table[string] of string) {
+  print fmt("test_string_table %s %s", |t|, t);
+}
+
+function test_addr_table(t: table[addr] of addr) {
+  print fmt("test_addr_table %s %s", |t|, t);
 }
 
 event zeek_done() {

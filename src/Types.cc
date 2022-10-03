@@ -485,6 +485,77 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
     }
 
     return wrap_result;
+  } else if (type_tag == zeek::TYPE_TABLE) {
+    zeek::TableTypePtr table_type = {zeek::NewRef{}, type->AsTableType()};
+    const std::vector<zeek::TypePtr>& itypes = table_type->GetIndexTypes();
+    // No support for compund indices.
+    if (itypes.size() != 1) {
+      wrap_result.ok = false;
+      wrap_result.error = zeek::util::fmt("Unsupported index size %lu for type %s",
+                                          itypes.size(), type->GetName().c_str());
+      return wrap_result;
+    }
+
+    if (table_type->IsSet()) {
+      if (v8_val->IsArray() || v8_val->IsSet()) {
+        zeek::TableValPtr table_val = zeek::make_intrusive<zeek::TableVal>(table_type);
+        v8::Local<v8::Array> v8_array;
+        if (v8_val->IsArray())
+          v8_array = v8::Local<v8::Array>::Cast(v8_val);
+        else
+          v8_array = v8::Local<v8::Set>::Cast(v8_val)->AsArray();
+
+        // Okay we have an array, just convert it over to index type of the set.
+        for (uint32_t i = 0; i < v8_array->Length(); i++) {
+          ZeekValWrapper::Result index_result =
+              ToZeekVal(v8_array->Get(context, i).ToLocalChecked(), itypes[0]);
+
+          if (!index_result.ok) {
+            wrap_result.ok = false;
+            wrap_result.error =
+                zeek::util::fmt("Error with array element at index %u: %s", i,
+                                index_result.error.c_str());
+            return wrap_result;
+          }
+          table_val->Assign(index_result.val, zeek::Val::nil);
+        }
+        wrap_result.val = std::move(table_val);
+        return wrap_result;
+      }
+    } else {
+      if (v8_val->IsObject()) {
+        zeek::TableValPtr table_val = zeek::make_intrusive<zeek::TableVal>(table_type);
+        zeek::TypePtr yield_type = type->Yield();
+        v8::Local<v8::Object> v8_obj = v8::Local<v8::Object>::Cast(v8_val);
+
+        v8::Local<v8::Array> v8_names =
+            v8_obj->GetOwnPropertyNames(context).ToLocalChecked();
+
+        for (uint32_t i = 0; i < v8_names->Length(); i++) {
+          // Property name to Zeek Val
+          v8::Local<v8::Value> key = v8_names->Get(context, i).ToLocalChecked();
+          ZeekValWrapper::Result index_result = ToZeekVal(key, itypes[0]);
+
+          if (!index_result.ok) {
+            wrap_result.ok = false;
+            wrap_result.error = index_result.error;
+            return wrap_result;
+          }
+
+          ZeekValWrapper::Result value_result =
+              ToZeekVal(v8_obj->Get(context, key).ToLocalChecked(), yield_type);
+
+          if (!value_result.ok) {
+            wrap_result.ok = false;
+            wrap_result.error = value_result.error;
+            return wrap_result;
+          }
+          table_val->Assign(index_result.val, value_result.val);
+        }
+        wrap_result.val = std::move(table_val);
+        return wrap_result;
+      }
+    }
   } else if (type_tag == zeek::TYPE_RECORD) {
     // Take the record type and attempt to assign all non-optional
     // fields from the provided Javascript object.
@@ -521,7 +592,7 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
           wrap_result.ok = false;
           wrap_result.error = std::string("missing property ") + field_decl->id;
           wrap_result.error += " for record type " + rt->GetName();
-          break;
+          return wrap_result;
         }
 
         ZeekValWrapper::Result field_result =
@@ -531,20 +602,14 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
           wrap_result.error += "Error for field ";
           wrap_result.error += field_decl->id;
           wrap_result.error += ": " + field_result.error;
-          break;
+          return wrap_result;
         }
 
         record_val->Assign(i, field_result.val);
       }
 
-      if (wrap_result.ok) {
-        wrap_result.val = record_val;
-        return wrap_result;
-      }
-// Please clang-tidy so it sees a delete of record_val.ptr_
-#ifdef __clang_analyzer__
-      delete record_val.release();
-#endif
+      wrap_result.val = std::move(record_val);
+      return wrap_result;
     }
   }
 
@@ -559,7 +624,7 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
   std::string error = "Unable to convert JS value '";
   error += *utf8_value + std::string("' of type ") + *utf8_type +
            std::string(" to Zeek type ");
-  error += zeek::type_name(type_tag);
+  error += (type->IsSet() ? "set" : zeek::type_name(type_tag));
   if (!wrap_result.error.empty()) {
     error += " (";
     error += wrap_result.error;

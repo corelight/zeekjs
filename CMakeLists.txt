@@ -7,7 +7,7 @@ include(ZeekPlugin)
 
 find_package(Nodejs REQUIRED)
 
-include_directories(BEFORE ${NODEJS_INCLUDE_DIR} ${UV_INCLUDE_DIR})
+include_directories(BEFORE ${NODEJS_INCLUDE_DIR} ${UV_INCLUDE_DIR} ${V8_CONFIG_INCLUDE_DIR})
 
 zeek_plugin_begin(Corelight ZeekJS)
 

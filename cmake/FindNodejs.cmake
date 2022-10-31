@@ -34,6 +34,18 @@ find_path(UV_INCLUDE_DIR
     NAMES uv.h
 )
 
+# Find the v8config.h, prefer to use the one shipped within
+# the node installation.
+find_path(V8_CONFIG_INCLUDE_DIR
+    NAMES v8config.h
+    PATHS ${NODEJS_INCLUDE_DIR}/node
+    NO_DEFAULT_PATH
+)
+
+find_path(V8_CONFIG_INCLUDE_DIR
+    NAMES v8config.h
+)
+
 #
 # libnode.so.83, Fedora 34, node 14.18
 # libnode.so.93, Fedora 35, node 16.13
@@ -62,7 +74,9 @@ find_library(NODEJS_LIBRARY
 find_package_handle_standard_args(Nodejs DEFAULT_MSG
     NODEJS_INCLUDE_DIR
     UV_INCLUDE_DIR
+    V8_CONFIG_INCLUDE_DIR
     NODEJS_LIBRARY
 )
 message(STATUS "     library: ${NODEJS_LIBRARY}")
 message(STATUS "        uv.h: ${UV_INCLUDE_DIR}")
+message(STATUS "  v8config.h: ${V8_CONFIG_INCLUDE_DIR}")

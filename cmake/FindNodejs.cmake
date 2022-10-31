@@ -38,6 +38,7 @@ find_path(UV_INCLUDE_DIR
 # libnode.so.83, Fedora 34, node 14.18
 # libnode.so.93, Fedora 35, node 16.13
 # libnode.so.102, node 17.3.0
+# libnode.so.111, node 19.0.0
 #
 set(nodejs_known_names
     "node"
@@ -46,6 +47,7 @@ set(nodejs_known_names
     "libnode.so.93"
     "libnode.so.102"
     "libnode.so.108"
+    "libnode.so.111"
 )
 
 find_library(NODEJS_LIBRARY

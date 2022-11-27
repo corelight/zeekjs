@@ -14,7 +14,7 @@ RUN dnf install -y \
 
 RUN dnf config-manager --add-repo https://download.opensuse.org/repositories/security:zeek/Fedora_36/security:zeek.repo
 
-ENV ZEEK_VERSION='5.0.*'
+ENV ZEEK_VERSION='5.1.*'
 
 RUN dnf install -y \
   zeek-btest-$ZEEK_VERSION \

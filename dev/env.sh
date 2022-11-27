@@ -10,5 +10,5 @@ if ! command -v zeek-cut > /dev/null; then
 fi
 
 export ASAN_OPTIONS="abort_on_error=1 detect_odr_violation=0"
-export LSAN_OPTIONS=suppressions=$ZEEKJS_HOME/dev/nodejs.lsan.supp
+export LSAN_OPTIONS=suppressions=$ZEEKJS_HOME/tests/Files/nodejs.lsan.supp
 export ZEEK_PLUGIN_PATH=$ZEEKJS_HOME/build

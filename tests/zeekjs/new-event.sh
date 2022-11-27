@@ -3,6 +3,7 @@
 # @TEST-REQUIRES: zeek -e 'record_fields(connection)["service_violation"]'
 # @TEST-EXEC: zeek -r $TRACES/dns-http-https.pcap ./new-event.js | grep -v -F '"type_name"'
 # @TEST-EXEC: btest-diff .stdout
+# @TEST-GROUP: smoke
 
 @TEST-START-FILE new-event.js
 // Interpret BigInt as simple number - do not use this unless

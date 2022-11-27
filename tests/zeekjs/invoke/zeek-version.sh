@@ -1,6 +1,7 @@
 # @TEST-DOC: Invoke zeek_version in Zeek, pass it over to Javascript and ensure it gets the same version using zeek.invoke().
 # @TEST-EXEC: zeek ./check-version.zeek ./check-version.js
 # @TEST-EXEC: btest-diff .stdout
+# @TEST-GROUP: smoke
 
 @TEST-START-FILE ./check-version.js
 // check_version handler, invoked by Zeek.

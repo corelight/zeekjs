@@ -1,6 +1,5 @@
 # @TEST-DOC: Run a http server and client using two separate zeek processes. Expect 100 requests to take less than a few seconds.
 # @TEST-EXEC: bash %INPUT
-# @TEST-GROUP: smoke
 set -ux
 CWD=$(pwd)
 

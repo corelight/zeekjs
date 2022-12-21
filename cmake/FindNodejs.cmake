@@ -2,17 +2,16 @@
 #
 # Usage of this module as follows:
 #
-#     find_package(Nodejs)
+# find_package(Nodejs)
 #
 # Variables used by this module, they can change the default behaviour and
 # need to be set before calling find_package:
 #
-#  NODEJS_ROOT_DIR   Set this variable to the root installation of
-#                    Node.js if the module has problems finding
-#                    the proper installation path.
+# NODEJS_ROOT_DIR   Set this variable to the root installation of
+# Node.js if the module has problems finding
+# the proper installation path.
 #
 include(FindPackageHandleStandardArgs)
-
 
 find_path(NODEJS_INCLUDE_DIR
     NAMES node/node.h
@@ -53,22 +52,18 @@ find_path(V8_CONFIG_INCLUDE_DIR
 # libnode.so.111, node 19.0.0
 #
 set(nodejs_known_names
-    "node"
-    "libnode.so"
-    "libnode.so.83"
-    "libnode.so.93"
-    "libnode.so.102"
-    "libnode.so.108"
-    "libnode.so.111"
+    "libnode.so" "libnode.dylib"
+    "libnode.so.83" "libnode.83.dylib"
+    "libnode.so.93" "libnode.93.dylib"
+    "libnode.so.102" "libnode.102.dylib"
+    "libnode.so.108" "libnode.108.dylib"
+    "libnode.so.111" "libnode.111.dylib"
 )
 
 find_library(NODEJS_LIBRARY
     NAMES ${nodejs_known_names}
     PATHS ${NODEJS_ROOT_DIR}/lib
     NO_DEFAULT_PATH
-)
-find_library(NODEJS_LIBRARY
-    NAMES ${nodejs_known_names}
 )
 
 find_package_handle_standard_args(Nodejs DEFAULT_MSG

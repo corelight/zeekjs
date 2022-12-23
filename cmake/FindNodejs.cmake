@@ -2,16 +2,17 @@
 #
 # Usage of this module as follows:
 #
-# find_package(Nodejs)
+#     find_package(Nodejs)
 #
 # Variables used by this module, they can change the default behaviour and
 # need to be set before calling find_package:
 #
-# NODEJS_ROOT_DIR   Set this variable to the root installation of
-# Node.js if the module has problems finding
-# the proper installation path.
+#  NODEJS_ROOT_DIR   Set this variable to the root installation of
+#                    Node.js if the module has problems finding
+#                    the proper installation path.
 #
 include(FindPackageHandleStandardArgs)
+
 
 find_path(NODEJS_INCLUDE_DIR
     NAMES node/node.h
@@ -64,6 +65,9 @@ find_library(NODEJS_LIBRARY
     NAMES ${nodejs_known_names}
     PATHS ${NODEJS_ROOT_DIR}/lib
     NO_DEFAULT_PATH
+)
+find_library(NODEJS_LIBRARY
+    NAMES ${nodejs_known_names}
 )
 
 find_package_handle_standard_args(Nodejs DEFAULT_MSG

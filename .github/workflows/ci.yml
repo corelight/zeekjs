@@ -6,11 +6,14 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        distro: [fedora, fedora-37, debian-bookworm]
     steps:
     - uses: actions/checkout@v2
 
     - name: Check (clang-format, build, btest, clang-tidy)
-      run: docker build -t zeekjs-check -f docker/fedora.Dockerfile .
+      run: docker build -t zeekjs-check-${{ matrix.distro }} -f docker/${{ matrix.distro }}.Dockerfile .
 
   doc:
     runs-on: ubuntu-latest

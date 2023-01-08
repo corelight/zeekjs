@@ -1,4 +1,4 @@
-FROM fedora:36
+FROM fedora:37
 
 # Dependencies required to compile and test ZeekJS on Fedora
 RUN dnf install -y \
@@ -11,7 +11,7 @@ RUN dnf install -y \
   which \
   clang-tools-extra
 
-RUN dnf config-manager --add-repo https://download.opensuse.org/repositories/security:zeek/Fedora_36/security:zeek.repo
+RUN dnf config-manager --add-repo https://download.opensuse.org/repositories/security:zeek/Fedora_37/security:zeek.repo
 
 ENV ZEEK_VERSION='5.1.*'
 
@@ -33,6 +33,9 @@ COPY . .
 RUN make check-clang-format
 
 RUN rm -rf build && ./configure && make && ( cd tests && btest -A -d -c btest.cfg ) && make install
+
+# Run clang-tidy now - this may take a while.
+RUN make check-clang-tidy
 
 RUN zeek -N Corelight::ZeekJS
 RUN zeek ./examples/hello.js

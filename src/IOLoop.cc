@@ -56,9 +56,9 @@ PipeSource::~PipeSource() {
 
 void PipeSource::Process() {
   char c;
-  ssize_t r;
-  if ((r = read(notify_pipe_[0], &c, 1)) != 1) {
-    eprintf("r=%zd error=%s", r, strerror(errno));
+  ssize_t r = read(notify_pipe_[0], &c, 1);
+  if (r != 1) {
+    eprintf("PipeSource read failed: r=%zd error=%s", r, strerror(errno));
     throw std::runtime_error("Failed to read notification");
   }
   instance_->Process();
@@ -69,9 +69,9 @@ int PipeSource::GetFd() {
 }
 
 void PipeSource::Notify() {
-  ssize_t r;
-  if ((r = write(notify_pipe_[1], "n", 1) != 1)) {
-    eprintf("r=%zd error=%s", r, strerror(errno));
+  ssize_t r = write(notify_pipe_[1], "n", 1);
+  if (r != 1) {
+    eprintf("PipeSource write failed: r=%zd error=%s", r, strerror(errno));
     throw std::runtime_error("Failed to send notification");
   }
 }

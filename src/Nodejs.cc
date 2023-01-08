@@ -797,11 +797,19 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
     args.emplace_back("--trace-uncaught");
   }
 
+#if NODE_VERSION_AT_LEAST(18, 0, 0)
+  auto flags = node::ProcessInitializationFlags::kLegacyInitializeNodeWithArgsBehavior;
+  auto result = node::InitializeOncePerProcess(args, flags);
+  int r = result->exit_code();
+#else
   int r = node::InitializeNodeWithArgs(&args, &exec_args, &errors);
+#endif
+
   if (r != 0) {
-    eprintf("InitializeNodeWithArgs() failed: %d\n", r);
+    eprintf("Node initialization failed: %d\n", r);
     return false;
   }
+
   dprintf("Node initialized. Compiled with %s", NODE_VERSION);
 
   node_platform_ = node::MultiIsolatePlatform::Create(thread_pool_size);

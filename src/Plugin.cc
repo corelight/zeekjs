@@ -27,7 +27,7 @@ zeek::plugin::Configuration Plugin::Configure() {
   config.description = "Experimental JavaScript support for Zeek";
   config.version.major = 0;
   config.version.minor = 4;
-  config.version.patch = 2;
+  config.version.patch = 3;
   return config;
 }
 

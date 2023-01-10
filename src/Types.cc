@@ -860,20 +860,24 @@ void ZeekValWrapper::ZeekTableEnumerator(
   }
   auto size = static_cast<int>(tval->Size());
 
+  zeek::TableTypePtr tt = tval->GetType<zeek::TableType>();
+
 #ifdef DEBUG
-  zeek::TypeTag tag = tval->GetType()->Tag();
-  dprintf("tval tag %d/%s set=%d size=%d", tag, zeek::type_name(tag),
-          tval->GetType()->IsSet(), size);
+  zeek::TypeTag tag = tt->Tag();
+  dprintf("tval tag %d/%s set=%d size=%d", tag, zeek::type_name(tag), tt->IsSet(),
+          size);
 #endif
 
   // Let's shortcut here, only support ToPureListVal, anything else
   // a bit crazy.
-  zeek::ListValPtr lv = tval->ToPureListVal();
-  if (!lv) {
+  const std::vector<zeek::TypePtr>& tl = tt->GetIndices()->GetTypes();
+
+  if (tl.size() != 1) {
     eprintf("Wrapping multi index table is not supported.");
     return;
   }
 
+  zeek::ListValPtr lv = tval->ToPureListVal();
   v8::Local<v8::Array> array = v8::Array::New(isolate, size);
   for (int i = 0; i < size; i++) {
     // zeek::TypeTag tag = lv->Idx(i)->GetType()->Tag();

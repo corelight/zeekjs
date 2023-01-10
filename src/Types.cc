@@ -409,7 +409,6 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
           plugin::Corelight_ZeekJS::compat::DoubleVal_New(result.ToChecked());
       return wrap_result;
     }
-
   } else if (type_tag == zeek::TYPE_TIME) {
     if (v8_val->IsNumber()) {
       double ts = v8_val->NumberValue(context).ToChecked();
@@ -420,7 +419,12 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
       wrap_result.val = plugin::Corelight_ZeekJS::compat::TimeVal_New(ts);
       return wrap_result;
     }
-
+  } else if (type_tag == zeek::TYPE_INTERVAL) {
+    if (v8_val->IsNumber()) {
+      double interval = v8_val->NumberValue(context).ToChecked();
+      wrap_result.val = plugin::Corelight_ZeekJS::compat::IntervalVal_New(interval);
+      return wrap_result;
+    }
   } else if (type_tag == zeek::TYPE_STRING) {
     if (v8_val->IsString()) {
       // TODO/XXX: Don't do UTF8 encoding here, just treat it as binary blob.

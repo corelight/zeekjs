@@ -17,6 +17,10 @@ zeek.on('zeek_done', function() {
   zeek.event('zeekjs_test_to_time', ['number', ts / 1000.0]);
   zeek.event('zeekjs_test_to_time', ['date1', d1]);
   zeek.event('zeekjs_test_to_time', ['date2', d2]);
+
+  zeek.event('zeekjs_test_to_interval', ['interval1', 5]);
+  zeek.event('zeekjs_test_to_interval', ['interval2', 5.25]);
+  zeek.event('zeekjs_test_to_interval', ['interval3', 5.2]);
 });
 @TEST-END-FILE
 
@@ -32,5 +36,9 @@ event zeek_init() {
 
 event zeekjs_test_to_time(msg: string, t: time) {
   print(fmt("ZEEK: %s %s (%s)", msg, t, time_to_double(t)));
+}
+
+event zeekjs_test_to_interval(msg: string, i: interval) {
+  print(fmt("ZEEK: %s %s (%s)", msg, i, interval_to_double(i)));
 }
 @TEST-END-FILE

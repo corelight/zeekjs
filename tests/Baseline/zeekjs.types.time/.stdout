@@ -4,3 +4,6 @@ JS: interval: typeof=number i=1.234 json=1.234
 ZEEK: number 1651407414.437566 (1651407414.437566)
 ZEEK: date1 1651407414.437 (1651407414.437)
 ZEEK: date2 1651407414.437 (1651407414.437)
+ZEEK: interval1 5.0 secs (5.0)
+ZEEK: interval2 5.0 secs 250.0 msecs (5.25)
+ZEEK: interval3 5.0 secs 200.0 msecs (5.2)

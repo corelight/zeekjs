@@ -17,6 +17,7 @@ namespace plugin::Corelight_ZeekJS::compat {
 // errors about virtual function calls in constructors...
 #ifdef __clang_analyzer__
 zeek::ValPtr DoubleVal_New(double x);
+zeek::ValPtr IntervalVal_New(double x);
 zeek::ValPtr TimeVal_New(double x);
 
 #else
@@ -26,6 +27,10 @@ inline zeek::ValPtr DoubleVal_New(double x) {
 
 inline zeek::ValPtr TimeVal_New(double x) {
   return ::zeek::make_intrusive< ::zeek::TimeVal>(x);
+}
+
+inline zeek::ValPtr IntervalVal_New(double x) {
+  return ::zeek::make_intrusive< ::zeek::IntervalVal>(x);
 }
 #endif
 

@@ -98,6 +98,9 @@ class Instance {
     return zeek_val_wrapper_->Unwrap(GetIsolate(), obj, wrap);
   }
 
+  // The "process" object.
+  v8::Local<v8::Object> GetProcessObj() { return process_obj_.Get(GetIsolate()); }
+
   friend class EventHandler;
   friend class HookHandler;
 
@@ -134,6 +137,11 @@ class Instance {
 
   // Marker for HookDrainEvents() whether instance->Process() should be called.
   bool js_called_ = false;
+
+  // Handle to the Node.js "process" object. Used for top-level CallbackScope
+  // invocations. This is the object that Node.js uses for CheckImmediate and
+  // RunTimers, so lets do that, too.
+  v8::Global<v8::Object> process_obj_;
 };
 
 class EventHandler : public plugin::Corelight_ZeekJS::Js::EventHandler {

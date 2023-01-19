@@ -21,3 +21,6 @@ leak:v8::internal::StoreIC::Store
 leak:v8::internal::TorqueGeneratedInterceptorInfo
 leak:v8::internal::UnoptimizedCompilationJob::FinalizeJob
 leak:v8::internal::baseline::BaselineBatchCompiler::CompileBatch
+leak:zeek::Connection::GetVal
+leak:zeek::RecordVal::Assign
+leak:uv__reallocf

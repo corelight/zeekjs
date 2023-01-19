@@ -97,7 +97,9 @@ static v8::Local<v8::Value> callFunction(v8::Isolate* isolate,
   // TODO: Who's the receiver if the function is bound? Shouldn't it be
   //       the object the function is bounded to?
   //       https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_objects/Function/bind
-  v8::Local<v8::Value> receiver = context->Global();
+  v8::Local<v8::Object> receiver = context->Global();
+  node::Environment* env = node::GetCurrentEnvironment(context);
+  node::CallbackScope callback_scope(env, instance->GetProcessObj(), {0, 0});
 
   instance->SetJsCalled();
 
@@ -891,7 +893,14 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
 
   node::AddLinkedBinding(node_environment_.get(), "zeekjs", RegisterModule, this);
 
-  return ExecuteAndWaitForInit(context, GetIsolate(), main_script_source);
+  if (!ExecuteAndWaitForInit(context, GetIsolate(), main_script_source))
+    return false;
+
+  auto process = v8::Local<v8::Object>::Cast(
+      context->Global()->Get(context, v8_str(isolate_, "process")).ToLocalChecked());
+  process_obj_.Reset(isolate_, process);
+
+  return true;
 }
 
 // Emit process 'beforeExit'
@@ -985,10 +994,18 @@ inline bool operator==(const UvHandle& l, const UvHandle& r) {
 static void collectUvHandles(uv_handle_t* h, void* arg) {
   auto handles = static_cast<std::vector<UvHandle>*>(arg);
 
+#define NO_ZEEKJS_LOOP_DEBUG
+
   int fd = -1;
   uv_fileno(h, &fd);
-  if (fd < 0)
+  if (fd < 0) {
+#ifdef ZEEKJS_LOOP_DEBUG
+    uv_handle_type t = uv_handle_get_type(h);
+    const char* type_name = uv_handle_type_name(t);
+    dprintf("Bad fd? h=%p %s fd=%d active=%d", h, type_name, fd, uv_is_active(h));
+#endif
     return;
+  }
 
 #ifdef ZEEKJS_LOOP_DEBUG
   uv_handle_type t = uv_handle_get_type(h);
@@ -1018,7 +1035,10 @@ void Instance::Process() {
   v8::Isolate* isolate = GetIsolate();
   v8::Isolate::Scope isolate_scope(isolate);
   v8::HandleScope handle_scope(isolate);
-  v8::Context::Scope context_scope(isolate->GetCurrentContext());
+  v8::Local<v8::Context> context = isolate->GetCurrentContext();
+  v8::Context::Scope context_scope(context);
+  node::Environment* env = node::GetCurrentEnvironment(context);
+  node::CallbackScope callback_scope(env, GetProcessObj(), {0, 0});
   v8::SealHandleScope seal(isolate);
 
   // XXX: This is hard to understand.

@@ -12,8 +12,8 @@ function my_zeek_init() {
   throw "Exception in my_zeek_init()";
 }
 
-zeek.on('zeek_init', my_zeek_init);
-zeek.on('zeek_init', () => { throw "Anonymous"; })
+zeek.on('zeek_init', {priority: 2}, () => { throw "Anonymous"; })
+zeek.on('zeek_init', {priority: 1}, my_zeek_init);
 
 zeek.on('zeek_done', () => {
   a();

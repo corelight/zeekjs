@@ -9,6 +9,7 @@ jobs:
     strategy:
       matrix:
         distro:
+          - ubuntu-2210
           - fedora-37
           - fedora-37-nightly
           - debian-bookworm

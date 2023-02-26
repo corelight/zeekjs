@@ -799,7 +799,7 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
     args.emplace_back("--trace-uncaught");
   }
 
-#if NODE_VERSION_AT_LEAST(18, 0, 0)
+#if NODE_VERSION_AT_LEAST(18, 11, 0)
   auto flags = node::ProcessInitializationFlags::kLegacyInitializeNodeWithArgsBehavior;
   auto result = node::InitializeOncePerProcess(args, flags);
   int r = result->exit_code();

@@ -15,9 +15,10 @@
 [4] 2 RESULT 200
 [4] 3 DATA Thanks for request number 4 to /ssl
 [4] 4 END
-[5] 1 SENDING request for conn
+[4] Terminate timeout
+[5] 1 SENDING request for reporter
 [5] 2 RESULT 200
-[5] 3 DATA Thanks for request number 5 to /conn
+[5] 3 DATA Thanks for request number 5 to /reporter
 [5] 4 END
 [6] 1 SENDING request for conn
 [6] 2 RESULT 200
@@ -27,3 +28,7 @@
 [7] 2 RESULT 200
 [7] 3 DATA Thanks for request number 7 to /conn
 [7] 4 END
+[8] 1 SENDING request for conn
+[8] 2 RESULT 200
+[8] 3 DATA Thanks for request number 8 to /conn
+[8] 4 END

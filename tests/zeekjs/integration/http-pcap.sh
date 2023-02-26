@@ -11,7 +11,7 @@ CWD=$(pwd)
 
 (mkdir .background && cd .background && btest-bg-run zeek-http zeek ${CWD}/http-server.js)
 
-zeek --pseudo-realtime -r $TRACES/dns-http-https.pcap ./http-export.js | tee -a http-export.log
+zeek --pseudo-realtime -r $TRACES/dns-http-https.pcap ./http-export.js exit_only_after_terminate=T | tee -a http-export.log
 res=$?
 
 (cd .background && btest-bg-wait 1)
@@ -25,13 +25,15 @@ var counter = 0;
 
 const server = http.createServer((req, resp) => {
   ++counter;
-  console.log(`[${counter}] HTTP REQUEST ${req.method} ${req.url}`);
-  resp.end(`Thanks for request number ${counter} to ${req.url}`);
+  const rc = counter;
+  console.log(`[${rc}] HTTP REQUEST ${req.method} ${req.url}`);
+  resp.end(`Thanks for request number ${rc} to ${req.url}`);
 });
 
 server.listen(3000);
 @TEST-END-FILE
 
+# Naive HTTP exporter doing one request per log entry.
 @TEST-START-FILE http-export.js
 const http = require('http');
 
@@ -76,5 +78,24 @@ zeek.hook('Log::log_stream_policy', {priority: -1000}, function(rec, log_id) {
   sendit(flat_rec);
 
   return false;
+});
+
+// Primitive keep-alive timer based on incoming packets.
+// This would be nicer via net_done(), but that's not triggered
+// when exit_only_after_terminate=T. Need pcap_done() or so.
+var last_packet_timeout = null;
+var timer = 0;
+zeek.on('raw_packet', (hdr) => {
+  if (last_packet_timeout !== null) {
+    // console.log('JS: clearing', last_packet_timeout);
+    clearTimeout(last_packet_timeout)
+  }
+
+  ++timer;
+  const tt = timer;
+  last_packet_timeout = setTimeout(() => {
+    console.log(`[${counter}] Terminate timeout`);
+    zeek.invoke('terminate');
+  }, 1000);
 });
 @TEST-END-FILE

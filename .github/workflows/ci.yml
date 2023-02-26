@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        distro: [fedora, fedora-37, debian-bookworm]
+        distro: [fedora-37, debian-bookworm]
     steps:
     - uses: actions/checkout@v2
 

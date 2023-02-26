@@ -45,4 +45,4 @@ check:
 	$(DOCKER) build -t zeekjs-check -f ./docker/fedora-37.Dockerfile .
 
 check-nightly:
-	$(DOCKER) build --build-arg STAMP=$(shell date +%Y-%m-%d) -t zeekjs-check-nightly -f ./docker/fedora-nightly.Dockerfile .
+	$(DOCKER) build --build-arg STAMP=$(shell date +%Y-%m-%d) -t zeekjs-check-nightly -f ./docker/fedora-37-nightly.Dockerfile .

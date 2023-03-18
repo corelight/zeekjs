@@ -45,12 +45,12 @@ export {
 	) &redef;
 
 	## Vector of filenames to compile/execute after the bootstrap file.
-	option files: vector of string = {} &redef;
+	const files: vector of string = {} &redef;
 
 	## Be very conservative.
-	option initial_heap_size_in_bytes: count = 64 * 1024 * 1024;
-	option maximum_heap_size_in_bytes: count = 128 * 1024 * 1024;
-	option thread_pool_size: count = 4;
+	const initial_heap_size_in_bytes: count = 64 * 1024 * 1024 &redef;
+	const maximum_heap_size_in_bytes: count = 128 * 1024 * 1024 &redef;
+	const thread_pool_size: count = 4 &redef;
 
 	## Node.js default behavior is to exit a process on uncaught exceptions.
 	## Specifically exceptions in timer callbacks are problematic as a throwing
@@ -59,5 +59,5 @@ export {
 	## Set this to F in order to just keep going when errors happen. Note,
 	## if you see any Uncaught errors, this likely means the Javascript
 	## state is corrupt.
-	option exit_on_uncaught_exceptions: bool = T;
+	const exit_on_uncaught_exceptions: bool = T &redef;
 }

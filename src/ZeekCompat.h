@@ -9,6 +9,12 @@
 //                         SetLocationInfo(&detail::start_location,
 //                         &detail::end_location);
 
+#if __has_include(<zeek/zeek-version.h>)
+#include <zeek/zeek-version.h>
+#else
+#include <zeek/zeek-config.h>
+#endif
+
 #include <zeek/Val.h>
 
 namespace plugin::Corelight_ZeekJS::compat {

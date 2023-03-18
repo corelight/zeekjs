@@ -12,10 +12,10 @@ include_directories(BEFORE ${NODEJS_INCLUDE_DIR} ${UV_INCLUDE_DIR} ${V8_CONFIG_I
 zeek_plugin_begin(Corelight ZeekJS)
 
 if ( ZEEK_PLUGIN_INTERNAL_BUILD )
-  # This is a hack for the current bug in zeek with doing built in plugins
-  set(zeekdeps ${zeekdeps} ${NODEJS_LIBRARY} PARENT_SCOPE)
+    # This is a hack for the current bug in zeek with doing built in plugins
+    set(zeekdeps ${zeekdeps} ${NODEJS_LIBRARIES} PARENT_SCOPE)
 else()
-  zeek_plugin_link_library("${NODEJS_LIBRARY}")
+    zeek_plugin_link_library("${NODEJS_LIBRARIES}")
 endif()
 
 #
@@ -28,7 +28,7 @@ endif()
 # https://github.com/k-nuth/infrastructure/pull/14/files
 #
 if ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 9))
-     zeek_plugin_link_library(stdc++fs)
+    zeek_plugin_link_library(stdc++fs)
 endif()
 
 zeek_plugin_cc(src/IOLoop.cc src/Nodejs.cc src/Plugin.cc src/Types.cc)

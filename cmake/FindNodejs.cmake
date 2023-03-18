@@ -14,14 +14,17 @@
 include(FindPackageHandleStandardArgs)
 
 
-find_path(NODEJS_INCLUDE_DIR
-    NAMES node/node.h
-    HINTS ${NODEJS_ROOT_DIR}/include
-    NO_DEFAULT_PATH
-)
-find_path(NODEJS_INCLUDE_DIR
-    NAMES node/node.h
-)
+if ( NODEJS_ROOT_DIR )
+    find_path(NODEJS_INCLUDE_DIR
+        NAMES node/node.h
+        HINTS ${NODEJS_ROOT_DIR}/include
+        NO_DEFAULT_PATH
+    )
+else ()
+    find_path(NODEJS_INCLUDE_DIR
+        NAMES node/node.h
+    )
+endif ()
 
 # Find the location of uv.h, prefer to use the one shipped within
 # the node installation.
@@ -61,21 +64,53 @@ set(nodejs_known_names
     "libnode.so.111" "libnode.111.dylib"
 )
 
-find_library(NODEJS_LIBRARY
-    NAMES ${nodejs_known_names}
-    PATHS ${NODEJS_ROOT_DIR}/lib
-    NO_DEFAULT_PATH
-)
-find_library(NODEJS_LIBRARY
-    NAMES ${nodejs_known_names}
-)
+if ( NODEJS_ROOT_DIR )
+    find_library(NODEJS_LIBRARY
+        NAMES ${nodejs_known_names}
+        PATHS ${NODEJS_ROOT_DIR}/lib
+        NO_DEFAULT_PATH
+    )
+else ()
+    find_library(NODEJS_LIBRARY
+        NAMES ${nodejs_known_names}
+    )
+endif ()
 
-find_package_handle_standard_args(Nodejs DEFAULT_MSG
-    NODEJS_INCLUDE_DIR
-    UV_INCLUDE_DIR
-    V8_CONFIG_INCLUDE_DIR
-    NODEJS_LIBRARY
+if ( NODEJS_INCLUDE_DIR )
+    # Extract the version from node_version.h
+    file(STRINGS "${NODEJS_INCLUDE_DIR}/node/node_version.h" NODEJS_MAJOR_VERSION_H  REGEX "^#define NODE_MAJOR_VERSION [0-9]+$")
+    file(STRINGS "${NODEJS_INCLUDE_DIR}/node/node_version.h" NODEJS_MINOR_VERSION_H  REGEX "^#define NODE_MINOR_VERSION [0-9]+$")
+    file(STRINGS "${NODEJS_INCLUDE_DIR}/node/node_version.h" NODEJS_PATCH_VERSION_H  REGEX "^#define NODE_PATCH_VERSION [0-9]+$")
+    string(REGEX REPLACE "^.*NODE_MAJOR_VERSION ([0-9]+)$" "\\1" NODEJS_MAJOR_VERSION "${NODEJS_MAJOR_VERSION_H}")
+    string(REGEX REPLACE "^.*NODE_MINOR_VERSION ([0-9]+)$" "\\1" NODEJS_MINOR_VERSION "${NODEJS_MINOR_VERSION_H}")
+    string(REGEX REPLACE "^.*NODE_PATCH_VERSION ([0-9]+)$" "\\1" NODEJS_PATCH_VERSION "${NODEJS_PATCH_VERSION_H}")
+
+    # If libnode was built with a shared libuv, ensure we add libuv
+    # into NODEJS_LIBRARIES. Specifically when building Zeek with ZeekJS
+    # builtin, libuv needs to be propagated as a link dependency to
+    # the Zeek executable as the plugin is using libuv functionality
+    # directly. Depending on the distro the configuration is in node/config.gypi
+    # or node/config-<arch>.gypi.
+    file(GLOB NODE_CONFIG_GYPIS "${NODEJS_INCLUDE_DIR}/node/config*gypi")
+    foreach ( GYPI ${NODE_CONFIG_GYPIS} )
+        file(STRINGS "${GYPI}" HAVE_SHARED_LIB_UV REGEX "node_shared_libuv.*:.*'true'")
+        if ( HAVE_SHARED_LIB_UV )
+            find_package(LibUV REQUIRED)
+            break ()
+        endif ()
+    endforeach ()
+
+endif ()
+
+set(NODEJS_VERSION "${NODEJS_MAJOR_VERSION}.${NODEJS_MINOR_VERSION}.${NODEJS_PATCH_VERSION}")
+
+find_package_handle_standard_args(Nodejs
+    REQUIRED_VARS NODEJS_INCLUDE_DIR UV_INCLUDE_DIR V8_CONFIG_INCLUDE_DIR NODEJS_LIBRARY
+    VERSION_VAR NODEJS_VERSION
 )
-message(STATUS "     library: ${NODEJS_LIBRARY}")
+set(NODEJS_LIBRARIES ${NODEJS_LIBRARY} ${LibUV_LIBRARIES})
+
+message(STATUS "     version: ${NODEJS_VERSION}")
+message(STATUS "   libraries: ${NODEJS_LIBRARIES}")
 message(STATUS "        uv.h: ${UV_INCLUDE_DIR}")
 message(STATUS "  v8config.h: ${V8_CONFIG_INCLUDE_DIR}")

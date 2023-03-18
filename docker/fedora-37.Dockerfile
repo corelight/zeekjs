@@ -37,5 +37,5 @@ RUN rm -rf build && ./configure && make && ( cd tests && btest -A -d -c btest.cf
 # Run clang-tidy now - this may take a while.
 RUN make check-clang-tidy
 
-RUN zeek -N Corelight::ZeekJS
+RUN zeek -N Zeek::JavaScript
 RUN zeek ./examples/hello.js

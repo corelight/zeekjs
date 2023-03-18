@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 cmake_policy(SET CMP0074 NEW)
 
-project(ZeekPluginZeekJS)
+project(ZeekPluginZeekJavaScript)
 
 include(ZeekPlugin)
 
@@ -9,7 +9,7 @@ find_package(Nodejs REQUIRED)
 
 include_directories(BEFORE ${NODEJS_INCLUDE_DIR} ${UV_INCLUDE_DIR} ${V8_CONFIG_INCLUDE_DIR})
 
-zeek_plugin_begin(Corelight ZeekJS)
+zeek_plugin_begin(Zeek JavaScript)
 
 if ( ZEEK_PLUGIN_INTERNAL_BUILD )
     # This is a hack for the current bug in zeek with doing built in plugins

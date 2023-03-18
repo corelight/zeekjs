@@ -23,7 +23,7 @@ using namespace plugin::Corelight_ZeekJS;
 
 zeek::plugin::Configuration Plugin::Configure() {
   zeek::plugin::Configuration config;
-  config.name = "Corelight::ZeekJS";
+  config.name = "Zeek::JavaScript";
   config.description = "Experimental JavaScript support for Zeek";
   config.version.major = 0;
   config.version.minor = 4;

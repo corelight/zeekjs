@@ -38,5 +38,5 @@ ENV PATH=/opt/zeek/bin:$PATH
 WORKDIR /src/
 COPY . .
 RUN rm -rf build && ./configure && make && ( cd tests && btest -A -d -c btest.cfg ) && make install
-RUN zeek -N Corelight::ZeekJS
+RUN zeek -N Zeek::JavaScript
 RUN zeek ./examples/hello.js

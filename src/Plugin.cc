@@ -78,9 +78,10 @@ void Plugin::InitPostScript() {
   }
 
   // Register Node's loop as an IO source with the iosource mgr
-  loop_io_source = new plugin::Corelight_ZeekJS::IOLoop::LoopSource(nodejs);
-  zeek::iosource_mgr->Register(loop_io_source, false, false);
-  if (!zeek::iosource_mgr->RegisterFd(loop_io_source->GetFd(), loop_io_source)) {
+  loop_io_source =
+      std::make_unique<plugin::Corelight_ZeekJS::IOLoop::LoopSource>(nodejs);
+  zeek::iosource_mgr->Register(loop_io_source.get(), false, false);
+  if (!zeek::iosource_mgr->RegisterFd(loop_io_source->GetFd(), loop_io_source.get())) {
     zeek::reporter->Error("Failed to register LoopSource");
     return;
   }

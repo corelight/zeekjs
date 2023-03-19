@@ -1,7 +1,7 @@
 #pragma once
 
 #include <filesystem>
-#include <unordered_map>
+#include <memory>
 #include <vector>
 
 #include <zeek/Event.h>
@@ -58,7 +58,7 @@ class Plugin : public zeek::plugin::Plugin {
 
   std::vector<std::filesystem::path> load_files;
   plugin::Nodejs::Instance* nodejs;
-  IOLoop::LoopSource* loop_io_source;
+  std::unique_ptr<plugin::Corelight_ZeekJS::IOLoop::LoopSource> loop_io_source;
 };
 
 extern Plugin plugin;

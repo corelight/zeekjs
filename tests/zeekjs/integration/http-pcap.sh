@@ -1,4 +1,5 @@
 # @TEST-DOC: Run a http server receiving log records exported during pcap reading.
+# @TEST-PORT: HTTP_SERVER_PORT
 # @TEST-REQUIRES: zeek -e 'global_ids()["Log::log_stream_policy"]'
 # @TEST-EXEC: bash %INPUT
 # Sort the exporter log due to timing sensitivity
@@ -30,7 +31,7 @@ const server = http.createServer((req, resp) => {
   resp.end(`Thanks for request number ${rc} to ${req.url}`);
 });
 
-server.listen(3000);
+server.listen(parseInt(process.env.HTTP_SERVER_PORT), '127.0.0.1');
 @TEST-END-FILE
 
 # Naive HTTP exporter doing one request per log entry.
@@ -47,7 +48,7 @@ function sendit(rec) {
   ++counter;
   const request_id = counter;
   console.log(`[${request_id}] 1 SENDING request for ${rec._log_id}`);
-  const url = new URL(`http://localhost:3000/${rec._log_id}`);
+  const url = new URL(`http://127.0.0.1:${parseInt(process.env.HTTP_SERVER_PORT)}/${rec._log_id}`);
   const options = {
     method: 'POST',
   };

@@ -1,4 +1,5 @@
 # @TEST-DOC: Run a http server, but start listening from zeek_init() only.
+# @TEST-PORT: HTTP_SERVER_PORT
 # @TEST-EXEC: bash %INPUT
 
 # Server output
@@ -31,7 +32,7 @@ zeek.on('zeek_init', () => {
     resp.end(`${counter}\n`);
   });
 
-  server.listen(3000, '0.0.0.0', 100, () => {
+  server.listen(parseInt(process.env.HTTP_SERVER_PORT), '127.0.0.1', 100, () => {
     console.log('We are listening!');
   });
 });
@@ -40,7 +41,7 @@ zeek.on('zeek_init', () => {
 @TEST-START-FILE http-client.js
 const http = require('http');
 
-const url = new URL('http://localhost:3000');
+const url = new URL(`http://127.0.0.1:${parseInt(process.env.HTTP_SERVER_PORT)}`);
 
 const makeRequest = () => {
   console.log('Making request');

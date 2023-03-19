@@ -1,4 +1,5 @@
 # @TEST-DOC: Run a http server and client using two separate zeek processes. Expect 100 requests to take less than a few seconds.
+# @TEST-PORT: HTTP_SERVER_PORT
 # @TEST-EXEC: bash %INPUT
 set -ux
 CWD=$(pwd)
@@ -22,7 +23,7 @@ const server = http.createServer((req, resp) => {
   resp.end(`${counter}\n`);
 });
 
-server.listen(3000);
+server.listen(parseInt(process.env.HTTP_SERVER_PORT), '127.0.0.1');
 @TEST-END-FILE
 
 @TEST-START-FILE http-client.js
@@ -30,7 +31,7 @@ const http = require('http');
 
 var counter = 1;
 
-const url = new URL('http://localhost:3000');
+const url = new URL(`http://127.0.0.1:${parseInt(process.env.HTTP_SERVER_PORT)}`);
 
 const makeRequest = () => {
   console.log(`making request - ${counter}`);

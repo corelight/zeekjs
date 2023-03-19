@@ -11,6 +11,12 @@ zeek.on('zeek_init', () => {
 
 @TEST-START-FILE config.zeek
 @load base/frameworks/config
+
+# Keep local_nets empty with Zeek 6.0 or later.
+@ifdef ( Site::private_address_space_is_local )
+redef Site::private_address_space_is_local = F;
+@endif
+
 export {
   type subnet_set: set[subnet];
 }

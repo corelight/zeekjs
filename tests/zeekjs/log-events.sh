@@ -1,7 +1,7 @@
 # @TEST-DOC: Basic testing of the common log_ events from the base scripts
 # Only run this tests if ssl_history exists to keep a single baseline.
 # @TEST-REQUIRES: zeek -e 'exit(|get_record_field_comments("SSL::Info$ssl_history")| > 0 ? 0 : 1)'
-# @TEST-EXEC: zeek -r $TRACES/dns-http-https.pcap ./log-events.js
+# @TEST-EXEC: zeek -r $TRACES/dns-http-https.pcap ./log-events.js ./local.zeek
 # SSL history does not exist with Zeek 4
 # @TEST-EXEC: btest-diff .stdout
 
@@ -30,4 +30,11 @@ zeek.on('SSL::log_ssl', function(rec) {
   const log_rec = zeek.flatten(zeek.select_fields(rec, zeek.ATTR_LOG));
   zeek.print(`SSL::log_ssl: ${JSON.stringify(log_rec, null, 2)}`);
 });
+@TEST-END-FILE
+
+@TEST-START-FILE local.zeek
+# Keep local_nets empty with Zeek 6.0 or later.
+@ifdef ( Site::private_address_space_is_local )
+redef Site::private_address_space_is_local = F;
+@endif
 @TEST-END-FILE

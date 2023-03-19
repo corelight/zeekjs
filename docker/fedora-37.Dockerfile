@@ -7,7 +7,6 @@ RUN dnf install -y \
   dnf-plugins-core \
   gcc-c++ \
   nodejs-devel \
-  v8-devel \
   which \
   clang-tools-extra
 

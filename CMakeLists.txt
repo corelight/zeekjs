@@ -3,6 +3,18 @@ cmake_policy(SET CMP0074 NEW)
 
 project(ZeekPluginZeekJavaScript)
 
+# Establish version numbers in config.h
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" VERSION LIMIT_COUNT 1)
+
+string(REGEX REPLACE "[.-]" " " version_numbers ${VERSION})
+separate_arguments(version_numbers)
+list(GET version_numbers 0 VERSION_MAJOR)
+list(GET version_numbers 1 VERSION_MINOR)
+list(GET version_numbers 2 VERSION_PATCH)
+
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/config.h.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/config.h" @ONLY)
+
 include(ZeekPlugin)
 
 find_package(Nodejs REQUIRED)

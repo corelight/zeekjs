@@ -2,6 +2,7 @@
 #include "IOLoop.h"
 #include "Nodejs.h"
 #include "ZeekCompat.h"
+#include "config.h"
 #include "zeekjs.bif.h"
 
 #include <zeek/Expr.h>
@@ -25,9 +26,9 @@ zeek::plugin::Configuration Plugin::Configure() {
   zeek::plugin::Configuration config;
   config.name = "Zeek::JavaScript";
   config.description = "Experimental JavaScript support for Zeek";
-  config.version.major = 0;
-  config.version.minor = 4;
-  config.version.patch = 4;
+  config.version.major = ZEEKJS_VERSION_MAJOR;
+  config.version.minor = ZEEKJS_VERSION_MINOR;
+  config.version.patch = ZEEKJS_VERSION_PATCH;
   return config;
 }
 

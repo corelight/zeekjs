@@ -1,6 +1,6 @@
-# ZeekJS settings
+# JavaScript settings
 
-module ZeekJS;
+module JavaScript;
 
 export {
 	## The Javascript code executed for bootstrapping.
@@ -14,7 +14,7 @@ export {
 		"const publicRequire = module.createRequire(process.cwd() + '/');\n",
 		"globalThis.require = publicRequire;\n",
 		"\n",
-		"globalThis.zeekjs_init = async () => {\n",
+		"globalThis.zeek_javascript_init = async () => {\n",
 		"  const zeek = process._linkedBinding('zeekjs').zeek;\n",
 		"  // Helper for zeek record rendering.\n",
 		"  zeek.flatten = (obj, prefix, res) => {\n",
@@ -38,7 +38,7 @@ export {
 		"  // Compile a new module that imports all .js files found using import().\n",
 		"  //\n",
 		"  // https://stackoverflow.com/a/17585470/9044112\n",
-		"  return m._compile('const ps = []; zeek.__zeekjs_files.forEach((fn) => { ps.push(import(fn)); }); return Promise.all(ps);', process.cwd() + '/');\n",
+		"  return m._compile('const ps = []; zeek.__zeek_javascript_files.forEach((fn) => { ps.push(import(fn)); }); return Promise.all(ps);', process.cwd() + '/');\n",
 		"};\n",
 		"// Add a global zeek object from the linked zeekjs binding\n",
 		"globalThis.zeek = process._linkedBinding('zeekjs').zeek;\n"

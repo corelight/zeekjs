@@ -684,7 +684,7 @@ void Instance::AddZeekObject(v8::Local<v8::Object> exports,
   zeek_obj->Set(context, globals_str, zeek_global_vars_obj).Check();
 
   // Files to be loaded by the bootstrapping script.
-  v8::Local<v8::String> zeekjs_files_str = v8_str(isolate, "__zeekjs_files");
+  v8::Local<v8::String> zeekjs_files_str = v8_str(isolate, "__zeek_javascript_files");
   auto files = instance->GetFiles();
   v8::Local<v8::Array> array = v8::Array::New(isolate, static_cast<int>(files.size()));
   for (unsigned long i = 0; i < files.size(); i++) {
@@ -726,9 +726,9 @@ bool Instance::ExecuteAndWaitForInit(v8::Local<v8::Context> context,
     return false;
   }
 
-  // The main script is supposed to define an zeekjs_init() function
-  // in the global scope that we can then call.
-  const char* init_name = "zeekjs_init";
+  // The main script is supposed to define an javascript_init() function
+  // in the global scope that we'll be calling first.
+  const char* init_name = "zeek_javascript_init";
   v8::Local<v8::String> v8_init_name = v8_str_intern(GetIsolate(), init_name);
   v8::Local<v8::Value> init_val;
 

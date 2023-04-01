@@ -1,5 +1,5 @@
 # @TEST-DOC: Test overriding the main script source
-# @TEST-EXEC: zeek ZeekJS::main_script_source="console.log('JS: Should not be visible.')" ./test.zeek
+# @TEST-EXEC: zeek JavaScript::main_script_source="console.log('JS: Should not be visible.')" ./test.zeek
 # @TEST-EXEC: btest-diff .stdout
 
 @TEST-START-FILE test.zeek

@@ -1,4 +1,4 @@
-# @TEST-DOC: Invoke fs.unlinkSync() and trigger an uncaught exception. We keep going because of ZeekJS::exit_on_uncaught_exceptions=F.
+# @TEST-DOC: Invoke fs.unlinkSync() and trigger an uncaught exception. We keep going because of JavaScript::exit_on_uncaught_exceptions=F.
 # @TEST-EXEC: zeek unlink-sync.js unlink-sync.zeek
 # @TEST-EXEC: ! grep 'async hook stack has become corrupted' .stderr
 # Should be exactly 10...
@@ -24,7 +24,7 @@ function unlink() {
 
 @TEST-START-FILE unlink-sync.zeek
 redef exit_only_after_terminate=T;
-redef ZeekJS::exit_on_uncaught_exceptions=F;
+redef JavaScript::exit_on_uncaught_exceptions=F;
 
 event terminate_now() {
   if (zeek_is_terminating())

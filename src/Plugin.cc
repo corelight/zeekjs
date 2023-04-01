@@ -41,7 +41,7 @@ void Plugin::InitPreScript() {
 void Plugin::InitPostScript() {
   zeek::plugin::Plugin::InitPostScript();
 
-  zeek::VectorValPtr files = zeek::id::find_val<zeek::VectorVal>("ZeekJS::files");
+  zeek::VectorValPtr files = zeek::id::find_val<zeek::VectorVal>("JavaScript::files");
   std::vector<std::filesystem::path> std_files = load_files;
   for (unsigned int i = 0; i < files->Size(); i++) {
     zeek::ValPtr vp = plugin::Corelight_ZeekJS::compat::Vector_val_at(files.get(), i);
@@ -57,17 +57,21 @@ void Plugin::InitPostScript() {
   // Okay, initialize Node.js
   PLUGIN_DBG_LOG(plugin, "Hooked %ld .js files: Initializing!", std_files.size());
   std::string main_script_source =
-      zeek::id::find_val<zeek::StringVal>("ZeekJS::main_script_source")->ToStdString();
+      zeek::id::find_val<zeek::StringVal>("JavaScript::main_script_source")
+          ->ToStdString();
 
   size_t initial_heap_size_in_bytes =
-      zeek::id::find_val<zeek::Val>("ZeekJS::initial_heap_size_in_bytes")->AsCount();
+      zeek::id::find_val<zeek::Val>("JavaScript::initial_heap_size_in_bytes")
+          ->AsCount();
   size_t maximum_heap_size_in_bytes =
-      zeek::id::find_val<zeek::Val>("ZeekJS::maximum_heap_size_in_bytes")->AsCount();
+      zeek::id::find_val<zeek::Val>("JavaScript::maximum_heap_size_in_bytes")
+          ->AsCount();
   int thread_pool_size = static_cast<int>(
-      zeek::id::find_val<zeek::Val>("ZeekJS::thread_pool_size")->AsCount());
+      zeek::id::find_val<zeek::Val>("JavaScript::thread_pool_size")->AsCount());
 
   bool exit_on_uncaught_exceptions =
-      zeek::id::find_val<zeek::Val>("ZeekJS::exit_on_uncaught_exceptions")->AsBool();
+      zeek::id::find_val<zeek::Val>("JavaScript::exit_on_uncaught_exceptions")
+          ->AsBool();
 
   nodejs = new plugin::Nodejs::Instance();
 

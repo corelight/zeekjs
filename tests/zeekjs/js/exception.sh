@@ -1,5 +1,5 @@
 # @TEST-DOC: Test raising exception in Javascript
-# @TEST-EXEC: zeek ./exc.js ZeekJS::exit_on_uncaught_exceptions=F 2>&1
+# @TEST-EXEC: zeek ./exc.js JavaScript::exit_on_uncaught_exceptions=F 2>&1
 # @TEST-EXEC: grep Uncaught .stdout > uncaught
 # @TEST-EXEC: TEST_DIFF_CANONIFIER=$SCRIPTS/diff-remove-abspath btest-diff uncaught
 

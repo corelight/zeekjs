@@ -127,7 +127,7 @@ void Plugin::HookDrainEvents() {
 #ifdef ZEEKJS_LOOP_DEBUG
   dprintf(
       "event_mgr: size=%d | iosource size=%d | "
-      "timer_mgr size=%d | nodejs alive=%d",
+      "timer_mgr size=%ld | nodejs alive=%d\n",
       zeek::event_mgr.Size(), zeek::iosource_mgr->Size(),
       zeek::detail::timer_mgr->Size(), nodejs->IsAlive());
 #endif
@@ -138,19 +138,13 @@ void Plugin::HookDrainEvents() {
   if (nodejs->WasJsCalled()) {
     nodejs->Process();
     nodejs->SetJsCalled(false);
-    return;
   }
 
-  // Decide if we should shutdown / unregister the Node.js uv_loop.
+  // Decide if we should close the Node.js IO source in
+  // order to have Zeek shutdown.
   //
-  // Do it if Zeek is terminating, or if the following hold:
-  //
-  // * the uv_loop isn't alive
-  // * exit_only_after_terminate was not set
-  // * the LoopSource is the last IO soruce
-  // * there is no live packet source anymore
-  // * the event_mgr does not seem to have to do anything
-  //
+  // If Zeek is terminating and the IO source is still open,
+  // close it now.
   if (zeek::run_state::terminating) {
     if (loop_io_source->IsOpen())
       loop_io_source->UpdateClosed(true);
@@ -161,23 +155,32 @@ void Plugin::HookDrainEvents() {
   if (zeek::BifConst::exit_only_after_terminate)
     return;
 
+  // If we're reading traces and the packet source
+  // has closed, remove us from the IO loop as well.
+  //
+  // This may not always be the right thing to do,
+  // but then there's exit_only_after_terminate=T
+  // to prevent this.
+  auto ps = zeek::iosource_mgr->GetPktSrc();
+  if (ps && !ps->IsLive() && !ps->IsOpen()) {
+    loop_io_source->UpdateClosed(true);
+    return;
+  }
+
+  // Is there a HTTP server or something running?
   if (nodejs->IsAlive())
     return;
 
-  // Other IO source existing?
+  // Other live IO source existing?
   if (zeek::iosource_mgr->Size() > 1)
     return;
 
-  // Active packet source?
-  auto ps = zeek::iosource_mgr->GetPktSrc();
-  if (ps && ps->IsOpen())
-    return;
-
+  // Does the event manager have work scheduled?
   if (zeek::event_mgr.Size() > 0)
     return;
 
-  // Emit a beforeExit event that can be used by JavaScript to schedule more
-  // work and keep the IO loop going.
+  // Emit a beforeExit event that can be used by JavaScript to
+  // schedule more work and keep the IO loop going.
   if (loop_io_source->IsOpen()) {
     nodejs->BeforeExit();
     if (nodejs->IsAlive()) {

@@ -982,8 +982,10 @@ bool Instance::IsAlive() {
 
 struct UvHandle {
   void* h;
+  uv_handle_type t;
   int fd;
   int active;
+  int ref;
 };
 inline bool operator==(const UvHandle& l, const UvHandle& r) {
   return l.h == r.h && l.fd == r.fd && l.active == r.active;
@@ -994,25 +996,18 @@ inline bool operator==(const UvHandle& l, const UvHandle& r) {
 static void collectUvHandles(uv_handle_t* h, void* arg) {
   auto handles = static_cast<std::vector<UvHandle>*>(arg);
 
-#define NO_ZEEKJS_LOOP_DEBUG
-
   int fd = -1;
   uv_fileno(h, &fd);
-  if (fd < 0) {
-#ifdef ZEEKJS_LOOP_DEBUG
-    uv_handle_type t = uv_handle_get_type(h);
-    const char* type_name = uv_handle_type_name(t);
-    dprintf("Bad fd? h=%p %s fd=%d active=%d", h, type_name, fd, uv_is_active(h));
-#endif
-    return;
-  }
-
-#ifdef ZEEKJS_LOOP_DEBUG
   uv_handle_type t = uv_handle_get_type(h);
+
+#define NO_ZEEKJS_LOOP_DEBUG
+#ifdef ZEEKJS_LOOP_DEBUG
   const char* type_name = uv_handle_type_name(t);
-  dprintf("Adding h=%p type=%s fd=%d active=%d", h, type_name, fd, uv_is_active(h));
+  dprintf("Adding h=%p type=%-7s fd=%d active=%d has_ref=%d", h, type_name, fd,
+          uv_is_active(h), uv_has_ref(h));
 #endif
-  handles->push_back({.h = h, .fd = fd, .active = uv_is_active(h)});
+  handles->push_back(
+      {.h = h, .t = t, .fd = fd, .active = uv_is_active(h), .ref = uv_has_ref(h)});
 };
 
 // Process the Javascript IO loop.
@@ -1039,36 +1034,31 @@ void Instance::Process() {
   v8::Context::Scope context_scope(context);
 
   // XXX: This is hard to understand.
-  int round = 0, more = 0, handles_changed = 0;
-  std::vector<UvHandle> handles_before;
-  std::vector<UvHandle> handles_after;
-  while (round < 2) {
-    ++round;
+  int rounds = 0;
+  bool handles_changed = false;
+  static std::vector<UvHandle> handles_before;
+  static std::vector<UvHandle> handles_after;
+  do {
+    ++rounds;
     handles_before.clear();
-    handles_after.clear();
 
     uv_walk(&loop, collectUvHandles, &handles_before);
-    {
-      node::CallbackScope callback_scope(node_environment_.get(), GetProcessObj(),
-                                         {0, 0});
-      v8::SealHandleScope seal(isolate);
-
+    bool more = false;
+    do {
       uv_run(&loop, UV_RUN_NOWAIT);
-    }
-    more = node_platform_->FlushForegroundTasks(GetIsolate());
+      more = node_platform_->FlushForegroundTasks(GetIsolate());
+    } while (more);
+
+    handles_after.clear();
     uv_walk(&loop, collectUvHandles, &handles_after);
     handles_changed = handles_before != handles_after;
 
 #ifdef ZEEKJS_LOOP_DEBUG
-    dprintf("Loop debug more=%d timeout=%d handles_changed=%d", more,
-            uv_backend_timeout(&loop), handles_changed);
+    dprintf("Loop debug rounds=%d timeout=%d handles=%ld handles_changed=%d", rounds,
+            uv_backend_timeout(&loop), handles_after.size(), handles_changed);
 #endif
-    if (handles_changed || more)
-      continue;
+  } while (handles_changed && rounds < 8);
 
-    return;
-  }
-
-  if (more || handles_changed)
+  if (handles_changed)
     zeek_notifier_->Notify();
 }

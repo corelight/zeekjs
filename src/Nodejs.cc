@@ -1037,33 +1037,35 @@ void Instance::Process() {
   v8::HandleScope handle_scope(isolate);
   v8::Local<v8::Context> context = isolate->GetCurrentContext();
   v8::Context::Scope context_scope(context);
-  node::Environment* env = node::GetCurrentEnvironment(context);
-  node::CallbackScope callback_scope(env, GetProcessObj(), {0, 0});
-  v8::SealHandleScope seal(isolate);
 
   // XXX: This is hard to understand.
-  int round = 0, more = 0, handles_changed;
+  int round = 0, more = 0, handles_changed = 0;
   std::vector<UvHandle> handles_before;
   std::vector<UvHandle> handles_after;
   while (round < 2) {
     ++round;
     handles_before.clear();
     handles_after.clear();
-    handles_changed = 0;
 
     uv_walk(&loop, collectUvHandles, &handles_before);
+    {
+      node::CallbackScope callback_scope(node_environment_.get(), GetProcessObj(),
+                                         {0, 0});
+      v8::SealHandleScope seal(isolate);
 
-    uv_run(&loop, UV_RUN_NOWAIT);
+      uv_run(&loop, UV_RUN_NOWAIT);
+    }
     more = node_platform_->FlushForegroundTasks(GetIsolate());
-    if (more)
-      continue;
-
     uv_walk(&loop, collectUvHandles, &handles_after);
     handles_changed = handles_before != handles_after;
-    if (handles_changed)
+
+#ifdef ZEEKJS_LOOP_DEBUG
+    dprintf("Loop debug more=%d timeout=%d handles_changed=%d", more,
+            uv_backend_timeout(&loop), handles_changed);
+#endif
+    if (handles_changed || more)
       continue;
 
-    assert(!more && !handles_changed);
     return;
   }
 

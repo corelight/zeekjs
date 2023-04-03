@@ -26,8 +26,13 @@ zeek.on('zeekjs_test_table', function(t1, t2) {
   zeek.print(`table t1: typeof=${typeof(t1)} t=${t1} json=${JSON.stringify(t1)}`);
   zeek.print(`table t2: typeof=${typeof(t2)} t=${t2} json=${JSON.stringify(t2)}`);
 });
+
 zeek.on('zeekjs_test_table_addr', function(t) {
   zeek.print(`table addr: typeof=${typeof(t)} t=${t} json=${JSON.stringify(t)}`);
+});
+
+zeek.on('zeekjs_test_table_subnet', function(t) {
+  zeek.print(`table subnet: typeof=${typeof(t)} t=${t} json=${JSON.stringify(t)}`);
 });
 @TEST-END-FILE
 
@@ -44,6 +49,7 @@ global zeekjs_test_vector: event(v: vector of string);
 global zeekjs_test_set: event(v: set[string]);
 global zeekjs_test_table: event(t1: table[string] of string, t2: table[count] of string);
 global zeekjs_test_table_addr: event(t: table[addr] of string);
+global zeekjs_test_table_subnet: event(t: table[subnet] of string);
 
 event zeek_init() {
   local v = vector("a", "b");
@@ -70,6 +76,12 @@ event zeek_init() {
     [127.0.0.1] = "localhost",
   };
   event zeekjs_test_table_addr(t3);
+
+  local t4: table[subnet] of string = {
+    [192.168.0.0/16] = "home",
+    [127.0.0.0/8] = "very home",
+  };
+  event zeekjs_test_table_subnet(t4);
 }
 
 @TEST-END-FILE

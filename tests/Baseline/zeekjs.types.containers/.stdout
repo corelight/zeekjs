@@ -5,3 +5,4 @@ set: typeof=object s=a,c,b s.length=3 json=["a","c","b"]
 table t1: typeof=object t=[object Object] json={"k1":"entry 1","2":"entry 2"}
 table t2: typeof=object t=[object Object] json={"42":"entry 42","1":"entry 1"}
 table addr: typeof=object t=[object Object] json={"127.0.0.1":"localhost","192.168.0.1":"router"}
+table subnet: typeof=object t=[object Object] json={"192.168.0.0/16":"home","127.0.0.0/8":"very home"}

@@ -200,43 +200,26 @@ v8::Local<v8::Value> ZeekValWrapper::Wrap(const zeek::ValPtr& vp, int attr_mask)
       zeek::TableVal* tval = vp->AsTableVal();
       // dprintf("Table tval=%p", tval);
       if (tval->GetType()->IsSet()) {
-        // XXX: There's something wrong within Zeek.
-        //
-        // Calling ToPureListVal() on removal hooks
-        // crashes when comparing the func flavors.
-        //
-        // Return null for sets with functions at this
-        // point (not clear what to actually do).
         zeek::TableTypePtr tt = tval->GetType<zeek::TableType>();
-        std::vector<zeek::TypePtr> types = tt->GetIndices()->GetTypes();
+        auto index_size = tt->GetIndexTypes().size();
+        zeek::ListValPtr lv = tval->ToListVal();
 
-        if (types[0]->Tag() == zeek::TYPE_FUNC) {
-          dprintf(
-              "ToPureListVal() with functions crashes - returning null "
-              "instead");
-
-          // We could construct a set with some
-          // function names, but not sure that
-          // would be all that useful.
+        // Set of functions: return null for backwards compat
+        if (index_size == 1 && tt->GetIndexTypes()[0]->Tag() == zeek::TYPE_FUNC)
           return v8::Null(isolate_);
-        }
-
-        const std::vector<zeek::TypePtr>& tl = tt->GetIndices()->GetTypes();
-
-        zeek::ListValPtr lv;
-        if (tl.size() == 1) {
-          lv = tval->ToPureListVal();
-        } else {
-          lv = tval->ToListVal();
-        }
 
         // For expedience, at this point, a set is
         // simply converted to an array. There's Set()
         // but that's not JSON stringify'ble, so...
         auto size = lv->Length();
         v8::Local<v8::Array> array = v8::Array::New(isolate_, size);
-        for (int i = 0; i < size; i++)
-          array->Set(context, i, Wrap(lv->Idx(i))).Check();
+        for (int i = 0; i < size; i++) {
+          auto& v = lv->Idx(i);
+          if (index_size == 1)
+            array->Set(context, i, Wrap(v->AsListVal()->Idx(0))).Check();
+          else
+            array->Set(context, i, Wrap(v)).Check();
+        }
         return array;
       } else {
         // TODO: Precheck for multi keys and just crash or ignore
@@ -880,16 +863,26 @@ void ZeekValWrapper::ZeekTableEnumerator(
           size);
 #endif
 
-  // Let's shortcut here, only support ToPureListVal, anything else
-  // a bit crazy.
-  const std::vector<zeek::TypePtr>& tl = tt->GetIndices()->GetTypes();
-
-  if (tl.size() != 1) {
-    eprintf("Wrapping multi index table is not supported.");
+  // Let's shortcut here, only support Pure lists with size 1
+  // of the base types, anything else is a bit nuts.
+  const zeek::TypeListPtr& tl = tt->GetIndices();
+  if (!tl->IsPure()) {
+    isolate->ThrowException(::v8_str(isolate, "can enumerate only pure tables"));
     return;
   }
 
-  zeek::ListValPtr lv = tval->ToPureListVal();
+  if (tl->GetTypes().size() != 1) {
+    isolate->ThrowException(::v8_str(isolate, "composite table indices not supported"));
+    return;
+  }
+
+  if (!zeek::is_atomic_type(tl->GetTypes()[0])) {
+    isolate->ThrowException(
+        ::v8_str(isolate, "table with non-atomic index not supported"));
+    return;
+  }
+
+  zeek::ListValPtr lv = tval->ToListVal();
   v8::Local<v8::Array> array = v8::Array::New(isolate, size);
   for (int i = 0; i < size; i++) {
     // zeek::TypeTag tag = lv->Idx(i)->GetType()->Tag();

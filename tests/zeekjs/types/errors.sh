@@ -33,6 +33,13 @@ zeek.on('zeek_init', () => {
     zeek.print(`Caught it: ${error}`)
   }
 
+  zeek.print('Null ts value in object');
+  try {
+    zeek.event('EventReceiver::event1', [{'ts': null}]);
+  } catch (error) {
+    zeek.print(`Caught it: ${error}`)
+  }
+
   zeek.print('ts can not be converted to timestamp');
   try {
     zeek.event('EventReceiver::event1', [{'ts': 'not a timestamp'}]);

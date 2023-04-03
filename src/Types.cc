@@ -599,6 +599,18 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
           return wrap_result;
         }
 
+        // If the field is null and it's optional, skip it, otherwise
+        // report an error.
+        if (v8_field_value->IsNull()) {
+          if (is_optional)
+            continue;
+
+          wrap_result.ok = false;
+          wrap_result.error = std::string("property ") + field_decl->id;
+          wrap_result.error += " for record type " + rt->GetName() + " cannot be null";
+          return wrap_result;
+        }
+
         ZeekValWrapper::Result field_result =
             ToZeekVal(v8_field_value, field_decl->type);
         if (!field_result.ok) {

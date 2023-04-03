@@ -7,6 +7,8 @@ Too many arguments
 Caught it: Wrong number of parameters. 3 provided, 1 required, 1 total
 Missing ts key in object
 Caught it: missing property ts for record type EventReceiver::MyRecord
+Null ts value in object
+Caught it: property ts for record type EventReceiver::MyRecord cannot be null
 ts can not be converted to timestamp
 Caught it: Error for field ts: Unable to convert JS value 'not a timestamp' of type string to Zeek type time
 can not convert to count

@@ -424,10 +424,13 @@ v8::Local<v8::Value> Instance::ZeekInvoke(v8::Local<v8::String> v8_name,
 
   zeek::ValPtr ret = plugin_->Invoke(*name_str, *args, *script_str, line_number);
 
-  // Throw if this isn't a void function and we didn't get a Val back.
-  if (ret == zeek::Val::nil && ft->Yield()->Tag() != zeek::TYPE_VOID) {
-    isolate_->ThrowException(v8_str(isolate_, "Error calling function"));
-    return v8::Undefined(isolate_);
+  // Throw if the call returned nil and this isn't a void or any function.
+  if (ret == zeek::Val::nil) {
+    zeek::TypeTag tag = ft->Yield()->Tag();
+    if (tag != zeek::TYPE_VOID && tag != zeek::TYPE_ANY) {
+      isolate_->ThrowException(v8_str(isolate_, "Function call returned nil"));
+      return v8::Undefined(isolate_);
+    }
   }
 
 #ifdef DEBUG

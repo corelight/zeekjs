@@ -408,6 +408,13 @@ v8::Local<v8::Value> Instance::ZeekInvoke(v8::Local<v8::String> v8_name,
     isolate_->ThrowException(v8_str(isolate_, "Not a function"));
     return v8::Undefined(isolate_);
   }
+
+  // Non-implemented function? Exported but not defined?
+  if (!id->GetVal()) {
+    isolate_->ThrowException(v8_str(isolate_, "Function without value"));
+    return v8::Undefined(isolate_);
+  }
+
   const zeek::FuncType* ft = t->AsFuncType();
   std::optional<zeek::Args> args = v8_to_zeek_args(ft, v8_args);
   if (!args)

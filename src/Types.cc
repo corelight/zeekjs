@@ -69,8 +69,12 @@ v8::Local<v8::String> v8_str_extern(v8::Isolate* i,
 }  // namespace
 
 ZeekValWrapper::ZeekValWrapper(v8::Isolate* isolate) : isolate_(isolate) {
+  wrap_private_key_.Reset(isolate,
+                          v8::Private::ForApi(isolate, v8_str("zeekjs::object::tag")));
   v8::Local<v8::ObjectTemplate> record_template = v8::ObjectTemplate::New(isolate_);
   record_template->SetInternalFieldCount(1);
+  record_template->SetPrivate(GetWrapPrivateKey(isolate), v8::True(isolate),
+                              v8::PropertyAttribute::DontEnum);
   v8::NamedPropertyHandlerConfiguration record_conf = {nullptr};
   record_conf.getter = ZeekRecordGetter;
   record_conf.setter = ZeekRecordSetter;
@@ -79,9 +83,6 @@ ZeekValWrapper::ZeekValWrapper(v8::Isolate* isolate) : isolate_(isolate) {
   record_template->SetHandler(record_conf);
 
   record_template_.Reset(isolate_, record_template);
-
-  wrap_private_key_.Reset(isolate,
-                          v8::Private::ForApi(isolate, v8_str("zeekjs::object::tag")));
 
   v8::Local<v8::ObjectTemplate> table_template = v8::ObjectTemplate::New(isolate_);
   table_template->SetInternalFieldCount(1);
@@ -1029,8 +1030,6 @@ ZeekValWrap::ZeekValWrap(v8::Isolate* isolate,
                          zeek::Val* vp,
                          int attr_mask)
     : wrapper_(wrapper), vp_(vp), attr_mask_(attr_mask) {
-  record_obj->SetPrivate(isolate->GetCurrentContext(),
-                         wrapper->GetWrapPrivateKey(isolate), v8::True(isolate));
   record_obj->SetAlignedPointerInInternalField(0, this);
   persistent_obj_.Reset(isolate, record_obj);
   persistent_obj_.SetWeak(this, ZeekValWrap_WeakCallback,

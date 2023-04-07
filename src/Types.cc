@@ -141,6 +141,9 @@ v8::Local<v8::Value> ZeekValWrapper::Wrap(const zeek::ValPtr& vp, int attr_mask)
       return v8::Number::New(isolate_, vp->AsTime());
     case zeek::TYPE_STRING: {
       auto sv = vp->AsStringVal();
+      if (sv->Len() == 0)
+        return v8::String::Empty(isolate_);
+
       auto data = reinterpret_cast<const char*>(sv->Bytes());
       return v8_str_extern(isolate_, sv, data, sv->Len());
     }

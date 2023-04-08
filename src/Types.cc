@@ -12,6 +12,14 @@
 
 namespace {
 
+// Tracking of wrapped Zeek objects. As long as the JavaScript side object wrapping
+// a Zeek side object hasn't been collected yet, we can re-use it as Zeek gives us
+// the same ZeekVal pointer.
+//
+// Include the mask, because it's part of a wrap.
+using ZeekValWrapKey = std::pair<zeek::Val*, int>;
+static std::map<ZeekValWrapKey, ZeekValWrap*> wrapped_objects;
+
 // Zeek allocated strings as external string resource to avoid copying strings into
 // the JS heap. The Zeek object "owning" the string is ref'ed/unref'ed to control
 // lifetime of the string. Used for StringVal and also field and enum names.
@@ -21,8 +29,11 @@ class ExternalZeekStringResource : public v8::String::ExternalOneByteStringResou
       : obj_(obj), data_(data), length_(length) {
     Ref(obj_);
   }
+
   void Dispose() override {
-    dprintf("Disposing ExternalZeekString: %s obj_=%p", data_, obj_);
+    dprintf("Disposing ExternalZeekString: this=%p data=%p length=%lu obj_=%p", this,
+            data_, length_, obj_);
+
     Unref(obj_);
     data_ = nullptr;
     length_ = 0;
@@ -37,8 +48,8 @@ class ExternalZeekStringResource : public v8::String::ExternalOneByteStringResou
 
  private:
   zeek::Obj* obj_;
-  const char* data_;
-  size_t length_;
+  const char* data_ = nullptr;
+  size_t length_ = -1;
 };
 
 v8::Local<v8::String> v8_str_intern(v8::Isolate* i, const char* s) {
@@ -108,6 +119,11 @@ ZeekValWrapper::ZeekValWrapper(v8::Isolate* isolate) : isolate_(isolate) {
 
 v8::Local<v8::Object> ZeekValWrapper::WrapAsObject(const zeek::ValPtr& vp,
                                                    int attr_mask) {
+  const ZeekValWrapKey k{vp.get(), attr_mask};
+  if (auto const& it = ::wrapped_objects.find(k); it != ::wrapped_objects.end()) {
+    return it->second->GetHandle(isolate_);
+  }
+
   v8::Local<v8::Context> context = isolate_->GetCurrentContext();
   v8::Local<v8::ObjectTemplate> tmpl = record_template_.Get(isolate_);
   v8::Local<v8::Object> obj = tmpl->NewInstance(context).ToLocalChecked();
@@ -1037,6 +1053,12 @@ ZeekValWrap::ZeekValWrap(v8::Isolate* isolate,
   persistent_obj_.Reset(isolate, record_obj);
   persistent_obj_.SetWeak(this, ZeekValWrap_WeakCallback,
                           v8::WeakCallbackType::kParameter);
+
+  ZeekValWrapKey k{vp_, attr_mask};
+  ::wrapped_objects.insert({k, this});
+
+  constexpr int adjust = 8 * sizeof(zeek::RecordVal);
+  isolate->AdjustAmountOfExternalAllocatedMemory(adjust);
 }
 
 void ZeekValWrap::ZeekValWrap_WeakCallback(
@@ -1050,6 +1072,12 @@ void ZeekValWrap::ZeekValWrap_WeakCallback(
   dprintf("Unrefing vp_=%p (type tag %d/%s/%s) and deleting wrap=%p", wrap->vp_,
           type_tag, zeek::type_name(type_tag), type_name.c_str(), wrap);
 #endif
+
+  ZeekValWrapKey k{wrap->vp_, wrap->attr_mask_};
+  ::wrapped_objects.erase(k);
+
+  constexpr int adjust = -8 * static_cast<int>(sizeof(zeek::RecordVal));
+  data.GetIsolate()->AdjustAmountOfExternalAllocatedMemory(adjust);
 
   if (wrap->vp_)
     zeek::Unref(wrap->vp_);

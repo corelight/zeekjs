@@ -13,15 +13,18 @@ class ZeekValWrapper {
  public:
   ZeekValWrapper(v8::Isolate* isolate);
 
+  // Get the record field offset for this field, or -1 if not existing.
+  int GetRecordFieldOffset(const zeek::RecordTypePtr& rt, const std::string& field);
+
+  // Wrap any zeek::ValPtr as object rather than converting to primitive types.
+  v8::Local<v8::Object> WrapAsObject(const zeek::ValPtr& vp, int attr_mask = 0);
+
   // Wrap anything into a v8::Value. Some types are converted
   // directly like strings and numbers. Others return a "proxy"
   // object which keeps a reference to the original ValPtr and
   // uses below callbacks.
   //
   v8::Local<v8::Value> Wrap(const zeek::ValPtr& vp, int attr_mask = 0);
-
-  // Wrap any zeek::ValPtr as object rather than converting to primitive types.
-  v8::Local<v8::Object> WrapAsObject(const zeek::ValPtr& vp, int attr_mask = 0);
 
   struct Result {
     bool ok;
@@ -84,6 +87,18 @@ class ZeekValWrapper {
   // are ZeekValWraps and we can Unwrap them directly. This
   // is done much nicer in node with napi_type_tag_object().
   v8::Global<v8::Private> wrap_private_key_;
+
+  // RecordType::FieldOffset is slow and the result is static. Cache it.
+  //
+  // XXX: This should be possible with operator< overloading?
+  struct RecordTypeLess {
+    bool operator()(const zeek::RecordTypePtr& l, const zeek::RecordTypePtr& r) const {
+      return l.get() < r.get();
+    }
+  };
+  using OffsetMap = std::map<std::string, int>;
+  using RecordOffsetMap = std::map<zeek::RecordTypePtr, OffsetMap, RecordTypeLess>;
+  RecordOffsetMap record_field_offsets;
 };
 
 // Wraps a zeek::ValPtr with enough info to continue wrapping.

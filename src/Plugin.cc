@@ -51,8 +51,10 @@ void Plugin::InitPostScript() {
   }
 
   // If no Javascript files were hooked, no need to initialize Node/V8.
-  if (std_files.size() == 0)
+  if (std_files.size() == 0) {
+    DisableHook(zeek::plugin::HOOK_DRAIN_EVENTS);
     return;
+  }
 
   // Okay, initialize Node.js
   PLUGIN_DBG_LOG(plugin, "Hooked %ld .js files: Initializing!", std_files.size());

@@ -218,13 +218,13 @@ v8::Local<v8::Value> ZeekValWrapper::Wrap(const zeek::ValPtr& vp, int attr_mask)
         return v8::Undefined(isolate_);
       }
       auto size = static_cast<int>(vv->Size());
-      v8::Local<v8::Array> array = v8::Array::New(isolate_, size);
+      std::vector<v8::Local<v8::Value>> elements;
+      elements.reserve(size);
       for (int i = 0; i < size; i++) {
         zeek::ValPtr vp = plugin::Corelight_ZeekJS::compat::Vector_val_at(vv, i);
-        array->Set(context, i, Wrap(vp)).Check();
+        elements.emplace_back(Wrap(vp));
       }
-
-      return array;
+      return v8::Array::New(isolate_, elements.data(), size);
     }
 
     case zeek::TYPE_TABLE: {

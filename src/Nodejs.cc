@@ -914,8 +914,6 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
 void Instance::BeforeExit() {
   v8::Isolate* isolate = GetIsolate();
   v8::Isolate::Scope isolate_scope(isolate);
-  v8::HandleScope handle_scope(isolate);
-  v8::SealHandleScope seal(isolate);
   node::EmitProcessBeforeExit(node_environment_.get()).Check();
 }
 
@@ -946,8 +944,6 @@ void Instance::Done() {
       // Emit process 'exit' event
       v8::Isolate* isolate = GetIsolate();
       v8::Isolate::Scope isolate_scope(isolate);
-      v8::HandleScope handle_scope(isolate);
-      v8::SealHandleScope seal(isolate);
       node::EmitProcessExit(node_environment_.get());
     }
 
@@ -1034,7 +1030,6 @@ static void collectUvHandles(uv_handle_t* h, void* arg) {
 void Instance::Process() {
   v8::Isolate* isolate = GetIsolate();
   v8::Isolate::Scope isolate_scope(isolate);
-  v8::HandleScope handle_scope(isolate);
 
   // XXX: This is hard to understand.
   int rounds = 0;

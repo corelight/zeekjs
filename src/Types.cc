@@ -128,6 +128,19 @@ int ZeekValWrapper::GetRecordFieldOffset(const zeek::RecordTypePtr& rt,
   return map.insert({field, offset}).first->second;
 }
 
+v8::Local<v8::BigInt> ZeekValWrapper::GetBigInt(zeek_uint_t v) {
+  if (persistent_bigints_.size() < v)
+    return v8::BigInt::NewFromUnsigned(isolate_, v);
+
+  v8::Persistent<v8::BigInt>& entry = persistent_bigints_[v];
+  if (!entry.IsEmpty())
+    return entry.Get(isolate_);
+
+  auto v8_v = v8::BigInt::NewFromUnsigned(isolate_, v);
+  entry.Reset(isolate_, v8_v);
+  return v8_v;
+}
+
 v8::Local<v8::Object> ZeekValWrapper::WrapAsObject(const zeek::ValPtr& vp,
                                                    int attr_mask) {
   const ZeekValWrapKey k{vp.get(), attr_mask};
@@ -156,7 +169,7 @@ v8::Local<v8::Value> ZeekValWrapper::Wrap(const zeek::ValPtr& vp, int attr_mask)
     case zeek::TYPE_BOOL:
       return v8::Boolean::New(isolate_, vp->CoerceToInt() ? true : false);
     case zeek::TYPE_COUNT:
-      return v8::BigInt::NewFromUnsigned(isolate_, vp->AsCount());
+      return GetBigInt(vp->AsCount());
     case zeek::TYPE_INT:
       // Grml, this may be lossy, but making it a bigint: annoying.
       return v8::Number::New(isolate_, static_cast<double>(vp->AsInt()));

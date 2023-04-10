@@ -16,6 +16,9 @@ class ZeekValWrapper {
   // Get the record field offset for this field, or -1 if not existing.
   int GetRecordFieldOffset(const zeek::RecordTypePtr& rt, const std::string& field);
 
+  // Return a BigInt object given v.
+  v8::Local<v8::BigInt> GetBigInt(zeek_uint_t v);
+
   // Wrap any zeek::ValPtr as object rather than converting to primitive types.
   v8::Local<v8::Object> WrapAsObject(const zeek::ValPtr& vp, int attr_mask = 0);
 
@@ -99,6 +102,13 @@ class ZeekValWrapper {
   using OffsetMap = std::map<std::string, int>;
   using RecordOffsetMap = std::map<zeek::RecordTypePtr, OffsetMap, RecordTypeLess>;
   RecordOffsetMap record_field_offsets;
+
+  // Zeek is keeping just 4096 counts, but SSL extensions or cipher codes
+  // are all 16 bit, so pre-allocate 2**16 instead. The static memory usage
+  // of the array is 512KB. Peanuts ;-)
+  //
+  // The entry are constructed lazily though.
+  std::array<v8::Persistent<v8::BigInt>, 65536> persistent_bigints_;
 };
 
 // Wraps a zeek::ValPtr with enough info to continue wrapping.

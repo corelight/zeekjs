@@ -92,7 +92,6 @@ static v8::Local<v8::Value> callFunction(v8::Isolate* isolate,
                                          v8::Local<v8::Function> func,
                                          const zeek::Args& args) {
   v8::Local<v8::Context> context = isolate->GetCurrentContext();
-  v8::Context::Scope context_scope(context);
 
   // TODO: Who's the receiver if the function is bound? Shouldn't it be
   //       the object the function is bounded to?
@@ -885,11 +884,9 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
   // ObjectTemplate for our global
   v8::Local<v8::ObjectTemplate> global = v8::ObjectTemplate::New(GetIsolate());
 
-  // This is the global context we have.
+  // This is the global context we have. We enter it and that's it.
   v8::Local<v8::Context> context = v8::Context::New(GetIsolate(), nullptr, global);
   context->Enter();
-
-  v8::Context::Scope context_scope(context);
 
   node_isolate_data_ = {node::CreateIsolateData(isolate_, &loop, node_platform_.get(),
                                                 node_allocator_.get()),
@@ -918,7 +915,6 @@ void Instance::BeforeExit() {
   v8::Isolate* isolate = GetIsolate();
   v8::Isolate::Scope isolate_scope(isolate);
   v8::HandleScope handle_scope(isolate);
-  v8::Context::Scope context_scope(isolate->GetCurrentContext());
   v8::SealHandleScope seal(isolate);
   node::EmitProcessBeforeExit(node_environment_.get()).Check();
 }
@@ -951,7 +947,6 @@ void Instance::Done() {
       v8::Isolate* isolate = GetIsolate();
       v8::Isolate::Scope isolate_scope(isolate);
       v8::HandleScope handle_scope(isolate);
-      v8::Context::Scope context_scope(isolate->GetCurrentContext());
       v8::SealHandleScope seal(isolate);
       node::EmitProcessExit(node_environment_.get());
     }
@@ -1040,8 +1035,6 @@ void Instance::Process() {
   v8::Isolate* isolate = GetIsolate();
   v8::Isolate::Scope isolate_scope(isolate);
   v8::HandleScope handle_scope(isolate);
-  v8::Local<v8::Context> context = isolate->GetCurrentContext();
-  v8::Context::Scope context_scope(context);
 
   // XXX: This is hard to understand.
   int rounds = 0;

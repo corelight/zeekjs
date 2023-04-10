@@ -127,6 +127,10 @@ int Plugin::HookLoadFile(const zeek::plugin::Plugin::LoadType,
 }
 
 void Plugin::HookDrainEvents() {
+  // Don't act on draining when a packet is being dispatched.
+  if (zeek::run_state::processing_start_time != 0.0)
+    return;
+
   if (!nodejs)
     return;
 
@@ -140,7 +144,9 @@ void Plugin::HookDrainEvents() {
 
   nodejs->UpdateTime();
 
-  // If any callbacks into Javascript happened, run Process() once.
+  // If any callbacks into Javascript happened prevoiusly
+  // and currently we're not processing a packet, run
+  // Process() housekeeping now.
   if (nodejs->WasJsCalled()) {
     nodejs->Process();
     nodejs->SetJsCalled(false);

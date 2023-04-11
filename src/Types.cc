@@ -123,15 +123,64 @@ ZeekValWrapper::ZeekValWrapper(v8::Isolate* isolate) : isolate_(isolate) {
   toJSON_str_.Reset(isolate, v8_str_intern("toJSON"));
 }
 
+void ZeekValWrapper::InitRecordOffsets(const zeek::RecordTypePtr& rt) {
+  IdentityHashOffsetMap ih_map;
+  NameOffsetMap n_map;
+  std::set<int> hash_collisions;
+
+  for (int offset = 0; offset < rt->NumFields(); offset++) {
+    std::string field_name = rt->FieldName(offset);
+    v8::Local<v8::String> v8_field_name = v8_str_intern(field_name.c_str());
+    int hash = v8_field_name->GetIdentityHash();
+    if (ih_map.count(hash) == 0) {
+      ih_map[hash] = offset;
+    } else {
+      hash_collisions.insert(hash);
+    }
+
+    n_map[field_name] = offset;
+  }
+
+  // If there were any hash collisions, clear them.
+  for (const auto& hash : hash_collisions)
+    ih_map.erase(hash);
+
+  record_field_name_offsets.insert({rt, std::move(n_map)});
+  const auto& r = record_field_identity_hash_offsets.insert({rt, std::move(ih_map)});
+}
+
 int ZeekValWrapper::GetRecordFieldOffset(const zeek::RecordTypePtr& rt,
-                                         const std::string& field) {
-  OffsetMap& map = record_field_offsets[rt];  // Find or add.
+                                         const v8::Local<v8::Name>& property) {
+  int identity_hash = property->GetIdentityHash();
 
-  if (const auto& it = map.find(field); it != map.end())
-    return it->second;
+  if (const auto& it = record_field_identity_hash_offsets.find(rt);
+      it != record_field_identity_hash_offsets.end()) {
+    const auto& ih_map = it->second;
+    if (const auto& offset_it = ih_map.find(identity_hash); offset_it != ih_map.end()) {
+      return offset_it->second;
+    }
 
-  int offset = rt->FieldOffset(field.c_str());
-  return map.insert({field, offset}).first->second;
+    // Slow path: Make a string out of the property and look it up in the name map and
+    // if it's not there, then someone tried to get something that just doesn't exist.
+    v8::String::Utf8Value property_val(isolate_, property);
+    if (*property_val) {
+      std::string property_str(*property_val);
+      // std::fprintf(stderr, "Fallback via string %s::%s (%d)\n",
+      // rt->GetName().c_str(),
+      //             property_str.c_str(), identity_hash);
+      const auto& n_map = record_field_name_offsets[rt];
+      if (const auto& offset_it = n_map.find(property_str); offset_it != n_map.end()) {
+        return offset_it->second;
+      }
+    }
+
+    return -1;
+  }
+
+  // Not yet populated, do it now, then call recursively once.
+  InitRecordOffsets(rt);
+
+  return GetRecordFieldOffset(rt, property);
 }
 
 v8::Local<v8::BigInt> ZeekValWrapper::GetBigInt(zeek_uint_t v) {
@@ -958,24 +1007,20 @@ void ZeekValWrapper::ZeekTableEnumerator(
 // Callback for looking up properties of a record.
 void ZeekValWrapper::ZeekRecordGetter(v8::Local<v8::Name> property,
                                       const v8::PropertyCallbackInfo<v8::Value>& info) {
-  v8::Isolate* isolate = info.GetIsolate();
   v8::Local<v8::Object> receiver = info.This();
   auto wrap =
       static_cast<ZeekValWrap*>(receiver->GetAlignedPointerFromInternalField(0));
+
   if (wrap->GetVal()->GetType()->Tag() != zeek::TYPE_RECORD)
     return;
 
   auto rval = wrap->GetVal()->AsRecordVal();
   const auto& rt = rval->GetType<zeek::RecordType>();
 
-  v8::String::Utf8Value arg(isolate, property);
-
-  if (*arg) {
-    auto offset = wrap->GetWrapper()->GetRecordFieldOffset(rt, *arg);
-    if (offset >= 0) {
-      zeek::ValPtr vp = rval->GetFieldOrDefault(offset);
-      info.GetReturnValue().Set(wrap->GetWrapper()->Wrap(vp, wrap->GetAttrMask()));
-    }
+  auto offset = wrap->GetWrapper()->GetRecordFieldOffset(rt, property);
+  if (offset >= 0) {
+    zeek::ValPtr vp = rval->GetFieldOrDefault(offset);
+    info.GetReturnValue().Set(wrap->GetWrapper()->Wrap(vp, wrap->GetAttrMask()));
   }
 }
 
@@ -990,9 +1035,9 @@ void ZeekValWrapper::ZeekRecordSetter(v8::Local<v8::Name> property,
   auto rval = static_cast<zeek::RecordVal*>(wrap->GetVal());
   const auto& rt = rval->GetType<zeek::RecordType>();
 
-  v8::String::Utf8Value arg(isolate, property);
-  auto offset = *arg ? wrap->GetWrapper()->GetRecordFieldOffset(rt, *arg) : -1;
+  auto offset = wrap->GetWrapper()->GetRecordFieldOffset(rt, property);
   if (offset < 0) {
+    v8::String::Utf8Value arg(isolate, property);
     v8::Local<v8::Value> error = v8::Exception::TypeError(
         ::v8_str(isolate, zeek::util::fmt("field %s does not exist in record type %s",
                                           *arg, rt->GetName().c_str())));
@@ -1006,6 +1051,7 @@ void ZeekValWrapper::ZeekRecordSetter(v8::Local<v8::Name> property,
   v8::Local<v8::String> typeof_str = v8_val->TypeOf(isolate);
   v8::String::Utf8Value typeof_utf8(isolate, typeof_str);
   v8::String::Utf8Value val_utf8(isolate, v8_val);
+  v8::String::Utf8Value arg(isolate, property);
   dprintf("In setter for %s (%s) %s (%s)", *arg, zeek::type_name(field_type->Tag()),
           *val_utf8, *typeof_utf8);
 #endif

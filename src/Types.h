@@ -14,7 +14,8 @@ class ZeekValWrapper {
   ZeekValWrapper(v8::Isolate* isolate);
 
   // Get the record field offset for this field, or -1 if not existing.
-  int GetRecordFieldOffset(const zeek::RecordTypePtr& rt, const std::string& field);
+  int GetRecordFieldOffset(const zeek::RecordTypePtr& rt,
+                           const v8::Local<v8::Name>& property);
 
   // Return a BigInt object given v.
   v8::Local<v8::BigInt> GetBigInt(zeek_uint_t v);
@@ -99,9 +100,20 @@ class ZeekValWrapper {
       return l.get() < r.get();
     }
   };
-  using OffsetMap = std::map<std::string, int>;
-  using RecordOffsetMap = std::map<zeek::RecordTypePtr, OffsetMap, RecordTypeLess>;
-  RecordOffsetMap record_field_offsets;
+
+  // We identity hashes to offsets as well as strings to offsets in case
+  // there are collisions. We could probably ignore the latter.
+  using IdentityHashOffsetMap = std::map<int, int>;
+  using NameOffsetMap = std::map<std::string, int>;
+  using RecordIdentityHashOffsetMap =
+      std::map<zeek::RecordTypePtr, IdentityHashOffsetMap, RecordTypeLess>;
+  using RecordNameOffsetMap =
+      std::map<zeek::RecordTypePtr, NameOffsetMap, RecordTypeLess>;
+
+  RecordIdentityHashOffsetMap record_field_identity_hash_offsets;
+  RecordNameOffsetMap record_field_name_offsets;
+
+  void InitRecordOffsets(const zeek::RecordTypePtr& rt);
 
   // Zeek is keeping just 4096 counts, but SSL extensions or cipher codes
   // are all 16 bit, so pre-allocate 2**16 instead. The static memory usage

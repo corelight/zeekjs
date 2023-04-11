@@ -61,6 +61,12 @@ v8::Local<v8::String> v8_str(v8::Isolate* i, const char* s) {
   return v8::String::NewFromUtf8(i, s).ToLocalChecked();
 }
 
+v8::Local<v8::String> v8_bytes_str(v8::Isolate* i, const char* data, int length) {
+  return v8::String::NewFromOneByte(i, (const uint8_t*)data, v8::NewStringType::kNormal,
+                                    length)
+      .ToLocalChecked();
+}
+
 v8::Local<v8::String> v8_str_extern(v8::Isolate* i,
                                     zeek::Obj* obj,
                                     const char* data,
@@ -181,11 +187,19 @@ v8::Local<v8::Value> ZeekValWrapper::Wrap(const zeek::ValPtr& vp, int attr_mask)
       return v8::Number::New(isolate_, vp->AsTime());
     case zeek::TYPE_STRING: {
       auto sv = vp->AsStringVal();
-      if (sv->Len() == 0)
+      int len = sv->Len();
+      if (len == 0)
         return v8::String::Empty(isolate_);
 
       auto data = reinterpret_cast<const char*>(sv->Bytes());
-      return v8_str_extern(isolate_, sv, data, sv->Len());
+
+      // If we could figure out here that this is actually a
+      // conn uid, we may be able to pass a hint to internalize
+      // the string so that it's de-duplicated :-/
+      if (len <= 1024)
+        return ::v8_bytes_str(isolate_, data, len);
+
+      return v8_str_extern(isolate_, sv, data, len);
     }
     case zeek::TYPE_ADDR:
       return v8_str(vp->AsAddr().AsString().c_str());

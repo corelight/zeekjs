@@ -87,7 +87,7 @@ For example::
     $ zeek-config --version
     4.1.1
 
-    $ ./configure --with-nodejs/opt/node-16
+    $ ./configure --with-nodejs=/opt/node-16
     $ make
     $ sudo make install
 

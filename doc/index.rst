@@ -93,10 +93,9 @@ For example::
 
 If everything worked out the plugin should be available available::
 
-   $ zeek -NN Corelight::ZeekJS
-   Corelight::ZeekJS - Experimental JavaScript support for Zeek (dynamic, version 0.1.0)
+   $ zeek -NN Zeek::JavaScript
+   Zeek::JavaScript - Experimental JavaScript support for Zeek (dynamic, version 0.7.0)
        Implements LoadFile (priority 0)
-       Implements DrainEvents (priority 0)
 
 
 Hello, Zeek!

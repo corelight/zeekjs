@@ -85,6 +85,8 @@ if ( NODEJS_INCLUDE_DIR )
     string(REGEX REPLACE "^.*NODE_MINOR_VERSION ([0-9]+)$" "\\1" NODEJS_MINOR_VERSION "${NODEJS_MINOR_VERSION_H}")
     string(REGEX REPLACE "^.*NODE_PATCH_VERSION ([0-9]+)$" "\\1" NODEJS_PATCH_VERSION "${NODEJS_PATCH_VERSION_H}")
 
+    set(NODEJS_VERSION "${NODEJS_MAJOR_VERSION}.${NODEJS_MINOR_VERSION}.${NODEJS_PATCH_VERSION}")
+
     # If libnode was built with a shared libuv, ensure we add libuv
     # into NODEJS_LIBRARIES. Specifically when building Zeek with ZeekJS
     # builtin, libuv needs to be propagated as a link dependency to
@@ -99,10 +101,7 @@ if ( NODEJS_INCLUDE_DIR )
             break ()
         endif ()
     endforeach ()
-
 endif ()
-
-set(NODEJS_VERSION "${NODEJS_MAJOR_VERSION}.${NODEJS_MINOR_VERSION}.${NODEJS_PATCH_VERSION}")
 
 find_package_handle_standard_args(Nodejs
     REQUIRED_VARS NODEJS_INCLUDE_DIR UV_INCLUDE_DIR V8_CONFIG_INCLUDE_DIR NODEJS_LIBRARY

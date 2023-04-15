@@ -29,6 +29,10 @@ class ZeekValWrapper {
   // uses below callbacks.
   //
   v8::Local<v8::Value> Wrap(const zeek::ValPtr& vp, int attr_mask = 0);
+  v8::Local<v8::Value> wrap_port(const zeek::ValPtr& vp);
+  v8::Local<v8::Value> wrap_string(const zeek::ValPtr& vp);
+  v8::Local<v8::Value> wrap_vector(const zeek::ValPtr& vp);
+  v8::Local<v8::Value> wrap_table(const zeek::ValPtr& vp);
 
   struct Result {
     bool ok;
@@ -84,9 +88,15 @@ class ZeekValWrapper {
   v8::Isolate* isolate_;
   v8::Global<v8::ObjectTemplate> record_template_;
   v8::Global<v8::ObjectTemplate> table_template_;
+  v8::Global<v8::ObjectTemplate> port_template_;
+  v8::Global<v8::Function> port_toJSON_function_;
   v8::Global<v8::String> port_str_;
   v8::Global<v8::String> proto_str_;
   v8::Global<v8::String> toJSON_str_;
+  std::array<v8::Global<v8::String>, NUM_PORT_SPACES> transport_proto_str_map_;
+  std::array<v8::Global<v8::Object>, static_cast<size_t>(NUM_PORT_SPACES) * 65536>
+      port_cache_;
+
   // v8::Objects that have a private property with this key
   // are ZeekValWraps and we can Unwrap them directly. This
   // is done much nicer in node with napi_type_tag_object().

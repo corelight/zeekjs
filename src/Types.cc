@@ -425,6 +425,13 @@ v8::Local<v8::Value> ZeekValWrapper::wrap_table(const zeek::ValPtr& vp) {
   }
 }
 
+v8::Local<v8::Value> ZeekValWrapper::wrap_enum(const zeek::ValPtr& vp) {
+  zeek::EnumVal* ev = vp->AsEnumVal();
+  zeek::EnumType* et = vp->GetType()->AsEnumType();
+  const char* name = et->Lookup(ev->AsEnum());
+  return v8_str_extern(isolate_, et, name);
+}
+
 v8::Local<v8::Value> ZeekValWrapper::Wrap(const zeek::ValPtr& vp, int attr_mask) {
   // For nil/empty, return undefined. Expect the caller to figure
   // out if this is the right value. E.g. for void functions.
@@ -461,12 +468,8 @@ v8::Local<v8::Value> ZeekValWrapper::Wrap(const zeek::ValPtr& vp, int attr_mask)
       return wrap_vector(vp);
     case zeek::TYPE_TABLE:
       return wrap_table(vp);
-    case zeek::TYPE_ENUM: {
-      zeek::EnumVal* ev = vp->AsEnumVal();
-      zeek::EnumType* et = vp->GetType()->AsEnumType();
-      const char* name = et->Lookup(ev->AsEnum());
-      return v8_str_extern(isolate_, et, name);
-    }
+    case zeek::TYPE_ENUM:
+      return wrap_enum(vp);
     case zeek::TYPE_LIST: {  // types (?)
       v8::Local<v8::Context> context = isolate_->GetCurrentContext();
       zeek::ListVal* lval = vp->AsListVal();

@@ -38,6 +38,7 @@ class ZeekValWrapper {
   v8::Local<v8::Value> wrap_string(const zeek::ValPtr& vp);
   v8::Local<v8::Value> wrap_vector(const zeek::ValPtr& vp);
   v8::Local<v8::Value> wrap_table(const zeek::ValPtr& vp);
+  v8::Local<v8::Value> wrap_enum(const zeek::ValPtr& vp);
 
   struct Result {
     bool ok;

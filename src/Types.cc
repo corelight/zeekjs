@@ -187,64 +187,113 @@ ZeekValWrapper::ZeekValWrapper(v8::Isolate* isolate) : isolate_(isolate) {
   transport_proto_str_map_[TRANSPORT_ICMP].Reset(isolate_, v8_str_intern("icmp"));
 }
 
-void ZeekValWrapper::InitRecordOffsets(const zeek::RecordTypePtr& rt) {
+void ZeekValWrapper::init_record_infos(const zeek::RecordTypePtr& rt) {
+  v8::Local<v8::Context> context = isolate_->GetCurrentContext();
   IdentityHashOffsetMap ih_map;
   NameOffsetMap n_map;
   std::set<int> hash_collisions;
+  std::array<v8::Local<v8::Array>, 2> v8_field_names;
+
+  // Grumble: I'm not sure this will scale, but maybe we only ever
+  // have attribute log filtering and anything else is irrelevant
+  // (or we do not support oring together).
+  v8_field_names[ZEEKJS_ATTR_NONE] = v8::Array::New(isolate_);
+  v8_field_names[ZEEKJS_ATTR_LOG] = v8::Array::New(isolate_);
 
   for (int offset = 0; offset < rt->NumFields(); offset++) {
-    std::string field_name = rt->FieldName(offset);
+    const zeek::TypeDecl* const field_decl = rt->FieldDecl(offset);
+    std::string field_name = field_decl->id;
     v8::Local<v8::String> v8_field_name = v8_str_intern(field_name.c_str());
     int hash = v8_field_name->GetIdentityHash();
     if (ih_map.count(hash) == 0) {
       ih_map[hash] = offset;
     } else {
+      dprintf("collision %s %s for %s", field_name.c_str(), rt->FieldName(ih_map[hash]),
+              rt->GetName().c_str());
       hash_collisions.insert(hash);
     }
 
     n_map[field_name] = offset;
+
+    v8_field_names[ZEEKJS_ATTR_NONE]->Set(context, offset, v8_field_name).Check();
+    if (field_decl->GetAttr(zeek::detail::ATTR_LOG))
+      v8_field_names[ZEEKJS_ATTR_LOG]
+          ->Set(context, v8_field_names[ZEEKJS_ATTR_LOG]->Length(), v8_field_name)
+          .Check();
+  }
+
+  // Put toJSON with an offset of -1 so that lookups for it fail quickly.
+  static std::vector<std::string> no_offsets = {"toJSON", "toString"};
+  for (const auto& s : no_offsets) {
+    auto v8_str = v8::String::NewFromOneByte(
+                      isolate_, reinterpret_cast<const uint8_t*>(s.c_str()))
+                      .ToLocalChecked();
+    int hash = v8_str->GetIdentityHash();
+    if (ih_map.count(hash) == 0) {
+      ih_map[hash] = -1;
+    } else {
+      hash_collisions.insert(hash);
+    }
+
+    n_map[s] = -1;
   }
 
   // If there were any hash collisions, clear them.
   for (const auto& hash : hash_collisions)
     ih_map.erase(hash);
 
-  record_field_name_offsets.insert({rt, std::move(n_map)});
-  const auto& r = record_field_identity_hash_offsets.insert({rt, std::move(ih_map)});
+  RecordTypeInfo info{
+      .ih_map = std::move(ih_map),
+      .n_map = std::move(n_map),
+  };
+  info.v8_field_names[ZEEKJS_ATTR_NONE].Reset(isolate_,
+                                              v8_field_names[ZEEKJS_ATTR_NONE]);
+  info.v8_field_names[ZEEKJS_ATTR_LOG].Reset(isolate_, v8_field_names[ZEEKJS_ATTR_LOG]);
+
+  record_info_cache_.insert({rt, std::move(info)});
 }
 
 int ZeekValWrapper::GetRecordFieldOffset(const zeek::RecordTypePtr& rt,
                                          const v8::Local<v8::Name>& property) {
-  int identity_hash = property->GetIdentityHash();
-
-  if (const auto& it = record_field_identity_hash_offsets.find(rt);
-      it != record_field_identity_hash_offsets.end()) {
-    const auto& ih_map = it->second;
-    if (const auto& offset_it = ih_map.find(identity_hash); offset_it != ih_map.end()) {
-      return offset_it->second;
-    }
-
-    // Slow path: Make a string out of the property and look it up in the name map and
-    // if it's not there, then someone tried to get something that just doesn't exist.
-    v8::String::Utf8Value property_val(isolate_, property);
-    if (*property_val) {
-      std::string property_str(*property_val);
-      // std::fprintf(stderr, "Fallback via string %s::%s (%d)\n",
-      // rt->GetName().c_str(),
-      //             property_str.c_str(), identity_hash);
-      const auto& n_map = record_field_name_offsets[rt];
-      if (const auto& offset_it = n_map.find(property_str); offset_it != n_map.end()) {
-        return offset_it->second;
-      }
-    }
-
-    return -1;
+  const auto& it = record_info_cache_.find(rt);
+  if (it == record_info_cache_.end()) {
+    init_record_infos(rt);
+    return GetRecordFieldOffset(rt, property);
   }
 
-  // Not yet populated, do it now, then call recursively once.
-  InitRecordOffsets(rt);
+  const auto& info = it->second;
+  int identity_hash = property->GetIdentityHash();
 
-  return GetRecordFieldOffset(rt, property);
+  if (const auto& ih_it = info.ih_map.find(identity_hash); ih_it != info.ih_map.end()) {
+    return ih_it->second;
+  }
+
+  // Slow path: Make a string out of the property and look it up in the name map and
+  // if it's not there, then someone tried to get something that just doesn't exist.
+  v8::String::Utf8Value property_val(isolate_, property);
+  std::fprintf(stderr, "fallback for %s %s\n", rt->GetName().c_str(), *property_val);
+
+  if (*property_val) {
+    std::string property_str(*property_val);
+    // std::fprintf(stderr, "Fallback via string %s::%s (%d)\n",
+    // rt->GetName().c_str(),
+    //             property_str.c_str(), identity_hash);
+    if (const auto& n_it = info.n_map.find(property_str); n_it != info.n_map.end()) {
+      return n_it->second;
+    }
+  }
+
+  return -1;
+}
+
+v8::Local<v8::Array> ZeekValWrapper::GetRecordFieldNames(const zeek::RecordTypePtr& rt,
+                                                         int attr_mask) {
+  const auto& it = record_info_cache_.find(rt);
+  if (it == record_info_cache_.end()) {
+    init_record_infos(rt);
+    return GetRecordFieldNames(rt, attr_mask);
+  }
+  return it->second.v8_field_names[attr_mask].Get(isolate_);
 }
 
 v8::Local<v8::BigInt> ZeekValWrapper::GetBigInt(zeek_uint_t v) {
@@ -1144,32 +1193,14 @@ void ZeekValWrapper::ZeekRecordSetter(v8::Local<v8::Name> property,
 // Callback for enumerating the properties of a record.
 void ZeekValWrapper::ZeekRecordEnumerator(
     const v8::PropertyCallbackInfo<v8::Array>& info) {
-  v8::Isolate* isolate = info.GetIsolate();
   v8::Local<v8::Object> receiver = info.This();
   auto wrap =
       static_cast<ZeekValWrap*>(receiver->GetAlignedPointerFromInternalField(0));
   auto rval = static_cast<zeek::RecordVal*>(wrap->GetVal());
-  zeek::RecordType* rt = rval->GetType()->AsRecordType();
-
-  std::vector<v8::Local<v8::Value>> names;
-  names.reserve(rt->NumFields());
-
+  const auto& rt = rval->GetType<zeek::RecordType>();
   int attr_mask = wrap->GetAttrMask();
 
-  for (int i = 0; i < rt->NumFields(); i++) {
-    const zeek::TypeDecl* const field_decl = rt->FieldDecl(i);
-    // Somewhat ad-hoc attribute filtering here.
-    if (attr_mask & ZEEKJS_ATTR_LOG &&
-        field_decl->GetAttr(zeek::detail::ATTR_LOG) == zeek::detail::Attr::nil) {
-      continue;
-    }
-    v8::Local<v8::String> field_name =
-        ::v8_str_extern(isolate, rt, field_decl->id, strlen(field_decl->id));
-    names.emplace_back(v8::Local<v8::Name>::Cast(field_name));
-  }
-
-  v8::Local<v8::Array> array = v8::Array::New(isolate, names.data(), names.size());
-  info.GetReturnValue().Set(array);
+  info.GetReturnValue().Set(wrap->GetWrapper()->GetRecordFieldNames(rt, attr_mask));
 }
 
 // Implement Query for Zeek records.

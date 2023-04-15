@@ -4,6 +4,7 @@
 
 #include "zeek/Val.h"
 
+const int ZEEKJS_ATTR_NONE = 0;
 const int ZEEKJS_ATTR_LOG = 1;
 
 class ZeekValWrap;
@@ -16,6 +17,10 @@ class ZeekValWrapper {
   // Get the record field offset for this field, or -1 if not existing.
   int GetRecordFieldOffset(const zeek::RecordTypePtr& rt,
                            const v8::Local<v8::Name>& property);
+
+  // Return a V8 array representing the field names of a record type.
+  v8::Local<v8::Array> GetRecordFieldNames(const zeek::RecordTypePtr& rt,
+                                           int attr_mask);
 
   // Return a BigInt object given v.
   v8::Local<v8::BigInt> GetBigInt(zeek_uint_t v);
@@ -115,15 +120,19 @@ class ZeekValWrapper {
   // there are collisions. We could probably ignore the latter.
   using IdentityHashOffsetMap = std::map<int, int>;
   using NameOffsetMap = std::map<std::string, int>;
-  using RecordIdentityHashOffsetMap =
-      std::map<zeek::RecordTypePtr, IdentityHashOffsetMap, RecordTypeLess>;
-  using RecordNameOffsetMap =
-      std::map<zeek::RecordTypePtr, NameOffsetMap, RecordTypeLess>;
 
-  RecordIdentityHashOffsetMap record_field_identity_hash_offsets;
-  RecordNameOffsetMap record_field_name_offsets;
+  struct RecordTypeInfo {
+    IdentityHashOffsetMap ih_map;
+    NameOffsetMap n_map;
+    // Index 0 is without an attr_mask, index 1 is with ZEEKJS_ATTR_LOG
+    std::array<v8::Global<v8::Array>, 2> v8_field_names;
+  };
 
-  void InitRecordOffsets(const zeek::RecordTypePtr& rt);
+  std::map<zeek::RecordTypePtr, RecordTypeInfo, RecordTypeLess> record_info_cache_;
+
+  // Populate the record_info_cache_ with information about this
+  // record.
+  void init_record_infos(const zeek::RecordTypePtr& rt);
 
   // Zeek is keeping just 4096 counts, but SSL extensions or cipher codes
   // are all 16 bit, so pre-allocate 2**16 instead. The static memory usage

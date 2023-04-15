@@ -1176,15 +1176,14 @@ void ZeekValWrapper::ZeekRecordEnumerator(
 void ZeekValWrapper::ZeekRecordQuery(
     v8::Local<v8::Name> property,
     const v8::PropertyCallbackInfo<v8::Integer>& info) {
-  v8::Isolate* isolate = info.GetIsolate();
   v8::Local<v8::Object> receiver = info.This();
   auto wrap =
       static_cast<ZeekValWrap*>(receiver->GetAlignedPointerFromInternalField(0));
   auto rval = static_cast<zeek::RecordVal*>(wrap->GetVal());
+  const auto& rt = rval->GetType<zeek::RecordType>();
 
-  v8::String::Utf8Value arg(isolate, property);
-
-  if (*arg && plugin::Corelight_ZeekJS::compat::Record_has_field(rval, *arg)) {
+  auto offset = wrap->GetWrapper()->GetRecordFieldOffset(rt, property);
+  if (offset >= 0) {
     info.GetReturnValue().Set(v8::PropertyAttribute::ReadOnly);
   }
 }

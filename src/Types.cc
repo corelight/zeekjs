@@ -88,6 +88,8 @@ v8::Local<v8::String> v8_str_extern(v8::Isolate* i,
 ZeekValWrapper::ZeekValWrapper(v8::Isolate* isolate) : isolate_(isolate) {
   wrap_private_key_.Reset(isolate,
                           v8::Private::ForApi(isolate, v8_str("zeekjs::object::tag")));
+
+  // Object template for records
   v8::Local<v8::ObjectTemplate> record_template = v8::ObjectTemplate::New(isolate_);
   record_template->SetInternalFieldCount(1);
   record_template->SetPrivate(GetWrapPrivateKey(isolate), v8::True(isolate),
@@ -101,6 +103,7 @@ ZeekValWrapper::ZeekValWrapper(v8::Isolate* isolate) : isolate_(isolate) {
 
   record_template_.Reset(isolate_, record_template);
 
+  // Object template for tables
   v8::Local<v8::ObjectTemplate> table_template = v8::ObjectTemplate::New(isolate_);
   table_template->SetInternalFieldCount(1);
 
@@ -118,69 +121,179 @@ ZeekValWrapper::ZeekValWrapper(v8::Isolate* isolate) : isolate_(isolate) {
 
   table_template_.Reset(isolate, table_template);
 
+  // Object template for ports
+  //
+  // They have three internal fields representing port as number and proto
+  // as string and the custom toJSON method returns just the port number.
+  //
+  // There's probably a less convoluted way to do that efficiently.
+  v8::Local<v8::ObjectTemplate> port_template = v8::ObjectTemplate::New(isolate_);
+  port_template->SetInternalFieldCount(3);
+
+  v8::FunctionCallback toJSON_callback =
+      [](const v8::FunctionCallbackInfo<v8::Value>& info) -> void {
+    v8::Local<v8::Object> receiver = info.This();
+    info.GetReturnValue().Set(receiver->GetInternalField(0));
+  };
+
+  port_toJSON_function_.Reset(
+      isolate_,
+      v8::Function::New(isolate_->GetCurrentContext(), toJSON_callback,
+                        v8::Local<v8::Value>(), 0, v8::ConstructorBehavior::kThrow,
+                        v8::SideEffectType::kHasNoSideEffect)
+          .ToLocalChecked());
+
+  v8::AccessorGetterCallback toJSON_cb =
+      [](v8::Local<v8::String> property,
+         const v8::PropertyCallbackInfo<v8::Value>& info) {
+        info.GetReturnValue().Set(info.This()->GetInternalField(2));
+      };
+
+  port_template->SetAccessor(v8_str_intern("toJSON"), toJSON_cb, nullptr,
+                             v8::Local<v8::Value>(), v8::AccessControl::DEFAULT,
+                             v8::PropertyAttribute(v8::PropertyAttribute::DontEnum |
+                                                   v8::PropertyAttribute::ReadOnly),
+                             v8::SideEffectType::kHasNoSideEffect);
+
+  v8::AccessorGetterCallback port_cb =
+      [](v8::Local<v8::String> property,
+         const v8::PropertyCallbackInfo<v8::Value>& info) {
+        info.GetReturnValue().Set(info.This()->GetInternalField(0));
+      };
+  port_template->SetAccessor(v8_str_intern("port"), port_cb, nullptr,
+                             v8::Local<v8::Value>(), v8::AccessControl::DEFAULT,
+                             v8::PropertyAttribute::ReadOnly,
+                             v8::SideEffectType::kHasNoSideEffect);
+
+  v8::AccessorGetterCallback proto_cb =
+      [](v8::Local<v8::String> property,
+         const v8::PropertyCallbackInfo<v8::Value>& info) {
+        info.GetIsolate();
+        info.GetReturnValue().Set(info.This()->GetInternalField(1));
+      };
+  port_template->SetAccessor(v8_str_intern("proto"), proto_cb, nullptr,
+                             v8::Local<v8::Value>(), v8::AccessControl::DEFAULT,
+                             v8::PropertyAttribute::ReadOnly,
+                             v8::SideEffectType::kHasNoSideEffect);
+  port_template_.Reset(isolate_, port_template);
+
   port_str_.Reset(isolate, v8_str_intern("port"));
   proto_str_.Reset(isolate, v8_str_intern("proto"));
   toJSON_str_.Reset(isolate, v8_str_intern("toJSON"));
+
+  transport_proto_str_map_[TRANSPORT_UNKNOWN].Reset(isolate_, v8_str_intern("unknown"));
+  transport_proto_str_map_[TRANSPORT_TCP].Reset(isolate_, v8_str_intern("tcp"));
+  transport_proto_str_map_[TRANSPORT_UDP].Reset(isolate_, v8_str_intern("udp"));
+  transport_proto_str_map_[TRANSPORT_ICMP].Reset(isolate_, v8_str_intern("icmp"));
 }
 
-void ZeekValWrapper::InitRecordOffsets(const zeek::RecordTypePtr& rt) {
+void ZeekValWrapper::init_record_infos(const zeek::RecordTypePtr& rt) {
+  v8::Local<v8::Context> context = isolate_->GetCurrentContext();
   IdentityHashOffsetMap ih_map;
   NameOffsetMap n_map;
   std::set<int> hash_collisions;
+  std::array<v8::Local<v8::Array>, 2> v8_field_names;
+
+  // Grumble: I'm not sure this will scale, but maybe we only ever
+  // have attribute log filtering and anything else is irrelevant
+  // (or we do not support oring together).
+  v8_field_names[ZEEKJS_ATTR_NONE] = v8::Array::New(isolate_);
+  v8_field_names[ZEEKJS_ATTR_LOG] = v8::Array::New(isolate_);
 
   for (int offset = 0; offset < rt->NumFields(); offset++) {
-    std::string field_name = rt->FieldName(offset);
+    const zeek::TypeDecl* const field_decl = rt->FieldDecl(offset);
+    std::string field_name = field_decl->id;
     v8::Local<v8::String> v8_field_name = v8_str_intern(field_name.c_str());
     int hash = v8_field_name->GetIdentityHash();
     if (ih_map.count(hash) == 0) {
       ih_map[hash] = offset;
     } else {
+      dprintf("collision %s %s for %s", field_name.c_str(), rt->FieldName(ih_map[hash]),
+              rt->GetName().c_str());
       hash_collisions.insert(hash);
     }
 
     n_map[field_name] = offset;
+
+    v8_field_names[ZEEKJS_ATTR_NONE]->Set(context, offset, v8_field_name).Check();
+    if (field_decl->GetAttr(zeek::detail::ATTR_LOG))
+      v8_field_names[ZEEKJS_ATTR_LOG]
+          ->Set(context, v8_field_names[ZEEKJS_ATTR_LOG]->Length(), v8_field_name)
+          .Check();
+  }
+
+  // Put toJSON with an offset of -1 so that lookups for it fail quickly.
+  static std::vector<std::string> no_offsets = {"toJSON", "toString"};
+  for (const auto& s : no_offsets) {
+    auto v8_str = v8::String::NewFromOneByte(
+                      isolate_, reinterpret_cast<const uint8_t*>(s.c_str()))
+                      .ToLocalChecked();
+    int hash = v8_str->GetIdentityHash();
+    if (ih_map.count(hash) == 0) {
+      ih_map[hash] = -1;
+    } else {
+      hash_collisions.insert(hash);
+    }
+
+    n_map[s] = -1;
   }
 
   // If there were any hash collisions, clear them.
   for (const auto& hash : hash_collisions)
     ih_map.erase(hash);
 
-  record_field_name_offsets.insert({rt, std::move(n_map)});
-  const auto& r = record_field_identity_hash_offsets.insert({rt, std::move(ih_map)});
+  RecordTypeInfo info{
+      .ih_map = std::move(ih_map),
+      .n_map = std::move(n_map),
+  };
+  info.v8_field_names[ZEEKJS_ATTR_NONE].Reset(isolate_,
+                                              v8_field_names[ZEEKJS_ATTR_NONE]);
+  info.v8_field_names[ZEEKJS_ATTR_LOG].Reset(isolate_, v8_field_names[ZEEKJS_ATTR_LOG]);
+
+  record_info_cache_.insert({rt, std::move(info)});
 }
 
 int ZeekValWrapper::GetRecordFieldOffset(const zeek::RecordTypePtr& rt,
                                          const v8::Local<v8::Name>& property) {
-  int identity_hash = property->GetIdentityHash();
-
-  if (const auto& it = record_field_identity_hash_offsets.find(rt);
-      it != record_field_identity_hash_offsets.end()) {
-    const auto& ih_map = it->second;
-    if (const auto& offset_it = ih_map.find(identity_hash); offset_it != ih_map.end()) {
-      return offset_it->second;
-    }
-
-    // Slow path: Make a string out of the property and look it up in the name map and
-    // if it's not there, then someone tried to get something that just doesn't exist.
-    v8::String::Utf8Value property_val(isolate_, property);
-    if (*property_val) {
-      std::string property_str(*property_val);
-      // std::fprintf(stderr, "Fallback via string %s::%s (%d)\n",
-      // rt->GetName().c_str(),
-      //             property_str.c_str(), identity_hash);
-      const auto& n_map = record_field_name_offsets[rt];
-      if (const auto& offset_it = n_map.find(property_str); offset_it != n_map.end()) {
-        return offset_it->second;
-      }
-    }
-
-    return -1;
+  const auto& it = record_info_cache_.find(rt);
+  if (it == record_info_cache_.end()) {
+    init_record_infos(rt);
+    return GetRecordFieldOffset(rt, property);
   }
 
-  // Not yet populated, do it now, then call recursively once.
-  InitRecordOffsets(rt);
+  const auto& info = it->second;
+  int identity_hash = property->GetIdentityHash();
 
-  return GetRecordFieldOffset(rt, property);
+  if (const auto& ih_it = info.ih_map.find(identity_hash); ih_it != info.ih_map.end()) {
+    return ih_it->second;
+  }
+
+  // Slow path: Make a string out of the property and look it up in the name map and
+  // if it's not there, then someone tried to get something that just doesn't exist.
+  v8::String::Utf8Value property_val(isolate_, property);
+  std::fprintf(stderr, "fallback for %s %s\n", rt->GetName().c_str(), *property_val);
+
+  if (*property_val) {
+    std::string property_str(*property_val);
+    // std::fprintf(stderr, "Fallback via string %s::%s (%d)\n",
+    // rt->GetName().c_str(),
+    //             property_str.c_str(), identity_hash);
+    if (const auto& n_it = info.n_map.find(property_str); n_it != info.n_map.end()) {
+      return n_it->second;
+    }
+  }
+
+  return -1;
+}
+
+v8::Local<v8::Array> ZeekValWrapper::GetRecordFieldNames(const zeek::RecordTypePtr& rt,
+                                                         int attr_mask) {
+  const auto& it = record_info_cache_.find(rt);
+  if (it == record_info_cache_.end()) {
+    init_record_infos(rt);
+    return GetRecordFieldNames(rt, attr_mask);
+  }
+  return it->second.v8_field_names[attr_mask].Get(isolate_);
 }
 
 v8::Local<v8::BigInt> ZeekValWrapper::GetBigInt(zeek_uint_t v) {
@@ -210,9 +323,116 @@ v8::Local<v8::Object> ZeekValWrapper::WrapAsObject(const zeek::ValPtr& vp,
   return wrap->GetHandle(isolate_);
 }
 
-v8::Local<v8::Value> ZeekValWrapper::Wrap(const zeek::ValPtr& vp, int attr_mask) {
-  v8::Local<v8::Context> context = isolate_->GetCurrentContext();
+v8::Local<v8::Value> ZeekValWrapper::wrap_port(const zeek::ValPtr& vp) {
+  zeek::PortVal* pvp = vp->AsPortVal();
 
+  int cache_idx =
+      static_cast<int>(pvp->PortType()) * 65536 + static_cast<int>(pvp->Port());
+  if (!port_cache_[cache_idx].IsEmpty()) {
+    return port_cache_[cache_idx].Get(isolate_);
+  }
+
+  v8::Local<v8::Context> context = isolate_->GetCurrentContext();
+  v8::Local<v8::Object> obj =
+      port_template_.Get(isolate_)->NewInstance(context).ToLocalChecked();
+
+  v8::Local<v8::Number> port = v8::Number::New(isolate_, pvp->Port());
+  v8::Local<v8::String> proto =
+      transport_proto_str_map_.at(pvp->PortType()).Get(isolate_);
+
+  obj->SetInternalField(0, port);
+  obj->SetInternalField(1, proto);
+  obj->SetInternalField(2, port_toJSON_function_.Get(isolate_));
+
+  port_cache_[cache_idx].Reset(isolate_, obj);
+
+  return obj;
+}
+
+v8::Local<v8::Value> ZeekValWrapper::wrap_string(const zeek::ValPtr& vp) {
+  auto sv = vp->AsStringVal();
+  int len = sv->Len();
+  if (len == 0)
+    return v8::String::Empty(isolate_);
+
+  auto data = reinterpret_cast<const char*>(sv->Bytes());
+
+  // If we could figure out here that this is actually a
+  // conn uid, we may be able to pass a hint to internalize
+  // the string so that it's de-duplicated :-/
+  if (len <= 1024)
+    return ::v8_bytes_str(isolate_, data, len);
+
+  return v8_str_extern(isolate_, sv, data, len);
+}
+
+v8::Local<v8::Value> ZeekValWrapper::wrap_vector(const zeek::ValPtr& vp) {
+  // Hmm, hmm, maybe we could make this lazy and not
+  // construct the full array.
+  zeek::VectorVal* vv = vp->AsVectorVal();
+
+  // Could fix, but for now error and return undefined..
+  if (vv->Size() > INT_MAX) {
+    eprintf("Too many entries in vector: %u", vv->Size());
+    return v8::Undefined(isolate_);
+  }
+  auto size = static_cast<int>(vv->Size());
+  std::vector<v8::Local<v8::Value>> elements;
+  elements.reserve(size);
+  for (int i = 0; i < size; i++) {
+    zeek::ValPtr vp = plugin::Corelight_ZeekJS::compat::Vector_val_at(vv, i);
+    elements.emplace_back(Wrap(vp));
+  }
+  return v8::Array::New(isolate_, elements.data(), size);
+}
+
+v8::Local<v8::Value> ZeekValWrapper::wrap_table(const zeek::ValPtr& vp) {
+  v8::Local<v8::Context> context = isolate_->GetCurrentContext();
+  zeek::TableVal* tval = vp->AsTableVal();
+  // dprintf("Table tval=%p", tval);
+  if (tval->GetType()->IsSet()) {
+    zeek::TableTypePtr tt = tval->GetType<zeek::TableType>();
+    auto index_size = tt->GetIndexTypes().size();
+    zeek::ListValPtr lv = tval->ToListVal();
+
+    // Set of functions: return null for backwards compat
+    if (index_size == 1 && tt->GetIndexTypes()[0]->Tag() == zeek::TYPE_FUNC)
+      return v8::Null(isolate_);
+
+    // For expedience, at this point, a set is
+    // simply converted to an array. There's Set()
+    // but that's not JSON stringify'ble, so...
+    auto size = lv->Length();
+    v8::Local<v8::Array> array = v8::Array::New(isolate_, size);
+    for (int i = 0; i < size; i++) {
+      auto& v = lv->Idx(i);
+      if (index_size == 1)
+        array->Set(context, i, Wrap(v->AsListVal()->Idx(0))).Check();
+      else
+        array->Set(context, i, Wrap(v)).Check();
+    }
+    return array;
+  } else {
+    // TODO: Precheck for multi keys and just crash or ignore
+    //       or whatever.
+    //
+    // If it's an actual table, use the table_template
+    v8::Local<v8::ObjectTemplate> tmpl = table_template_.Get(isolate_);
+    v8::Local<v8::Object> obj = tmpl->NewInstance(context).ToLocalChecked();
+
+    ZeekValWrap* wrap = ZeekValWrap::Make(isolate_, this, obj, tval->Ref());
+    return wrap->GetHandle(isolate_);
+  }
+}
+
+v8::Local<v8::Value> ZeekValWrapper::wrap_enum(const zeek::ValPtr& vp) {
+  zeek::EnumVal* ev = vp->AsEnumVal();
+  zeek::EnumType* et = vp->GetType()->AsEnumType();
+  const char* name = et->Lookup(ev->AsEnum());
+  return v8_str_extern(isolate_, et, name);
+}
+
+v8::Local<v8::Value> ZeekValWrapper::Wrap(const zeek::ValPtr& vp, int attr_mask) {
   // For nil/empty, return undefined. Expect the caller to figure
   // out if this is the right value. E.g. for void functions.
   if (vp == zeek::Val::nil)
@@ -234,119 +454,24 @@ v8::Local<v8::Value> ZeekValWrapper::Wrap(const zeek::ValPtr& vp, int attr_mask)
       return v8::Number::New(isolate_, vp->AsInterval());
     case zeek::TYPE_TIME:
       return v8::Number::New(isolate_, vp->AsTime());
-    case zeek::TYPE_STRING: {
-      auto sv = vp->AsStringVal();
-      int len = sv->Len();
-      if (len == 0)
-        return v8::String::Empty(isolate_);
-
-      auto data = reinterpret_cast<const char*>(sv->Bytes());
-
-      // If we could figure out here that this is actually a
-      // conn uid, we may be able to pass a hint to internalize
-      // the string so that it's de-duplicated :-/
-      if (len <= 1024)
-        return ::v8_bytes_str(isolate_, data, len);
-
-      return v8_str_extern(isolate_, sv, data, len);
-    }
+    case zeek::TYPE_STRING:
+      return wrap_string(vp);
     case zeek::TYPE_ADDR:
       return v8_str(vp->AsAddr().AsString().c_str());
     case zeek::TYPE_SUBNET:
       return v8_str(vp->AsSubNet().AsString().c_str());
-    case zeek::TYPE_PORT: {
-      zeek::PortVal* pvp = vp->AsPortVal();
-      v8::Local<v8::Object> obj = v8::Object::New(isolate_);
-      obj->Set(context, port_str_.Get(isolate_), v8::Number::New(isolate_, pvp->Port()))
-          .Check();
-      obj->Set(context, proto_str_.Get(isolate_),
-               v8_str_intern(pvp->Protocol().c_str()))  // Should cache.
-          .Check();
-
-      static v8::FunctionCallback toJSON_callback =
-          [](const v8::FunctionCallbackInfo<v8::Value>& info) -> void {
-        v8::Local<v8::Object> receiver = info.This();
-        v8::Isolate* isolate = info.GetIsolate();
-        v8::Local<v8::Context> context = isolate->GetCurrentContext();
-        v8::Local<v8::Value> port =
-            receiver->Get(context, ::v8_str_intern(isolate, "port")).ToLocalChecked();
-
-        info.GetReturnValue().Set(port);
-      };
-      auto toJSON_func = v8::Function::New(context, toJSON_callback).ToLocalChecked();
-
-      obj->Set(context, toJSON_str_.Get(isolate_), toJSON_func).Check();
-
-      return obj;
-    }
-    case zeek::TYPE_RECORD: {
+    case zeek::TYPE_PORT:
+      return wrap_port(vp);
+    case zeek::TYPE_RECORD:
       return WrapAsObject(vp, attr_mask);
-    }
-
-    case zeek::TYPE_VECTOR: {
-      // Hmm, hmm, maybe we could make this lazy and not
-      // construct the full array.
-      zeek::VectorVal* vv = vp->AsVectorVal();
-
-      // Could fix, but for now error and return undefined..
-      if (vv->Size() > INT_MAX) {
-        eprintf("Too many entries in vector: %u", vv->Size());
-        return v8::Undefined(isolate_);
-      }
-      auto size = static_cast<int>(vv->Size());
-      std::vector<v8::Local<v8::Value>> elements;
-      elements.reserve(size);
-      for (int i = 0; i < size; i++) {
-        zeek::ValPtr vp = plugin::Corelight_ZeekJS::compat::Vector_val_at(vv, i);
-        elements.emplace_back(Wrap(vp));
-      }
-      return v8::Array::New(isolate_, elements.data(), size);
-    }
-
-    case zeek::TYPE_TABLE: {
-      zeek::TableVal* tval = vp->AsTableVal();
-      // dprintf("Table tval=%p", tval);
-      if (tval->GetType()->IsSet()) {
-        zeek::TableTypePtr tt = tval->GetType<zeek::TableType>();
-        auto index_size = tt->GetIndexTypes().size();
-        zeek::ListValPtr lv = tval->ToListVal();
-
-        // Set of functions: return null for backwards compat
-        if (index_size == 1 && tt->GetIndexTypes()[0]->Tag() == zeek::TYPE_FUNC)
-          return v8::Null(isolate_);
-
-        // For expedience, at this point, a set is
-        // simply converted to an array. There's Set()
-        // but that's not JSON stringify'ble, so...
-        auto size = lv->Length();
-        v8::Local<v8::Array> array = v8::Array::New(isolate_, size);
-        for (int i = 0; i < size; i++) {
-          auto& v = lv->Idx(i);
-          if (index_size == 1)
-            array->Set(context, i, Wrap(v->AsListVal()->Idx(0))).Check();
-          else
-            array->Set(context, i, Wrap(v)).Check();
-        }
-        return array;
-      } else {
-        // TODO: Precheck for multi keys and just crash or ignore
-        //       or whatever.
-        //
-        // If it's an actual table, use the table_template
-        v8::Local<v8::ObjectTemplate> tmpl = table_template_.Get(isolate_);
-        v8::Local<v8::Object> obj = tmpl->NewInstance(context).ToLocalChecked();
-
-        ZeekValWrap* wrap = ZeekValWrap::Make(isolate_, this, obj, tval->Ref());
-        return wrap->GetHandle(isolate_);
-      }
-    }
-    case zeek::TYPE_ENUM: {
-      zeek::EnumVal* ev = vp->AsEnumVal();
-      zeek::EnumType* et = vp->GetType()->AsEnumType();
-      const char* name = et->Lookup(ev->AsEnum());
-      return v8_str_extern(isolate_, et, name);
-    }
+    case zeek::TYPE_VECTOR:
+      return wrap_vector(vp);
+    case zeek::TYPE_TABLE:
+      return wrap_table(vp);
+    case zeek::TYPE_ENUM:
+      return wrap_enum(vp);
     case zeek::TYPE_LIST: {  // types (?)
+      v8::Local<v8::Context> context = isolate_->GetCurrentContext();
       zeek::ListVal* lval = vp->AsListVal();
       int size = lval->Length();
       v8::Local<v8::Array> array = v8::Array::New(isolate_, size);
@@ -1071,47 +1196,28 @@ void ZeekValWrapper::ZeekRecordSetter(v8::Local<v8::Name> property,
 // Callback for enumerating the properties of a record.
 void ZeekValWrapper::ZeekRecordEnumerator(
     const v8::PropertyCallbackInfo<v8::Array>& info) {
-  v8::Isolate* isolate = info.GetIsolate();
   v8::Local<v8::Object> receiver = info.This();
   auto wrap =
       static_cast<ZeekValWrap*>(receiver->GetAlignedPointerFromInternalField(0));
   auto rval = static_cast<zeek::RecordVal*>(wrap->GetVal());
-  zeek::RecordType* rt = rval->GetType()->AsRecordType();
-
-  std::vector<v8::Local<v8::Value>> names;
-  names.reserve(rt->NumFields());
-
+  const auto& rt = rval->GetType<zeek::RecordType>();
   int attr_mask = wrap->GetAttrMask();
 
-  for (int i = 0; i < rt->NumFields(); i++) {
-    const zeek::TypeDecl* const field_decl = rt->FieldDecl(i);
-    // Somewhat ad-hoc attribute filtering here.
-    if (attr_mask & ZEEKJS_ATTR_LOG &&
-        field_decl->GetAttr(zeek::detail::ATTR_LOG) == zeek::detail::Attr::nil) {
-      continue;
-    }
-    v8::Local<v8::String> field_name =
-        ::v8_str_extern(isolate, rt, field_decl->id, strlen(field_decl->id));
-    names.emplace_back(v8::Local<v8::Name>::Cast(field_name));
-  }
-
-  v8::Local<v8::Array> array = v8::Array::New(isolate, names.data(), names.size());
-  info.GetReturnValue().Set(array);
+  info.GetReturnValue().Set(wrap->GetWrapper()->GetRecordFieldNames(rt, attr_mask));
 }
 
 // Implement Query for Zeek records.
 void ZeekValWrapper::ZeekRecordQuery(
     v8::Local<v8::Name> property,
     const v8::PropertyCallbackInfo<v8::Integer>& info) {
-  v8::Isolate* isolate = info.GetIsolate();
   v8::Local<v8::Object> receiver = info.This();
   auto wrap =
       static_cast<ZeekValWrap*>(receiver->GetAlignedPointerFromInternalField(0));
   auto rval = static_cast<zeek::RecordVal*>(wrap->GetVal());
+  const auto& rt = rval->GetType<zeek::RecordType>();
 
-  v8::String::Utf8Value arg(isolate, property);
-
-  if (*arg && plugin::Corelight_ZeekJS::compat::Record_has_field(rval, *arg)) {
+  auto offset = wrap->GetWrapper()->GetRecordFieldOffset(rt, property);
+  if (offset >= 0) {
     info.GetReturnValue().Set(v8::PropertyAttribute::ReadOnly);
   }
 }

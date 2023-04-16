@@ -5,3 +5,5 @@ Wrong type for record
 Caught it: Expected object as first argument
 Plain object
 Caught it: Obj does not wrap a Zeek value
+Bad mask
+Caught it: invalid attribute mask - only 0 or 1 allowed

@@ -316,6 +316,13 @@ void Instance::ZeekSelectFieldsCallback(
   }
   int attr_mask = static_cast<int>(v8::Local<v8::Number>::Cast(args[1])->Value());
 
+  // Slightly ad-hoc protection from wrong attribute filtering masks.
+  if (attr_mask > ZEEKJS_ATTR_LOG) {
+    isolate->ThrowException(
+        v8_str(isolate, "invalid attribute mask - only 0 or 1 allowed"));
+    return;
+  }
+
   // dprintf("select_fields() wrap=%p vp=%p attr_mask=%x", wrap, wrap->GetVal(),
   //        attr_mask);
   ZeekValWrap* new_wrap = ZeekValWrap::Make(isolate, wrap->GetWrapper(), obj,

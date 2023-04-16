@@ -107,9 +107,12 @@ find_package_handle_standard_args(Nodejs
     REQUIRED_VARS NODEJS_INCLUDE_DIR UV_INCLUDE_DIR V8_CONFIG_INCLUDE_DIR NODEJS_LIBRARY
     VERSION_VAR NODEJS_VERSION
 )
-set(NODEJS_LIBRARIES ${NODEJS_LIBRARY} ${LibUV_LIBRARIES})
 
-message(STATUS "     version: ${NODEJS_VERSION}")
-message(STATUS "   libraries: ${NODEJS_LIBRARIES}")
-message(STATUS "        uv.h: ${UV_INCLUDE_DIR}")
-message(STATUS "  v8config.h: ${V8_CONFIG_INCLUDE_DIR}")
+if ( Nodejs_FOUND )
+  set(NODEJS_LIBRARIES ${NODEJS_LIBRARY} ${LibUV_LIBRARIES})
+
+  message(STATUS "     version: ${NODEJS_VERSION}")
+  message(STATUS "   libraries: ${NODEJS_LIBRARIES}")
+  message(STATUS "        uv.h: ${UV_INCLUDE_DIR}")
+  message(STATUS "  v8config.h: ${V8_CONFIG_INCLUDE_DIR}")
+endif ()

@@ -1,12 +1,9 @@
 #pragma once
-#include <chrono>
-using std::chrono::duration_cast;
-using std::chrono::microseconds;
-using std::chrono::seconds;
-using std::chrono::system_clock;
 
+#include <zeek/DebugLogger.h>
 #include <zeek/Event.h>
 #include <zeek/Stmt.h>
+#include <zeek/plugin/Plugin.h>
 
 namespace plugin::Corelight_ZeekJS::Js {
 
@@ -31,28 +28,20 @@ class HookHandler {
 };
 
 /* Poor man's logging */
-#define eprintf(...)                                        \
-  do {                                                      \
-    auto __now = system_clock::now().time_since_epoch();    \
-    auto __us = duration_cast<microseconds>(__now).count(); \
-    std::fprintf(stderr, "[ ERROR ] %s: ", __func__);       \
-    std::fprintf(stderr, __VA_ARGS__);                      \
-    std::fprintf(stderr, "\n");                             \
+#define eprintf(fmt, ...)                             \
+  do {                                                \
+    std::fprintf(stderr, "[ ERROR ] %s: ", __func__); \
+    std::fprintf(stderr, fmt, __VA_ARGS__);           \
+    std::fprintf(stderr, "\n");                       \
   } while (0);
 
-// #define DEBUG 1
 #ifdef DEBUG
-#define dprintf(...)                                                       \
-  do {                                                                     \
-    auto __now = system_clock::now().time_since_epoch();                   \
-    auto __us = duration_cast<microseconds>(__now).count();                \
-    std::fprintf(stderr, "%lf [ DEBUG ] %s ", __us / 1000000.0, __func__); \
-    std::fprintf(stderr, __VA_ARGS__);                                     \
-    std::fprintf(stderr, "\n");                                            \
+#define dprintf(fmt, ...)                                                    \
+  do {                                                                       \
+    PLUGIN_DBG_LOG(::plugin::Corelight_ZeekJS::plugin, "%s: " fmt, __func__, \
+                   __VA_ARGS__);                                             \
   } while (0);
 #else
-#define dprintf(...) \
-  do {               \
-  } while (0);
+#define dprintf(fmt, ...)
 #endif
 }  // namespace plugin::Corelight_ZeekJS::Js

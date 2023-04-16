@@ -11,7 +11,6 @@
 
 #include "IOLoop.h"
 #include "Nodejs.h"
-#include "ZeekJS.h"
 
 namespace plugin::Corelight_ZeekJS {
 

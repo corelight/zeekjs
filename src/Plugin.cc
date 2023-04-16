@@ -44,7 +44,7 @@ void Plugin::InitPostScript() {
   zeek::VectorValPtr files = zeek::id::find_val<zeek::VectorVal>("JavaScript::files");
   std::vector<std::filesystem::path> std_files = load_files;
   for (unsigned int i = 0; i < files->Size(); i++) {
-    zeek::ValPtr vp = plugin::Corelight_ZeekJS::compat::Vector_val_at(files.get(), i);
+    const auto& vp = files->ValAt(i);
     zeek::StringValPtr filename = {zeek::NewRef{}, vp->AsStringVal()};
 
     std_files.emplace_back(filename->ToStdString());
@@ -217,8 +217,7 @@ class InvokeJsEventHandlerStmt : public zeek::detail::Stmt {
         zeek_event_handler(zeek_eh),
         js_event_handler(js_eh) {}
 
-  zeek::ValPtr Exec(zeek::detail::Frame* f,
-                    zeek::detail::StmtFlowType& flow) ZEEKJS_STMT_EXEC_CONST override {
+  zeek::ValPtr Exec(zeek::detail::Frame* f, zeek::detail::StmtFlowType& flow) override {
     flow = zeek::detail::FLOW_NEXT;
     zeek::Args args = *f->GetFuncArgs();
 
@@ -229,12 +228,10 @@ class InvokeJsEventHandlerStmt : public zeek::detail::Stmt {
     return nullptr;
   }
 
-#ifdef ZEEKJS_STMT_NEEDS_DUPLICATE
   zeek::detail::StmtPtr Duplicate() override {
-    eprintf("%s", "XXX: This will likely blow up");
+    eprintf("%s", "Duplicate() on InvokeJsEventHandlerStmt not implemented");
     return {zeek::NewRef{}, this};
   }
-#endif
 
   zeek::detail::TraversalCode Traverse(
       zeek::detail::TraversalCallback* cb) const override {
@@ -251,8 +248,7 @@ class InvokeJsHookHandlerStmt : public zeek::detail::Stmt {
   InvokeJsHookHandlerStmt(Js::HookHandler* js_hh)
       : zeek::detail::Stmt(zeek::detail::STMT_ANY), js_hook_handler(js_hh) {}
 
-  zeek::ValPtr Exec(zeek::detail::Frame* f,
-                    zeek::detail::StmtFlowType& flow) ZEEKJS_STMT_EXEC_CONST override {
+  zeek::ValPtr Exec(zeek::detail::Frame* f, zeek::detail::StmtFlowType& flow) override {
     zeek::Args args = *f->GetFuncArgs();
     plugin::Corelight_ZeekJS::Js::HookHandlerResult result = (*js_hook_handler)(args);
 
@@ -265,12 +261,10 @@ class InvokeJsHookHandlerStmt : public zeek::detail::Stmt {
     return nullptr;
   }
 
-#ifdef ZEEKJS_STMT_NEEDS_DUPLICATE
   zeek::detail::StmtPtr Duplicate() override {
-    eprintf("%s", "XXX: This will likely blow up");
+    eprintf("%s", "Duplicate() on InvokeJsHookHandlerStmt not implemented");
     return {zeek::NewRef{}, this};
   }
-#endif
 
   zeek::detail::TraversalCode Traverse(
       zeek::detail::TraversalCallback* cb) const override {

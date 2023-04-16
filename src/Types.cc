@@ -381,7 +381,7 @@ v8::Local<v8::Value> ZeekValWrapper::wrap_vector(const zeek::ValPtr& vp) {
   std::vector<v8::Local<v8::Value>> elements;
   elements.reserve(size);
   for (int i = 0; i < size; i++) {
-    zeek::ValPtr vp = plugin::Corelight_ZeekJS::compat::Vector_val_at(vv, i);
+    const zeek::ValPtr& vp = vv->ValAt(i);
     elements.emplace_back(Wrap(vp));
   }
   return v8::Array::New(isolate_, elements.data(), size);
@@ -694,11 +694,11 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
         vals[i] = element_result.val;
       }
 
-      zeek::VectorTypePtr vtp = zeek::make_intrusive<zeek::VectorType>(type->Yield());
-      zeek::VectorValPtr vvp = zeek::make_intrusive<zeek::VectorVal>(vtp);
+      zeek::VectorTypePtr vector_type = {zeek::NewRef{}, type->AsVectorType()};
+      zeek::VectorValPtr vvp = zeek::make_intrusive<zeek::VectorVal>(vector_type);
 
       for (const auto& v : vals)
-        plugin::Corelight_ZeekJS::compat::Vector_append(vvp, v);
+        vvp->Append(v);
 
       wrap_result.val = vvp;
       return wrap_result;

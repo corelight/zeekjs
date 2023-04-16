@@ -42,9 +42,9 @@ PipeSource::PipeSource(plugin::Nodejs::Instance* instance) : instance_(instance)
 
 PipeSource::~PipeSource() {
   if (close(notify_pipe_[0]) != 0)
-    eprintf("Failed to close _notify_pipe[0]");
+    eprintf("%s", "Failed to close _notify_pipe[0]");
   if (close(notify_pipe_[1]) != 0)
-    eprintf("Failed to close _notify_pipe[0]");
+    eprintf("%s", "Failed to close _notify_pipe[0]");
 }
 
 void PipeSource::Process() {

@@ -1,7 +1,6 @@
 #include "Types.h"
 
 #include "ZeekCompat.h"
-#include "ZeekJS.h"
 
 #include "zeek/IPAddr.h"
 #include "zeek/IntrusivePtr.h"
@@ -9,6 +8,8 @@
 #include "zeek/Val.h"
 #include "zeek/ZeekString.h"
 #include "zeek/module_util.h"
+
+#include "Plugin.h"
 
 namespace {
 
@@ -880,7 +881,7 @@ void ZeekValWrapper::ZeekTableGetter(v8::Local<v8::Name> property,
   v8::String::Utf8Value arg(isolate, property);
 
   if (!*arg) {
-    dprintf("empty arg?");
+    dprintf("%s", "empty arg?");
     return;
   }
 

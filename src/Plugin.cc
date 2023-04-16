@@ -231,7 +231,7 @@ class InvokeJsEventHandlerStmt : public zeek::detail::Stmt {
 
 #ifdef ZEEKJS_STMT_NEEDS_DUPLICATE
   zeek::detail::StmtPtr Duplicate() override {
-    eprintf("XXX: This will likely blow up");
+    eprintf("%s", "XXX: This will likely blow up");
     return {zeek::NewRef{}, this};
   }
 #endif
@@ -267,7 +267,7 @@ class InvokeJsHookHandlerStmt : public zeek::detail::Stmt {
 
 #ifdef ZEEKJS_STMT_NEEDS_DUPLICATE
   zeek::detail::StmtPtr Duplicate() override {
-    eprintf("XXX: This will likely blow up");
+    eprintf("%s", "XXX: This will likely blow up");
     return {zeek::NewRef{}, this};
   }
 #endif

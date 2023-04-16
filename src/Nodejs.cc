@@ -77,7 +77,6 @@ static void ZeekGlobalVarsEnumerator(const v8::PropertyCallbackInfo<v8::Array>& 
 
     array->Set(context, i++, name).Check();
   }
-  dprintf("Enumerated...");
 
   info.GetReturnValue().Set(array);
 }
@@ -203,10 +202,8 @@ void Instance::ZeekEventCallback(const v8::FunctionCallbackInfo<v8::Value>& args
   dprintf("Event for %s", *utf8name);
 #endif
 
-  // Assume ZeekEvent internally throws the exception for Javascript land..
-  if (!instance->ZeekEvent(name, v8_args)) {
-    dprintf("Failed to invoke event");
-  }
+  // If this fails, ZeekEvent() will have thrown internally.
+  instance->ZeekEvent(name, v8_args);
 }
 
 //
@@ -738,7 +735,7 @@ bool Instance::ExecuteAndWaitForInit(v8::Local<v8::Context> context,
 
   if (ret.IsEmpty()) {
     // TODO: Introspect the error a bit.
-    eprintf("Exception?\n");
+    eprintf("%s", "LoadEnvironment() exception!?");
     return false;
   }
 
@@ -824,7 +821,7 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
 #endif
 
   if (r != 0) {
-    eprintf("Node initialization failed: %d\n", r);
+    eprintf("Node initialization failed: %d", r);
     return false;
   }
 
@@ -837,19 +834,19 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
 
   r = uv_loop_init(&loop);
   if (r != 0) {
-    eprintf("uv_loop_init() failed: %s\n", uv_err_name(r));
+    eprintf("uv_loop_init() failed: %s", uv_err_name(r));
     return false;
   }
 
   node_allocator_ = node::ArrayBufferAllocator::Create();
   if (!node_allocator_) {
-    eprintf("Failed to create ArrayBufferAllocator\n");
+    eprintf("%s", "Failed to create ArrayBufferAllocator");
     return false;
   }
 
   isolate_ = v8::Isolate::Allocate();
   if (!isolate_) {
-    eprintf("Could not allocate Isolate.");
+    eprintf("%s", "Could not allocate Isolate");
     return false;
   }
 
@@ -955,11 +952,12 @@ void Instance::Done() {
     }
 
     // Do garbage collection at shutdown to trigger disposal
-    // of objects on the JS heap that reference native objects.
+    // of objects on the JS heap that reference Zeek objects
+    // as a best effort measure to please the leak sanitizer.
     isolate_->MemoryPressureNotification(v8::MemoryPressureLevel::kModerate);
     isolate_->IdleNotificationDeadline(1.0);
     if (!isolate_->IdleNotificationDeadline(1.0)) {
-      dprintf("There was more garbage to be collected");
+      dprintf("%s", "There was more garbage to be collected");
     }
   }
 }

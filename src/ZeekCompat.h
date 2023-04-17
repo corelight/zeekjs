@@ -46,4 +46,5 @@ inline zeek::ValPtr IntervalVal_New(double x) {
 // older version as well.
 #if ZEEK_VERSION_NUMBER < 50100
 using zeek_int_t = int64_t;
+using zeek_uint_t = uint64_t;
 #endif

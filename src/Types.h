@@ -4,6 +4,8 @@
 
 #include "zeek/Val.h"
 
+#include "ZeekCompat.h"
+
 const int ZEEKJS_ATTR_NONE = 0;
 const int ZEEKJS_ATTR_LOG = 1;
 

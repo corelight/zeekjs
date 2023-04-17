@@ -13,6 +13,7 @@ jobs:
           - fedora-37
             # - fedora-37-nightly
           - debian-bookworm
+          - debian-bookworm-lts
     steps:
     - uses: actions/checkout@v2
 

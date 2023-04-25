@@ -11,7 +11,7 @@ jobs:
         distro:
           - ubuntu-2210
           - fedora-37
-            # - fedora-37-nightly
+          - fedora-37-nightly
           - debian-bookworm
           - debian-bookworm-lts
     steps:

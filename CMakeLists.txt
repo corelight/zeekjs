@@ -25,12 +25,7 @@ include_directories(BEFORE ${NODEJS_INCLUDE_DIR} ${UV_INCLUDE_DIR} ${V8_CONFIG_I
 
 zeek_plugin_begin(Zeek JavaScript)
 
-if ( ZEEK_PLUGIN_INTERNAL_BUILD )
-    # This is a hack for the current bug in zeek with doing built in plugins
-    set(zeekdeps ${zeekdeps} ${NODEJS_LIBRARIES} PARENT_SCOPE)
-else()
-    zeek_plugin_link_library("${NODEJS_LIBRARIES}")
-endif()
+zeek_plugin_link_library("${NODEJS_LIBRARIES}")
 
 #
 # Observed the following errors on Debian with GCC 8.3.0:

@@ -1,0 +1,35 @@
+name: Nightly Check
+on:
+  schedule:
+    - cron: '17 1 * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        distro:
+          - ubuntu-2210
+          - fedora-37
+          - fedora-37-nightly
+          - debian-bookworm
+          - debian-bookworm-lts
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Check (clang-format, build, btest, clang-tidy)
+      run: docker build -t zeekjs-check-${{ matrix.distro }} -f docker/${{ matrix.distro }}.Dockerfile .
+
+  doc:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Documentation
+      run: make -C doc container-html
+
+    - name: Archive html docs
+      uses: actions/upload-artifact@v2
+      with:
+        name: html
+        path: doc/_build/html

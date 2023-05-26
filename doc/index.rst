@@ -192,6 +192,7 @@ provides the following functions to interact with Zeek.
 .. autofunction:: hook
 .. autofunction:: event
 .. autofunction:: invoke
+.. autofunction:: as
 .. autofunction:: select_fields
 .. autofunction:: flatten
 .. autoattribute:: global_vars

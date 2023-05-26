@@ -400,9 +400,8 @@ v8::Local<v8::Value> Instance::ZeekInvoke(v8::Local<v8::String> v8_name,
   dprintf("invoke for %s", *name_str);
   const zeek::detail::IDPtr& id = zeek::id::find(*name_str);
   if (!id) {
-    std::string msg = "Unknown function: ";
-    msg += *name_str;
-    isolate_->ThrowException(v8_str(isolate_, msg.c_str()));
+    isolate_->ThrowException(
+        v8_str(isolate_, zeek::util::fmt("Unknown function: %s", *name_str)));
     return v8::Undefined(isolate_);
   }
 
@@ -412,13 +411,18 @@ v8::Local<v8::Value> Instance::ZeekInvoke(v8::Local<v8::String> v8_name,
     return v8::Undefined(isolate_);
   }
 
+  const zeek::FuncType* ft = t->AsFuncType();
+  if (ft->Flavor() == zeek::FUNC_FLAVOR_EVENT) {
+    isolate_->ThrowException(v8_str(isolate_, "Cannot invoke event, use zeek.event()"));
+    return v8::Undefined(isolate_);
+  }
+
   // Non-implemented function? Exported but not defined?
   if (!id->GetVal()) {
     isolate_->ThrowException(v8_str(isolate_, "Function without value"));
     return v8::Undefined(isolate_);
   }
 
-  const zeek::FuncType* ft = t->AsFuncType();
   std::optional<zeek::Args> args = v8_to_zeek_args(ft, v8_args);
   if (!args)
     return v8::Undefined(isolate_);

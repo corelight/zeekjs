@@ -7,7 +7,7 @@ plugin_usage()
 {
     : # Do nothing
     cat <<EOF
-    --with-nodjs=DIR           Path to Node.js installation directory.
+    --with-nodejs=DIR           Path to Node.js installation directory.
 EOF
 }
 

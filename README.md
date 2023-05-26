@@ -34,8 +34,10 @@ zkg install zeekjs
 ## Documentation
 
 To build online documentation for ZeekJS, change into the `docs` directory
-and run `make html` if sphinx/jsdoc is available locally, or
-`make container-html` to use Docker.
+and run `make html` if sphinx/jsdoc is available locally, or run
+`make container-html` to use a Docker container.
 
-The existing [tests](./tests) are a good source of documentation and there
-are a few [examples](./examples), too.
+The [API documentation](https://zeekjs.readthedocs.io/en/latest/#api-reference) is also available on Read the Docs.
+
+The existing [tests](./tests) are a source of documentation, too, and there
+are a few [examples](./examples) in the repository as well.

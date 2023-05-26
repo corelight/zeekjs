@@ -1,6 +1,5 @@
-# @TEST-DOC: Hook into new_event and record the output. Might require baseline frequent baseline updates.
-# Only run this test on the (dev) version. It's too difficult to maintain it otherwise.
-# @TEST-REQUIRES: zeek -e 'exit(Version::info$major >= 6 ? 0 : 1)'
+# @TEST-DOC: Hook into new_event and record the output. Might require frequent baseline updates. Run this test only on the latest versions. It's too difficult to maintain otherwise.
+# @TEST-REQUIRES: zeek --version >&2 && zeek -e 'exit(Version::info$commit >= 559 ? 0 : 1)'
 # @TEST-EXEC: zeek -r $TRACES/dns-http-https.pcap ./new-event.js | grep -v -F '"type_name"'
 # @TEST-EXEC: btest-diff .stdout
 # @TEST-GROUP: smoke

@@ -4,3 +4,5 @@ Caught it: Wrong number of parameters. 1 provided, 2 required, 2 total
 Caught it: Unable to convert JS value '[object Object]' of type object to Zeek type count
 Caught it: Wrong number of parameters. 1 provided, 2 required, 2 total
 Caught it: Wrong number of parameters. 3 provided, 2 required, 2 total
+Caught it: Cannot invoke event, use zeek.event()
+Caught it: Not a function

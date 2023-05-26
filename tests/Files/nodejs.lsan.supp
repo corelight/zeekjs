@@ -3,6 +3,7 @@ leak:Heap::CollectGarbage
 leak:ObjectTemplate::NewInstance
 leak:PlatformWorkerThread
 leak:node::native_module::NativeModuleEnv::CompileFunction
+leak:node::builtins::BuiltinLoader::CompileFunction
 leak:v8::internal::ApiNatives::InstantiateFunction
 leak:v8::internal::Compiler::Compile
 leak:v8::internal::Factory::AllocateRaw

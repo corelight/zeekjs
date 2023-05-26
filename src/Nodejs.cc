@@ -35,8 +35,8 @@ static void ZeekGlobalVarsGetter(v8::Local<v8::Name> property,
                                  const v8::PropertyCallbackInfo<v8::Value>& info) {
   v8::Isolate* isolate = info.GetIsolate();
 
-  v8::Local<v8::Object> receiver = info.This();
-  auto field = v8::Local<v8::External>::Cast(receiver->GetInternalField(0));
+  auto zeek_obj = v8::Local<v8::Object>::Cast(info.Data());
+  auto field = v8::Local<v8::External>::Cast(zeek_obj->GetInternalField(0));
   auto instance = static_cast<Instance*>(field->Value());
 
   v8::String::Utf8Value arg(isolate, property);
@@ -176,8 +176,8 @@ void Instance::PrintCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
 //
 void Instance::ZeekEventCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
   v8::Isolate* isolate = args.GetIsolate();
-  v8::Local<v8::Object> receiver = args.This();
-  auto field = v8::Local<v8::External>::Cast(receiver->GetInternalField(0));
+  auto zeek_obj = v8::Local<v8::Object>::Cast(args.Data());
+  auto field = v8::Local<v8::External>::Cast(zeek_obj->GetInternalField(0));
   auto instance = static_cast<Instance*>(field->Value());
 
   if (args.Length() < 1 || args.Length() > 2) {
@@ -214,8 +214,8 @@ void Instance::ZeekEventCallback(const v8::FunctionCallbackInfo<v8::Value>& args
 //
 void Instance::ZeekInvokeCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
   v8::Isolate* isolate = args.GetIsolate();
-  v8::Local<v8::Object> receiver = args.This();
-  auto field = v8::Local<v8::External>::Cast(receiver->GetInternalField(0));
+  auto zeek_obj = v8::Local<v8::Object>::Cast(args.Data());
+  auto field = v8::Local<v8::External>::Cast(zeek_obj->GetInternalField(0));
   auto instance = static_cast<Instance*>(field->Value());
 
   if (args.Length() < 1 || args.Length() > 2) {
@@ -246,11 +246,8 @@ void Instance::ZeekInvokeCallback(const v8::FunctionCallbackInfo<v8::Value>& arg
 //
 void Instance::ZeekAsCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
   v8::Isolate* isolate = args.GetIsolate();
-
-  // The receiver of zeek.select_fields() is the global zeek object itself.
-  // We can get to the Instance object via the internal field.
-  v8::Local<v8::Object> receiver = args.This();
-  auto field = v8::Local<v8::External>::Cast(receiver->GetInternalField(0));
+  auto zeek_obj = v8::Local<v8::Object>::Cast(args.Data());
+  auto field = v8::Local<v8::External>::Cast(zeek_obj->GetInternalField(0));
   auto instance = static_cast<Instance*>(field->Value());
 
   if (args.Length() != 2) {
@@ -284,10 +281,8 @@ void Instance::ZeekSelectFieldsCallback(
     const v8::FunctionCallbackInfo<v8::Value>& args) {
   v8::Isolate* isolate = args.GetIsolate();
 
-  // The receiver of zeek.select_fields() is the global zeek object itself.
-  // We can get to the Instance object via the internal field.
-  v8::Local<v8::Object> receiver = args.This();
-  auto field = v8::Local<v8::External>::Cast(receiver->GetInternalField(0));
+  auto zeek_obj = v8::Local<v8::Object>::Cast(args.Data());
+  auto field = v8::Local<v8::External>::Cast(zeek_obj->GetInternalField(0));
   auto instance = static_cast<Instance*>(field->Value());
 
   if (args.Length() != 2) {
@@ -565,8 +560,8 @@ struct HandlerArgs {
 
 void Instance::ZeekOnCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
   v8::Isolate* isolate = args.GetIsolate();
-  v8::Local<v8::Object> receiver = args.This();
-  auto field = v8::Local<v8::External>::Cast(receiver->GetInternalField(0));
+  auto zeek_obj = v8::Local<v8::Object>::Cast(args.Data());
+  auto field = v8::Local<v8::External>::Cast(zeek_obj->GetInternalField(0));
   auto instance = static_cast<Instance*>(field->Value());
 
   HandlerArgs ha = HandlerArgs::Parse(args);
@@ -580,8 +575,8 @@ void Instance::ZeekOnCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
 
 void Instance::ZeekHookCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
   v8::Isolate* isolate = args.GetIsolate();
-  v8::Local<v8::Object> receiver = args.This();
-  auto field = v8::Local<v8::External>::Cast(receiver->GetInternalField(0));
+  auto zeek_obj = v8::Local<v8::Object>::Cast(args.Data());
+  auto field = v8::Local<v8::External>::Cast(zeek_obj->GetInternalField(0));
   auto instance = static_cast<Instance*>(field->Value());
 
   HandlerArgs ha = HandlerArgs::Parse(args);
@@ -627,28 +622,28 @@ void Instance::AddZeekObject(v8::Local<v8::Object> exports,
 
   v8::Local<v8::String> on_str = v8_str_intern(isolate, "on");
   v8::Local<v8::FunctionTemplate> zeek_on_tmpl =
-      v8::FunctionTemplate::New(isolate, ZeekOnCallback);
+      v8::FunctionTemplate::New(isolate, ZeekOnCallback, zeek_obj);
   zeek_obj->Set(context, on_str, zeek_on_tmpl->GetFunction(context).ToLocalChecked())
       .Check();
 
   // TODO: Make this use the PrintStmt if possible.
   v8::Local<v8::String> print_str = v8_str_intern(isolate, "print");
   v8::Local<v8::FunctionTemplate> zeek_print_tmpl =
-      v8::FunctionTemplate::New(isolate, PrintCallback);
+      v8::FunctionTemplate::New(isolate, PrintCallback, zeek_obj);
   zeek_obj
       ->Set(context, print_str, zeek_print_tmpl->GetFunction(context).ToLocalChecked())
       .Check();
 
   v8::Local<v8::String> event_str = v8_str_intern(isolate, "event");
   v8::Local<v8::FunctionTemplate> zeek_event_tmpl =
-      v8::FunctionTemplate::New(isolate, ZeekEventCallback);
+      v8::FunctionTemplate::New(isolate, ZeekEventCallback, zeek_obj);
   zeek_obj
       ->Set(context, event_str, zeek_event_tmpl->GetFunction(context).ToLocalChecked())
       .Check();
 
   v8::Local<v8::String> hook_str = v8_str_intern(isolate, "hook");
   v8::Local<v8::FunctionTemplate> zeek_hook_tmpl =
-      v8::FunctionTemplate::New(isolate, ZeekHookCallback);
+      v8::FunctionTemplate::New(isolate, ZeekHookCallback, zeek_obj);
   zeek_obj
       ->Set(context, hook_str, zeek_hook_tmpl->GetFunction(context).ToLocalChecked())
       .Check();
@@ -656,7 +651,7 @@ void Instance::AddZeekObject(v8::Local<v8::Object> exports,
   // invoke
   v8::Local<v8::String> invoke_str = v8_str_intern(isolate, "invoke");
   v8::Local<v8::FunctionTemplate> zeek_invoke_tmpl =
-      v8::FunctionTemplate::New(isolate, ZeekInvokeCallback);
+      v8::FunctionTemplate::New(isolate, ZeekInvokeCallback, zeek_obj);
   zeek_obj
       ->Set(context, invoke_str,
             zeek_invoke_tmpl->GetFunction(context).ToLocalChecked())
@@ -665,14 +660,14 @@ void Instance::AddZeekObject(v8::Local<v8::Object> exports,
   // as
   v8::Local<v8::String> as_str = v8_str_intern(isolate, "as");
   v8::Local<v8::FunctionTemplate> zeek_as_tmpl =
-      v8::FunctionTemplate::New(isolate, ZeekAsCallback);
+      v8::FunctionTemplate::New(isolate, ZeekAsCallback, zeek_obj);
   zeek_obj->Set(context, as_str, zeek_as_tmpl->GetFunction(context).ToLocalChecked())
       .Check();
 
   // select_fields
   v8::Local<v8::String> select_fields_str = v8_str_intern(isolate, "select_fields");
   v8::Local<v8::FunctionTemplate> zeek_select_fields_tmpl =
-      v8::FunctionTemplate::New(isolate, ZeekSelectFieldsCallback);
+      v8::FunctionTemplate::New(isolate, ZeekSelectFieldsCallback, zeek_obj);
   zeek_obj
       ->Set(context, select_fields_str,
             zeek_select_fields_tmpl->GetFunction(context).ToLocalChecked())
@@ -693,6 +688,7 @@ void Instance::AddZeekObject(v8::Local<v8::Object> exports,
   v8::NamedPropertyHandlerConfiguration global_vars_conf = {nullptr};
   global_vars_conf.getter = ZeekGlobalVarsGetter;
   global_vars_conf.enumerator = ZeekGlobalVarsEnumerator;
+  global_vars_conf.data = zeek_obj;
   zeek_globals_tmpl->SetHandler(global_vars_conf);
 
   v8::Local<v8::Object> zeek_global_vars_obj =

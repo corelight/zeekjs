@@ -272,13 +272,12 @@ int ZeekValWrapper::GetRecordFieldOffset(const zeek::RecordTypePtr& rt,
   // Slow path: Make a string out of the property and look it up in the name map and
   // if it's not there, then someone tried to get something that just doesn't exist.
   v8::String::Utf8Value property_val(isolate_, property);
-  std::fprintf(stderr, "fallback for %s %s\n", rt->GetName().c_str(), *property_val);
+  dprintf("fallback for %s %s\n", rt->GetName().c_str(), *property_val);
 
   if (*property_val) {
     std::string property_str(*property_val);
-    // std::fprintf(stderr, "Fallback via string %s::%s (%d)\n",
-    // rt->GetName().c_str(),
-    //             property_str.c_str(), identity_hash);
+    dprintf("Fallback via string %s::%s (%d)\n", rt->GetName().c_str(),
+            property_str.c_str(), identity_hash);
     if (const auto& n_it = info.n_map.find(property_str); n_it != info.n_map.end()) {
       return n_it->second;
     }

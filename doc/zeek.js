@@ -45,6 +45,13 @@ exports.hook = function() { }
  * the resulting object. The plugin will thread through the underlying
  * Zeek value without attempting implicit conversion.
  *
+ * @example
+ * zeek.on('zeek_init', () => {
+ *   let version = zeek.invoke('zeek_version');
+ *   console.log(`Running on Zeek ${version}`);
+ * });
+ *
+ *
  * @param {string} name The name of the Zeek function to invoke.
  * @param {array} [args] Arguments to use.
  *
@@ -53,11 +60,6 @@ exports.invoke = function() { }
 
 /**
  * Explicit type conversion from JavaScript to Zeek.
- *
- * zeek.on('zeek_init', () => {
- *   let version = zeek.invoke('zeek_version');
- *   console.log(`Running on Zeek ${version}`);
- * });
  *
  * @param {string} type_name The name of the Zeek type. For example, ``addr``.
  * @param {} [value] The value to convert to ``type_name``.

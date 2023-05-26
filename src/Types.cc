@@ -414,10 +414,9 @@ v8::Local<v8::Value> ZeekValWrapper::wrap_table(const zeek::ValPtr& vp) {
     }
     return array;
   } else {
-    // TODO: Precheck for multi keys and just crash or ignore
-    //       or whatever.
-    //
-    // If it's an actual table, use the table_template
+    // Note, if the table has multiple indices, we still wrap it and
+    // pass it through to JavaScript so it can be threaded back to Zeek.
+    // Lookups or enumerating such tables will throw exceptions, however.
     v8::Local<v8::ObjectTemplate> tmpl = table_template_.Get(isolate_);
     v8::Local<v8::Object> obj = tmpl->NewInstance(context).ToLocalChecked();
 
@@ -924,7 +923,7 @@ void ZeekValWrapper::ZeekTableSetter(v8::Local<v8::Name> property,
   auto tval = static_cast<zeek::TableVal*>(wrap->GetVal());
 
   zeek::TableTypePtr ttype = tval->GetType<zeek::TableType>();
-  std::vector<zeek::TypePtr> itypes = ttype->GetIndexTypes();
+  const auto& itypes = ttype->GetIndexTypes();
   v8::String::Utf8Value property_utf8(isolate, property);
   dprintf("tval=%p ttype=%p itypes=%lu property=%s", tval, ttype.get(), itypes.size(),
           *property_utf8);
@@ -979,7 +978,7 @@ void ZeekValWrapper::ZeekTableIndexGetter(
   dprintf("ZeekTableIndexGetter: tval=%p index=%d", tval, index);
 
   zeek::TableTypePtr ttype = tval->GetType<zeek::TableType>();
-  std::vector<zeek::TypePtr> itypes = ttype->GetIndexTypes();
+  const auto& itypes = ttype->GetIndexTypes();
   if (itypes.size() != 1) {
     v8::Local<v8::Value> error = v8::Exception::TypeError(::v8_str(
         isolate,
@@ -1027,7 +1026,7 @@ void ZeekValWrapper::ZeekTableIndexSetter(
   dprintf("tval=%p index=%d", tval, index);
 
   zeek::TableTypePtr ttype = tval->GetType<zeek::TableType>();
-  std::vector<zeek::TypePtr> itypes = ttype->GetIndexTypes();
+  const auto& itypes = ttype->GetIndexTypes();
   if (itypes.size() != 1) {
     v8::Local<v8::Value> error = v8::Exception::TypeError(::v8_str(
         isolate,
@@ -1089,27 +1088,28 @@ void ZeekValWrapper::ZeekTableEnumerator(
   auto size = static_cast<int>(tval->Size());
 
   zeek::TableTypePtr tt = tval->GetType<zeek::TableType>();
+  const zeek::TypeListPtr& tl = tt->GetIndices();
+  const auto& itypes = tt->GetIndexTypes();
 
 #ifdef DEBUG
   zeek::TypeTag tag = tt->Tag();
-  dprintf("tval tag %d/%s set=%d size=%d", tag, zeek::type_name(tag), tt->IsSet(),
-          size);
+  dprintf("tval=%p tag %d/%s set=%d size=%d itypes=%lu", tval, tag,
+          zeek::type_name(tag), tt->IsSet(), size, itypes.size());
 #endif
 
   // Let's shortcut here, only support Pure lists with size 1
   // of the base types, anything else is a bit nuts.
-  const zeek::TypeListPtr& tl = tt->GetIndices();
   if (!tl->IsPure()) {
     isolate->ThrowException(::v8_str(isolate, "can enumerate only pure tables"));
     return;
   }
 
-  if (tl->GetTypes().size() != 1) {
+  if (itypes.size() != 1) {
     isolate->ThrowException(::v8_str(isolate, "composite table indices not supported"));
     return;
   }
 
-  if (!zeek::is_atomic_type(tl->GetTypes()[0])) {
+  if (!zeek::is_atomic_type(itypes[0])) {
     isolate->ThrowException(
         ::v8_str(isolate, "table with non-atomic index not supported"));
     return;

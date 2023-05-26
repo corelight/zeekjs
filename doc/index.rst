@@ -30,9 +30,16 @@ available as a shared library.
 Zeek
 ----
 
-Currently ZeekJS is compatible with Zeek 4.0, 4.1 and the latest
-4.2 development version. Development happens primarily against the
-latest feature release.
+Currently ZeekJS strives to be compatible with latest stable, feature and
+nightly releases of Zeek.
+
+.. note::
+
+   With Zeek version 6.0, the ZeekJS is automatically ncluded as
+   a builtin plugin when Node.js is available on the build system.
+   The Zeek documentation received a section about
+   `JavaScript <https://docs.zeek.org/en/master/scripting/javascript.html>`_,
+   too.
 
 
 Node.js
@@ -117,21 +124,12 @@ Verify ZeekJS is functional by running a JavaScript file using Zeek::
 Limitations
 ===========
 
-* It is not possible to call Zeek functions with arguments of type ``any``.
-  ZeekJS converts arguments into the types Zeek functions declare. This trick
-  doesn't work for ``any``. You can work around this by adding typed trampoline
-  functions in Zeek script.
-
-* No setter-access on Zeek objects. It's not possible to modify fields of Zeek
-  records from JavaScript. The ``Setter()`` logic isn't (yet) implemented.
-
 * No multi-index support for tables and sets. JavaScript objects have string
   properties only.
 
 
 Generally, look out for ``[ ERROR ]`` messages on ``stderr``.
 If something doesn't seem to work, it may just not be implemented.
-
 
 Examples
 ========

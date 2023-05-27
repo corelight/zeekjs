@@ -35,7 +35,7 @@ nightly releases of Zeek.
 
 .. note::
 
-   With Zeek version 6.0, the ZeekJS is automatically ncluded as
+   With Zeek version 6.0, the ZeekJS plugin is automatically included as
    a builtin plugin when Node.js is available on the build system.
    The Zeek documentation received a section about
    `JavaScript <https://docs.zeek.org/en/master/scripting/javascript.html>`_,

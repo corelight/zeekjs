@@ -64,9 +64,9 @@ and install it.
 .. code::
 
     $ git clone https://github.com/nodejs/node.git
-    $ cd nodejs
-    $ git reset --hard v16.13.1
-    $ ./configure --prefix=/opt/node-16 --shared
+    $ cd node
+    $ git reset --hard v19.9.0
+    $ ./configure --prefix=/opt/node-19 --shared
     $ make
     $ sudo make install
 
@@ -94,7 +94,7 @@ For example::
     $ zeek-config --version
     4.1.1
 
-    $ ./configure --with-nodejs=/opt/node-16
+    $ ./configure --with-nodejs=/opt/node-19
     $ make
     $ sudo make install
 

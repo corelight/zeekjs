@@ -1,4 +1,4 @@
-FROM fedora:37
+FROM fedora:38
 
 # Dependencies required to compile and test ZeekJS on Fedora
 RUN dnf install -y \
@@ -32,6 +32,9 @@ COPY . .
 RUN make check-clang-format
 
 RUN rm -rf build && ./configure && make && ( cd tests && btest -A -d -c btest.cfg ) && make install
+
+# Run clang-tidy now - this may take a while.
+RUN make check-clang-tidy
 
 RUN zeek -N Zeek::JavaScript
 RUN zeek ./examples/hello.js

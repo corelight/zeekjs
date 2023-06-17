@@ -799,7 +799,7 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
   plugin_ = plugin;
   files_ = files;
 
-  std::vector<std::string> args = {"zeek"};
+  std::vector<std::string> args{"zeek"};
   std::vector<std::string> exec_args;
   std::vector<std::string> errors;
 

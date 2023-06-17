@@ -808,8 +808,8 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
   // callback corrupts the async stack and setting this flag
   // prevents node exiting due to this.
   if (!exit_on_uncaught_exceptions) {
-    args.emplace_back("--no-force-async-hooks-checks");
-    args.emplace_back("--trace-uncaught");
+    args.push_back("--no-force-async-hooks-checks");  // NOLINT
+    args.push_back("--trace-uncaught");               // NOLINT
   }
 
 #if NODE_VERSION_AT_LEAST(18, 11, 0)

@@ -894,11 +894,11 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
 
   node_isolate_data_ = {node::CreateIsolateData(isolate_, &loop, node_platform_.get(),
                                                 node_allocator_.get()),
-                        node::FreeIsolateData};
+                        &node::FreeIsolateData};
 
   node_environment_ = {
       node::CreateEnvironment(node_isolate_data_.get(), context, args, exec_args),
-      node::FreeEnvironment};
+      &node::FreeEnvironment};
 
   zeek_val_wrapper_ = std::make_unique<ZeekValWrapper>(GetIsolate());
 

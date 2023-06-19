@@ -10,8 +10,8 @@ export {
 	## https://docs.w3cub.com/node~14_lts/embedding
 	##
 	const main_script_source: string = cat(
-		"const module = require('module')\n",
-		"const publicRequire = module.createRequire(process.cwd() + '/');\n",
+		"const module_mod = require('module')\n",
+		"const publicRequire = module_mod.createRequire(process.cwd() + '/');\n",
 		"globalThis.require = publicRequire;\n",
 		"\n",
 		"globalThis.zeek_javascript_init = async () => {\n",
@@ -34,7 +34,7 @@ export {
 		"    return res\n",
 		"  }\n",
 		"\n",
-		"  const m = new module();\n",
+		"  const m = new module_mod();\n",
 		"  // Compile a new module that imports all .js files found using import().\n",
 		"  //\n",
 		"  // https://stackoverflow.com/a/17585470/9044112\n",

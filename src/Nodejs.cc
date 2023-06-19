@@ -944,21 +944,10 @@ void Instance::Done() {
       std::this_thread::sleep_for(1ms);
     }
 
-    {
-      // Emit process 'exit' event
-      v8::Isolate* isolate = GetIsolate();
-      v8::Isolate::Scope isolate_scope(isolate);
-      node::EmitProcessExit(node_environment_.get());
-    }
-
-    // Do garbage collection at shutdown to trigger disposal
-    // of objects on the JS heap that reference Zeek objects
-    // as a best effort measure to please the leak sanitizer.
-    isolate_->MemoryPressureNotification(v8::MemoryPressureLevel::kModerate);
-    isolate_->IdleNotificationDeadline(1.0);
-    if (!isolate_->IdleNotificationDeadline(1.0)) {
-      dprintf("%s", "There was more garbage to be collected");
-    }
+    // Emit process 'exit' event
+    v8::Isolate* isolate = GetIsolate();
+    v8::Isolate::Scope isolate_scope(isolate);
+    node::EmitProcessExit(node_environment_.get());
   }
 }
 

@@ -62,6 +62,7 @@ set(nodejs_known_names
     "libnode.so.102" "libnode.102.dylib"
     "libnode.so.108" "libnode.108.dylib"
     "libnode.so.111" "libnode.111.dylib"
+    "libnode.so.115" "libnode.115.dylib"
 )
 
 if ( NODEJS_ROOT_DIR )

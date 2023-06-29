@@ -1,5 +1,7 @@
-#include "Types.h"
+#include <limits>
 
+#include "Plugin.h"
+#include "Types.h"
 #include "ZeekCompat.h"
 
 #include "zeek/IPAddr.h"
@@ -8,8 +10,6 @@
 #include "zeek/Val.h"
 #include "zeek/ZeekString.h"
 #include "zeek/module_util.h"
-
-#include "Plugin.h"
 
 namespace {
 
@@ -26,9 +26,13 @@ static std::map<ZeekValWrapKey, ZeekValWrap*> wrapped_objects;
 // lifetime of the string. Used for StringVal and also field and enum names.
 class ExternalZeekStringResource : public v8::String::ExternalOneByteStringResource {
  public:
-  ExternalZeekStringResource(zeek::Obj* obj, const char* data, size_t length)
-      : obj_(obj), data_(data), length_(length) {
+  ExternalZeekStringResource(v8::Isolate* isolate,
+                             zeek::Obj* obj,
+                             const char* data,
+                             int64_t length)
+      : isolate_(isolate), obj_(obj), data_(data), length_(length) {
     Ref(obj_);
+    isolate_->AdjustAmountOfExternalAllocatedMemory(length_);
   }
 
   void Dispose() override {
@@ -36,6 +40,7 @@ class ExternalZeekStringResource : public v8::String::ExternalOneByteStringResou
             data_, length_, obj_);
 
     Unref(obj_);
+    isolate_->AdjustAmountOfExternalAllocatedMemory(-length_);
     data_ = nullptr;
     length_ = 0;
 
@@ -48,9 +53,10 @@ class ExternalZeekStringResource : public v8::String::ExternalOneByteStringResou
   [[nodiscard]] size_t length() const override { return length_; };
 
  private:
+  v8::Isolate* isolate_;
   zeek::Obj* obj_;
-  const char* data_ = nullptr;
-  size_t length_ = -1;
+  const char* data_;
+  int64_t length_;
 };
 
 v8::Local<v8::String> v8_str_intern(v8::Isolate* i, const char* s) {
@@ -79,7 +85,8 @@ v8::Local<v8::String> v8_str_extern(v8::Isolate* i,
 #else
   if (length == 0)
     length = strlen(data);
-  auto res = new ExternalZeekStringResource(obj, data, length);
+  assert(length <= std::numeric_limits<int64_t>::max());
+  auto res = new ExternalZeekStringResource(i, obj, data, static_cast<int64_t>(length));
   return v8::String::NewExternalOneByte(i, res).ToLocalChecked();
 #endif
 }

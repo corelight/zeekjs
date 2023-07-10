@@ -13,8 +13,10 @@ RUN apt update && apt install -y --no-install-recommends \
 # Cache busting
 ARG STAMP=1681753750
 
-RUN curl -fsSL https://download.opensuse.org/repositories/security:zeek/Debian_Testing/Release.key | gpg --dearmor | tee /etc/apt/trusted.gpg.d/security_zeek.gpg > /dev/null
-RUN echo 'deb http://download.opensuse.org/repositories/security:/zeek/Debian_Testing/ /' | tee /etc/apt/sources.list.d/security:zeek.list && apt update
+ENV REPO_DISTRO=Debian_12
+
+RUN curl -fsSL https://download.opensuse.org/repositories/security:zeek/${REPO_DISTRO}/Release.key | gpg --dearmor | tee /etc/apt/trusted.gpg.d/security_zeek.gpg > /dev/null
+RUN echo "deb http://download.opensuse.org/repositories/security:/zeek/${REPO_DISTRO}/ /" | tee /etc/apt/sources.list.d/security:zeek.list && apt update
 
 RUN apt install -y --no-install-recommends \
 	zeek-lts-btest \

@@ -1,4 +1,4 @@
-FROM fedora:37
+FROM fedora:38
 
 # Dependencies required to compile and test ZeekJS on Fedora
 RUN dnf install -y \

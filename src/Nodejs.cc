@@ -192,10 +192,16 @@ void Instance::ZeekEventCallback(const v8::FunctionCallbackInfo<v8::Value>& args
 
   v8::Local<v8::String> name = v8::Local<v8::String>::Cast(args[0]);
   v8::Local<v8::Array> v8_args;
-  if (args.Length() == 2)
+  if (args.Length() == 2) {
+    if (!args[1]->IsArray()) {
+      isolate->ThrowException(v8_str(isolate, "Expected array as second argument"));
+      return;
+    }
+
     v8_args = v8::Local<v8::Array>::Cast(args[1]);
-  else
+  } else {
     v8_args = v8::Array::New(isolate, 0);
+  }
 
 #ifdef DEBUG
   v8::String::Utf8Value utf8name(isolate, args[0]);

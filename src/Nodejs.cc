@@ -230,10 +230,16 @@ void Instance::ZeekInvokeCallback(const v8::FunctionCallbackInfo<v8::Value>& arg
 
   auto name = v8::Local<v8::String>::Cast(args[0]);
   v8::Local<v8::Array> v8_args;
-  if (args.Length() == 2)
+  if (args.Length() == 2) {
+    if (!args[1]->IsArray()) {
+      isolate->ThrowException(v8_str(isolate, "Expected array as second argument"));
+      return;
+    }
+
     v8_args = v8::Local<v8::Array>::Cast(args[1]);
-  else
+  } else {
     v8_args = v8::Array::New(isolate, 0);
+  }
 
   v8::Local<v8::Value> ret = instance->ZeekInvoke(name, v8_args);
   args.GetReturnValue().Set(ret);

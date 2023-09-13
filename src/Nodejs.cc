@@ -814,6 +814,12 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
 
 #if NODE_VERSION_AT_LEAST(18, 11, 0)
   auto flags = node::ProcessInitializationFlags::kLegacyInitializeNodeWithArgsBehavior;
+#if NODE_VERSION_AT_LEAST(20, 6, 0)
+  // Let Node.js initialize the Oilpan cppgc garbage collector.
+  flags = node::ProcessInitializationFlags::Flags(
+      flags & (~node::ProcessInitializationFlags::kNoInitializeCppgc));
+#endif
+
   auto result = node::InitializeOncePerProcess(args, flags);
   int r = result->exit_code();
 #else

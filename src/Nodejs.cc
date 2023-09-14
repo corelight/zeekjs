@@ -776,7 +776,7 @@ bool Instance::ExecuteAndWaitForInit(v8::Local<v8::Context> context,
     dprintf("%s returned promise, state=%d - running JS loop", init_name,
             promise->State());
     while (promise->State() == v8::Promise::PromiseState::kPending) {
-      uv_run(&loop, UV_RUN_DEFAULT);
+      uv_run(&loop, UV_RUN_ONCE);
       node_platform_->FlushForegroundTasks(GetIsolate());
     }
 

@@ -18,6 +18,13 @@ zeek.on('zeek_init', () => {
   }
 
   try {
+
+    zeek.invoke('Test::test_add', ["a", "b"]);
+  } catch (error) {
+    zeek.print(`Caught it: ${error}`);
+  }
+
+  try {
     zeek.invoke('Test::test_add', [{"a": "b"}, {"a": "b"}]);
   } catch (error) {
     zeek.print(`Caught it: ${error}`);
@@ -43,6 +50,18 @@ zeek.on('zeek_init', () => {
 
   try {
     zeek.invoke('Test::not_changing', ["hello"]);
+  } catch (error) {
+    zeek.print(`Caught it: ${error}`);
+  }
+
+  try {
+    zeek.invoke('Test::test_add', 0);
+  } catch (error) {
+    zeek.print(`Caught it: ${error}`);
+  }
+
+  try {
+    zeek.invoke('Test::test_add', {});
   } catch (error) {
     zeek.print(`Caught it: ${error}`);
   }

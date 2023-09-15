@@ -17,6 +17,13 @@ fi
 new_version=$1
 tag="v${1}"
 
+current_branch="$(git rev-parse --abbrev-ref HEAD)"
+
+if [ "${current_branch}" != "main" ]; then
+  echo "error: not on main branch: $current_branch" >&2
+  exit 1
+fi
+
 if git cat-file -t "$tag" >/dev/null 2>&1; then
   echo "error: tag $tag exists" >&2
   exit 1

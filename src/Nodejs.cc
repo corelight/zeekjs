@@ -192,10 +192,16 @@ void Instance::ZeekEventCallback(const v8::FunctionCallbackInfo<v8::Value>& args
 
   v8::Local<v8::String> name = v8::Local<v8::String>::Cast(args[0]);
   v8::Local<v8::Array> v8_args;
-  if (args.Length() == 2)
+  if (args.Length() == 2) {
+    if (!args[1]->IsArray()) {
+      isolate->ThrowException(v8_str(isolate, "Expected array as second argument"));
+      return;
+    }
+
     v8_args = v8::Local<v8::Array>::Cast(args[1]);
-  else
+  } else {
     v8_args = v8::Array::New(isolate, 0);
+  }
 
 #ifdef DEBUG
   v8::String::Utf8Value utf8name(isolate, args[0]);
@@ -230,10 +236,16 @@ void Instance::ZeekInvokeCallback(const v8::FunctionCallbackInfo<v8::Value>& arg
 
   auto name = v8::Local<v8::String>::Cast(args[0]);
   v8::Local<v8::Array> v8_args;
-  if (args.Length() == 2)
+  if (args.Length() == 2) {
+    if (!args[1]->IsArray()) {
+      isolate->ThrowException(v8_str(isolate, "Expected array as second argument"));
+      return;
+    }
+
     v8_args = v8::Local<v8::Array>::Cast(args[1]);
-  else
+  } else {
     v8_args = v8::Array::New(isolate, 0);
+  }
 
   v8::Local<v8::Value> ret = instance->ZeekInvoke(name, v8_args);
   args.GetReturnValue().Set(ret);
@@ -776,7 +788,7 @@ bool Instance::ExecuteAndWaitForInit(v8::Local<v8::Context> context,
     dprintf("%s returned promise, state=%d - running JS loop", init_name,
             promise->State());
     while (promise->State() == v8::Promise::PromiseState::kPending) {
-      uv_run(&loop, UV_RUN_DEFAULT);
+      uv_run(&loop, UV_RUN_ONCE);
       node_platform_->FlushForegroundTasks(GetIsolate());
     }
 

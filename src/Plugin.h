@@ -6,6 +6,7 @@
 
 #include <zeek/Event.h>
 #include <zeek/EventRegistry.h>
+#include <zeek/Expr.h>
 #include <zeek/iosource/IOSource.h>
 #include <zeek/plugin/Plugin.h>
 
@@ -58,6 +59,14 @@ class Plugin : public zeek::plugin::Plugin {
   std::vector<std::filesystem::path> load_files;
   plugin::Nodejs::Instance* nodejs;
   std::unique_ptr<plugin::Corelight_ZeekJS::IOLoop::LoopSource> loop_io_source;
+
+  // Expression used for the parent frame when calling into Zeek to
+  // propagate Javascript location information to Zeek.
+  zeek::detail::CallExprPtr fake_call_expr;
+
+  // We use fake_call_file_name.c_str() as file_name for the location. While
+  // the content may change between calls, the c_str() pointer stays stable.
+  std::string fake_call_file_name;
 };
 
 extern Plugin plugin;

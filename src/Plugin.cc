@@ -9,6 +9,7 @@
 #include <zeek/Frame.h>
 #include <zeek/Func.h>
 #include <zeek/ID.h>
+#include <zeek/IntrusivePtr.h>
 #include <zeek/RunState.h>
 #include <zeek/Trigger.h>
 #include <zeek/iosource/Manager.h>
@@ -55,6 +56,13 @@ void Plugin::InitPostScript() {
     DisableHook(zeek::plugin::HOOK_DRAIN_EVENTS);
     return;
   }
+
+  // Create a fake CallExpr we can use for zeek.invoke()
+  const auto& fake_func = zeek::id::find("zeek_version");
+  fake_call_expr = zeek::make_intrusive<zeek::detail::CallExpr>(
+      zeek::make_intrusive<zeek::detail::NameExpr>(fake_func),
+      zeek::make_intrusive<zeek::detail::ListExpr>());
+  fake_call_file_name.reserve(PATH_MAX);
 
   // Okay, initialize Node.js
   PLUGIN_DBG_LOG(plugin, "Hooked %ld .js files: Initializing!", std_files.size());
@@ -369,22 +377,14 @@ zeek::ValPtr Plugin::Invoke(const std::string& name,
 
   zeek::FuncPtr func = zeek::id::find_func(name);
 
-  // Setup a fake call frame for Zeek. We need to provide
-  // CallExpr with Zeek 4.0. Use one that doesn't have any
-  // parameters, so we don't need to deal with the details.
-  //
-  // If possible, just ignore this for now.
+  // Setup a fake call frame for Zeek.
   auto js_frame = zeek::detail::Frame(0, nullptr, &args);
-  auto location =
-      zeek::detail::Location(file_name.c_str(), line_number, line_number, 0, 0);
+  fake_call_file_name.assign(file_name, 0, PATH_MAX - 1);
+  auto location = zeek::detail::Location(fake_call_file_name.c_str(), line_number,
+                                         line_number, 0, 0);
 
-  zeek::detail::IDPtr fake_func = zeek::id::find("zeek_version");
-  zeek::detail::NameExpr fake_func_expr(fake_func);
-  zeek::detail::ListExpr fake_list_expr;
-  zeek::detail::CallExpr fake_call_expr({zeek::NewRef{}, &fake_func_expr},
-                                        {zeek::NewRef{}, &fake_list_expr});
-  fake_call_expr.SetLocationInfo(&location);
-  js_frame.SetCall(&fake_call_expr);
+  fake_call_expr->SetLocationInfo(&location);
+  js_frame.SetCall(fake_call_expr.get());
 
   return func->Invoke(&args, &js_frame);
 }
@@ -397,4 +397,6 @@ void Plugin::Done() {
     delete nodejs;
     nodejs = nullptr;
   }
+
+  fake_call_expr = nullptr;
 }

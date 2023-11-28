@@ -49,12 +49,6 @@ find_path(V8_CONFIG_INCLUDE_DIR
     NAMES v8config.h
 )
 
-#
-# libnode.so.83, Fedora 34, node 14.18
-# libnode.so.93, Fedora 35, node 16.13
-# libnode.so.102, node 17.3.0
-# libnode.so.111, node 19.0.0
-#
 set(nodejs_known_names
     "libnode.so" "libnode.dylib"
     "libnode.so.83" "libnode.83.dylib"
@@ -63,6 +57,7 @@ set(nodejs_known_names
     "libnode.so.108" "libnode.108.dylib"
     "libnode.so.111" "libnode.111.dylib"
     "libnode.so.115" "libnode.115.dylib"
+    "libnode.so.120" "libnode.120.dylib"
 )
 
 if ( NODEJS_ROOT_DIR )

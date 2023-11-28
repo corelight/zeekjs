@@ -324,6 +324,9 @@ v8::Local<v8::Object> ZeekValWrapper::WrapAsObject(const zeek::ValPtr& vp,
   }
 
   v8::Local<v8::Context> context = isolate_->GetCurrentContext();
+  // Note, with opaque and zeek.as() the record_template is also
+  // used for non-record types. It might make sense to have type
+  // specific templates in the future.
   v8::Local<v8::ObjectTemplate> tmpl = record_template_.Get(isolate_);
   v8::Local<v8::Object> obj = tmpl->NewInstance(context).ToLocalChecked();
   ZeekValWrap* wrap = ZeekValWrap::Make(isolate_, this, obj, vp->Ref(), attr_mask);
@@ -476,6 +479,8 @@ v8::Local<v8::Value> ZeekValWrapper::Wrap(const zeek::ValPtr& vp, int attr_mask)
       return wrap_table(vp);
     case zeek::TYPE_ENUM:
       return wrap_enum(vp);
+    case zeek::TYPE_OPAQUE:
+      return WrapAsObject(vp);
     case zeek::TYPE_LIST: {  // types (?)
       v8::Local<v8::Context> context = isolate_->GetCurrentContext();
       zeek::ListVal* lval = vp->AsListVal();
@@ -528,7 +533,8 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
     ZeekValWrap* zeek_val_wrap = nullptr;
     if (Unwrap(isolate_, obj, &zeek_val_wrap)) {
       zeek::Val* vp = zeek_val_wrap->GetVal();
-      if (type_tag == zeek::TYPE_ANY || vp->GetType()->Tag() == type_tag) {
+      if (type_tag == zeek::TYPE_ANY || type_tag == zeek::TYPE_OPAQUE ||
+          vp->GetType()->Tag() == type_tag) {
         wrap_result.val = {zeek::NewRef{}, vp};
         return wrap_result;
       }
@@ -1206,8 +1212,14 @@ void ZeekValWrapper::ZeekRecordEnumerator(
   v8::Local<v8::Object> receiver = info.This();
   auto wrap =
       static_cast<ZeekValWrap*>(receiver->GetAlignedPointerFromInternalField(0));
-  auto rval = static_cast<zeek::RecordVal*>(wrap->GetVal());
-  const auto& rt = rval->GetType<zeek::RecordType>();
+
+  const auto* val = wrap->GetVal();
+  if (val->GetType()->Tag() != zeek::TYPE_RECORD) {
+    info.GetReturnValue().Set(v8::Array::New(info.GetIsolate()));
+    return;
+  }
+
+  const auto& rt = val->GetType<zeek::RecordType>();
   int attr_mask = wrap->GetAttrMask();
 
   info.GetReturnValue().Set(wrap->GetWrapper()->GetRecordFieldNames(rt, attr_mask));
@@ -1220,9 +1232,12 @@ void ZeekValWrapper::ZeekRecordQuery(
   v8::Local<v8::Object> receiver = info.This();
   auto wrap =
       static_cast<ZeekValWrap*>(receiver->GetAlignedPointerFromInternalField(0));
-  auto rval = static_cast<zeek::RecordVal*>(wrap->GetVal());
-  const auto& rt = rval->GetType<zeek::RecordType>();
 
+  const auto* val = wrap->GetVal();
+  if (val->GetType()->Tag() != zeek::TYPE_RECORD)
+    return;
+
+  const auto& rt = val->GetType<zeek::RecordType>();
   auto offset = wrap->GetWrapper()->GetRecordFieldOffset(rt, property);
   if (offset >= 0) {
     info.GetReturnValue().Set(v8::PropertyAttribute::ReadOnly);

@@ -10,14 +10,12 @@ RUN dnf install -y \
   which \
   clang-tools-extra
 
-RUN dnf config-manager --add-repo https://download.opensuse.org/repositories/security:zeek/Fedora_37/security:zeek.repo
-
-ENV ZEEK_VERSION='6.1.*'
+RUN dnf config-manager --add-repo https://download.opensuse.org/repositories/security:zeek/Fedora_38/security:zeek.repo
 
 RUN dnf install -y \
-  zeek-btest-$ZEEK_VERSION \
-  zeek-core-$ZEEK_VERSION  \
-  zeek-devel-$ZEEK_VERSION
+  zeek-btest \
+  zeek-core \
+  zeek-devel
 
 ENV PATH=/opt/zeek/bin:$PATH
 

@@ -1,4 +1,4 @@
-FROM fedora:38
+FROM fedora:39
 
 # Dependencies required to compile and test ZeekJS on Fedora
 RUN dnf install -y \
@@ -13,7 +13,7 @@ RUN dnf install -y \
 # Bust the cache
 ARG STAMP=1662210869
 
-RUN dnf config-manager --add-repo https://download.opensuse.org/repositories/security:zeek/Fedora_37/security:zeek.repo
+RUN dnf config-manager --add-repo https://download.opensuse.org/repositories/security:zeek/Fedora_38/security:zeek.repo
 
 RUN dnf install -y \
   zeek-nightly-btest \

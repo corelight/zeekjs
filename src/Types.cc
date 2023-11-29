@@ -141,7 +141,7 @@ ZeekValWrapper::ZeekValWrapper(v8::Isolate* isolate) : isolate_(isolate) {
   v8::FunctionCallback toJSON_callback =
       [](const v8::FunctionCallbackInfo<v8::Value>& info) -> void {
     v8::Local<v8::Object> receiver = info.This();
-    info.GetReturnValue().Set(receiver->GetInternalField(0));
+    info.GetReturnValue().Set(receiver->GetInternalField(0).As<v8::Value>());
   };
 
   port_toJSON_function_.Reset(
@@ -154,7 +154,7 @@ ZeekValWrapper::ZeekValWrapper(v8::Isolate* isolate) : isolate_(isolate) {
   v8::AccessorGetterCallback toJSON_cb =
       [](v8::Local<v8::String> property,
          const v8::PropertyCallbackInfo<v8::Value>& info) {
-        info.GetReturnValue().Set(info.This()->GetInternalField(2));
+        info.GetReturnValue().Set(info.This()->GetInternalField(2).As<v8::Value>());
       };
 
   port_template->SetAccessor(v8_str_intern("toJSON"), toJSON_cb, nullptr,
@@ -166,7 +166,7 @@ ZeekValWrapper::ZeekValWrapper(v8::Isolate* isolate) : isolate_(isolate) {
   v8::AccessorGetterCallback port_cb =
       [](v8::Local<v8::String> property,
          const v8::PropertyCallbackInfo<v8::Value>& info) {
-        info.GetReturnValue().Set(info.This()->GetInternalField(0));
+        info.GetReturnValue().Set(info.This()->GetInternalField(0).As<v8::Value>());
       };
   port_template->SetAccessor(v8_str_intern("port"), port_cb, nullptr,
                              v8::Local<v8::Value>(), v8::AccessControl::DEFAULT,
@@ -177,7 +177,7 @@ ZeekValWrapper::ZeekValWrapper(v8::Isolate* isolate) : isolate_(isolate) {
       [](v8::Local<v8::String> property,
          const v8::PropertyCallbackInfo<v8::Value>& info) {
         info.GetIsolate();
-        info.GetReturnValue().Set(info.This()->GetInternalField(1));
+        info.GetReturnValue().Set(info.This()->GetInternalField(1).As<v8::Value>());
       };
   port_template->SetAccessor(v8_str_intern("proto"), proto_cb, nullptr,
                              v8::Local<v8::Value>(), v8::AccessControl::DEFAULT,

@@ -1,4 +1,4 @@
-FROM python:3.11@sha256:6b85854518f812d94cf2dfee2386df85b9cb78835a872d4769b4335f584c43ba
+FROM python:3.11@sha256:3df26df89a8935503d98a4a5a6430031760e8ba961fb75b85cb9d11696b34a3b
 
 RUN apt-get update && apt-get install -y --no-install-recommends npm
 

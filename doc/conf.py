@@ -10,6 +10,7 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+import pathlib
 import os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
@@ -25,7 +26,10 @@ copyright = '2021, Corelight'
 author = 'Corelight'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1.0'
+try:
+    release = (pathlib.Path(__file__).parent / 'VERSION').read_text()
+except FileNotFoundError:
+    release = (pathlib.Path(__file__).parent / '../VERSION').read_text()
 
 
 # -- General configuration ---------------------------------------------------

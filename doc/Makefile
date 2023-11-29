@@ -16,7 +16,9 @@ help:
 .PHONY: help Makefile
 
 container-html:
+	cp ../VERSION .
 	$(DOCKER) build -t zeekjs-doc .
+	rm -f VERSION
 	$(DOCKER) rm zeekjs-doc-ephemeral || true
 	$(DOCKER) create --name zeekjs-doc-ephemeral zeekjs-doc
 	rm -rf ./_build

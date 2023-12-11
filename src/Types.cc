@@ -36,8 +36,8 @@ class ExternalZeekStringResource : public v8::String::ExternalOneByteStringResou
   }
 
   void Dispose() override {
-    dprintf("Disposing ExternalZeekString: this=%p data=%p length=%lu obj_=%p", this,
-            data_, length_, obj_);
+    dprintf("Disposing ExternalZeekString: this=%p data=%p length=%" PRId64 " obj_=%p",
+            this, data_, length_, obj_);
 
     Unref(obj_);
     isolate_->AdjustAmountOfExternalAllocatedMemory(-length_);

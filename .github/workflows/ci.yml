@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         distro:
-          - ubuntu-2304
+          - ubuntu-2310
           - fedora-38
           - fedora-39
           - fedora-39-nightly

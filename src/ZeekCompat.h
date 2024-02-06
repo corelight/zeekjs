@@ -15,6 +15,7 @@
 #include <zeek/zeek-config.h>
 #endif
 
+#include <zeek/StmtEnums.h>
 #include <zeek/Val.h>
 
 namespace plugin::Corelight_ZeekJS::compat {
@@ -38,6 +39,12 @@ inline zeek::ValPtr TimeVal_New(double x) {
 inline zeek::ValPtr IntervalVal_New(double x) {
   return ::zeek::make_intrusive< ::zeek::IntervalVal>(x);
 }
+#endif
+
+#if ZEEK_VERSION_NUMBER < 60200
+constexpr zeek::detail::StmtTag STMT_EXTERN = zeek::detail::STMT_ANY;
+#else
+constexpr zeek::detail::StmtTag STMT_EXTERN = zeek::detail::STMT_EXTERN;
 #endif
 
 }  // namespace plugin::Corelight_ZeekJS::compat

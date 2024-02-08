@@ -221,7 +221,7 @@ namespace {
 class InvokeJsEventHandlerStmt : public zeek::detail::Stmt {
  public:
   InvokeJsEventHandlerStmt(zeek::EventHandler* zeek_eh, Js::EventHandler* js_eh)
-      : zeek::detail::Stmt(zeek::detail::STMT_ANY),
+      : zeek::detail::Stmt(compat::STMT_EXTERN),
         zeek_event_handler(zeek_eh),
         js_event_handler(js_eh) {}
 
@@ -254,7 +254,7 @@ class InvokeJsEventHandlerStmt : public zeek::detail::Stmt {
 class InvokeJsHookHandlerStmt : public zeek::detail::Stmt {
  public:
   InvokeJsHookHandlerStmt(Js::HookHandler* js_hh)
-      : zeek::detail::Stmt(zeek::detail::STMT_ANY), js_hook_handler(js_hh) {}
+      : zeek::detail::Stmt(compat::STMT_EXTERN), js_hook_handler(js_hh) {}
 
   zeek::ValPtr Exec(zeek::detail::Frame* f, zeek::detail::StmtFlowType& flow) override {
     zeek::Args args = *f->GetFuncArgs();

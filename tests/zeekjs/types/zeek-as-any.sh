@@ -10,8 +10,16 @@ zeek.hook('zeek_init', function() {
   zeek.invoke('do_anything', ['test with count', c]);
 
   let r = zeek.as('MyRecord', {count_field: 42, string_field: 's1'});
-  zeek.print(`JS: typeof(r)=${typeof(c)} r=${r}`);
+  zeek.print(`JS: typeof(r)=${typeof(r)} r=${r}`);
   zeek.invoke('do_anything', ['test with MyRecord', r]);
+
+  let s = zeek.as('set[subnet]', ["192.168.0.0/16"]);
+  zeek.print(`JS: typeof(s)=${typeof(s)} r=${s}`);
+  zeek.invoke('do_anything', ['test with set[subnet]', s]);
+
+  let t = zeek.as('table[count] of string', {1: "hello"});
+  zeek.print(`JS: typeof(t)=${typeof(t)} r=${t}`);
+  zeek.invoke('do_anything', ['test with table[count] of string', t]);
 });
 @TEST-END-FILE
 

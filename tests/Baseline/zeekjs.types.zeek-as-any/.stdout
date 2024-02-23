@@ -3,3 +3,7 @@ JS: typeof(c)=object c=[object Object]
 ZEEK: test with count: do_anything(42: count)
 JS: typeof(r)=object r=[object Object]
 ZEEK: test with MyRecord: do_anything([count_field=42, string_field=s1, string_field_optional=<uninitialized>]: MyRecord)
+JS: typeof(s)=object r=[object Object]
+ZEEK: test with set[subnet]: do_anything({\x0a\x09192.168.0.0/16\x0a}: set[subnet])
+JS: typeof(t)=object r=[object Object]
+ZEEK: test with table[count] of string: do_anything({\x0a\x09[1] = hello\x0a}: table[count] of string)

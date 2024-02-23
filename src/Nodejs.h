@@ -132,6 +132,8 @@ class Instance {
   // Wrapping.
   std::unique_ptr<ZeekValWrapper> zeek_val_wrapper_;
 
+  std::unique_ptr<ZeekTypeRegistry> zeek_type_registry_;
+
   // Allows kicking/notifying the Zeek IO loop.
   plugin::Corelight_ZeekJS::IOLoop::PipeSource* zeek_notifier_;
 

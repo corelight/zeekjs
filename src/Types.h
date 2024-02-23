@@ -1,13 +1,15 @@
 #pragma once
-// TODO: This needs some namespace
 #include <node/v8.h>
 
+#include "zeek/Type.h"
 #include "zeek/Val.h"
 
 #include "ZeekCompat.h"
 
 const int ZEEKJS_ATTR_NONE = 0;
 const int ZEEKJS_ATTR_LOG = 1;
+
+namespace plugin::Nodejs {
 
 class ZeekValWrap;
 
@@ -182,3 +184,18 @@ class ZeekValWrap {
   // anymore and we can now Unref() the Val we held on to.
   static void ZeekValWrap_WeakCallback(const v8::WeakCallbackInfo<ZeekValWrap>& data);
 };
+
+// Zeek does not have an API to lookup arbitrary types given
+// a type description as strings. This registry simply holds
+// all type names discovered via an AST traversal as a best
+// effort translation of what a user might provide to zeek.as()
+class ZeekTypeRegistry {
+ public:
+  ZeekTypeRegistry();
+  zeek::TypePtr Lookup(const std::string& name);
+
+ private:
+  std::map<std::string, zeek::TypePtr> type_map;
+};
+
+}  // namespace plugin::Nodejs

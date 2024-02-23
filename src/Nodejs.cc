@@ -486,8 +486,11 @@ v8::MaybeLocal<v8::Value> Instance::ZeekAs(v8::Local<v8::String> v8_name,
 
   if (!id)
     as_type = try_name_to_basetype(name);
-  else
+  else if (id->IsType())
     as_type = id->GetType();
+
+  if (!as_type)
+    as_type = zeek_type_registry_->Lookup(name);
 
   if (!as_type) {
     isolate_->ThrowException(v8_str(
@@ -919,6 +922,7 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
       &node::FreeEnvironment};
 
   zeek_val_wrapper_ = std::make_unique<ZeekValWrapper>(GetIsolate());
+  zeek_type_registry_ = std::make_unique<ZeekTypeRegistry>();
 
   node::AddLinkedBinding(node_environment_.get(), "zeekjs", RegisterModule, this);
 

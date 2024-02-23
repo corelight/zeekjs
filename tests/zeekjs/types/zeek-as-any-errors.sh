@@ -40,6 +40,18 @@ zeek.hook('zeek_init', function() {
     console.log(`Caught: ${error}`)
   }
 
+  try {
+    zeek.as('table', {"a": "b"});
+  } catch (error) {
+    console.log(`Caught: ${error}`)
+  }
+
+  try {
+    zeek.as('record', {"a": "b"});
+  } catch (error) {
+    console.log(`Caught: ${error}`)
+  }
+
 });
 @TEST-END-FILE
 

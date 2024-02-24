@@ -81,6 +81,52 @@ static void ZeekGlobalVarsEnumerator(const v8::PropertyCallbackInfo<v8::Array>& 
   info.GetReturnValue().Set(array);
 }
 
+void ZeekGlobalVarsSetter(v8::Local<v8::Name> property,
+                          v8::Local<v8::Value> v8_val,
+                          const v8::PropertyCallbackInfo<v8::Value>& info) {
+  v8::Isolate* isolate = info.GetIsolate();
+  auto zeek_obj = v8::Local<v8::Object>::Cast(info.Data());
+  auto field = v8::Local<v8::External>::Cast(zeek_obj->GetInternalField(0));
+  auto instance = static_cast<Instance*>(field->Value());
+
+  v8::String::Utf8Value arg(isolate, property);
+  dprintf("Property... %s", *arg);
+
+  if (!*arg)
+    return;
+
+  const zeek::detail::IDPtr& id = zeek::id::find(*arg);
+
+  // Don't allow the obvious ones that won't work.
+  if (!id || id->IsType() || id->IsConst() || id->IsOption() || !id->GetType()) {
+    std::string what;
+    if (!id)
+      what = "unknown global";
+    else if (id->IsType())
+      what = "type";
+    else if (id->IsConst())
+      what = "const";
+    else if (id->IsOption())
+      what = "option";
+    else if (!id->GetType())
+      what = "without type";
+
+    std::string error = zeek::util::fmt("Cannot set %s: %s", what.c_str(), *arg);
+    isolate->ThrowException(v8_str(isolate, error.c_str()));
+    return;
+  }
+
+  ZeekValWrapper::Result wrap_result = instance->ToZeekVal(v8_val, id->GetType());
+  if (!wrap_result.ok) {
+    v8::Local<v8::Value> error = v8::Exception::TypeError(
+        ::v8_str(isolate, zeek::util::fmt("Bad value: %s", wrap_result.error.c_str())));
+    isolate->ThrowException(error);
+    return;
+  }
+
+  id->SetVal(wrap_result.val);
+}
+
 // Call a Javascript function with Zeek land arguments.
 //
 // The caller is supposed to enter the IsolateScope and HandleScope so that
@@ -700,6 +746,7 @@ void Instance::AddZeekObject(v8::Local<v8::Object> exports,
   v8::NamedPropertyHandlerConfiguration global_vars_conf = {nullptr};
   global_vars_conf.getter = ZeekGlobalVarsGetter;
   global_vars_conf.enumerator = ZeekGlobalVarsEnumerator;
+  global_vars_conf.setter = ZeekGlobalVarsSetter;
   global_vars_conf.data = zeek_obj;
   zeek_globals_tmpl->SetHandler(global_vars_conf);
 

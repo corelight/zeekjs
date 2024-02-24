@@ -741,7 +741,6 @@ void Instance::AddZeekObject(v8::Local<v8::Object> exports,
   // global_vars dictionary
   v8::Local<v8::String> globals_str = v8_str_intern(isolate, "global_vars");
   v8::Local<v8::ObjectTemplate> zeek_globals_tmpl = v8::ObjectTemplate::New(isolate);
-  zeek_globals_tmpl->SetInternalFieldCount(1);
 
   v8::NamedPropertyHandlerConfiguration global_vars_conf = {nullptr};
   global_vars_conf.getter = ZeekGlobalVarsGetter;
@@ -752,7 +751,6 @@ void Instance::AddZeekObject(v8::Local<v8::Object> exports,
 
   v8::Local<v8::Object> zeek_global_vars_obj =
       zeek_globals_tmpl->NewInstance(context).ToLocalChecked();
-  zeek_global_vars_obj->SetInternalField(0, v8::External::New(isolate, instance));
   zeek_obj->Set(context, globals_str, zeek_global_vars_obj).Check();
 
   // Files to be loaded by the bootstrapping script.

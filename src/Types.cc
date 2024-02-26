@@ -6,6 +6,7 @@
 
 #include "zeek/IPAddr.h"
 #include "zeek/IntrusivePtr.h"
+#include "zeek/RE.h"
 #include "zeek/Type.h"
 #include "zeek/Val.h"
 #include "zeek/ZeekString.h"
@@ -441,6 +442,11 @@ v8::Local<v8::Value> ZeekValWrapper::wrap_enum(const zeek::ValPtr& vp) {
   return v8_str_extern(isolate_, et, name);
 }
 
+v8::Local<v8::Value> ZeekValWrapper::wrap_pattern(const zeek::ValPtr& vp) {
+  const zeek::RE_Matcher* re = vp->AsPatternVal()->AsPattern();
+  return v8_str(re->PatternText());
+}
+
 v8::Local<v8::Value> ZeekValWrapper::Wrap(const zeek::ValPtr& vp, int attr_mask) {
   // For nil/empty, return undefined. Expect the caller to figure
   // out if this is the right value. E.g. for void functions.
@@ -479,6 +485,8 @@ v8::Local<v8::Value> ZeekValWrapper::Wrap(const zeek::ValPtr& vp, int attr_mask)
       return wrap_table(vp);
     case zeek::TYPE_ENUM:
       return wrap_enum(vp);
+    case zeek::TYPE_PATTERN:
+      return wrap_pattern(vp);
     case zeek::TYPE_OPAQUE:
       return WrapAsObject(vp);
     case zeek::TYPE_LIST: {  // types (?)
@@ -583,6 +591,23 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
         }
       }
     }
+  } else if (type_tag == zeek::TYPE_PATTERN) {
+    if (v8_val->IsString()) {
+      // Convert a JS string to a pattern
+      v8::Local<v8::String> v8_str = v8_val->ToString(context).ToLocalChecked();
+      v8::String::Utf8Value utf8_value(isolate_, v8_str);
+
+      auto re = std::make_unique<zeek::RE_Matcher>(*utf8_value);
+      if (!re->Compile(false)) {
+        wrap_result.ok = false;
+        wrap_result.error = "Unable to compile pattern";
+        return wrap_result;
+      }
+
+      wrap_result.val = zeek::make_intrusive<zeek::PatternVal>(re.release());
+      return wrap_result;
+    }
+
   } else if (type_tag == zeek::TYPE_PORT) {
     // If this is an object, look for "port" and "proto" fields and interpret them.
     // This allows forth and back conversion between Zeek and Javascript

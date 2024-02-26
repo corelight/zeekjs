@@ -65,8 +65,13 @@ and install it.
 
     $ git clone https://github.com/nodejs/node.git
     $ cd node
+
+    # Reset repo to a specific Node.js version
     $ git reset --hard v19.9.0
-    $ ./configure --prefix=/opt/node-19 --shared
+
+    # Configure Node.js with shared OpenSSL and set desired installation prefix
+    $ ./configure --prefix=/opt/node-19 --shared-openssl
+
     $ make
     $ sudo make install
 

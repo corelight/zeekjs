@@ -65,8 +65,13 @@ and install it.
 
     $ git clone https://github.com/nodejs/node.git
     $ cd node
-    $ git reset --hard v19.9.0
-    $ ./configure --prefix=/opt/node-19 --shared
+
+    # Reset repo to a specific Node.js version
+    $ git reset --hard v20.11.1
+
+    # Configure Node.js with shared OpenSSL and set desired installation prefix
+    $ ./configure --prefix=/opt/node-20.11 --shared --shared-openssl
+
     $ make
     $ sudo make install
 
@@ -92,16 +97,16 @@ If Node.js is installed in a non-standard location, use
 For example::
 
     $ zeek-config --version
-    4.1.1
+    6.0.3
 
-    $ ./configure --with-nodejs=/opt/node-19
+    $ ./configure --with-nodejs=/opt/node-20.11
     $ make
     $ sudo make install
 
 If everything worked out the plugin should be available available::
 
    $ zeek -NN Zeek::JavaScript
-   Zeek::JavaScript - Experimental JavaScript support for Zeek (dynamic, version 0.7.0)
+   Zeek::JavaScript - Experimental JavaScript support for Zeek (dynamic, version 0.11.0)
        Implements LoadFile (priority 0)
 
 

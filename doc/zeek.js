@@ -61,6 +61,16 @@ exports.invoke = function() { }
 /**
  * Explicit type conversion from JavaScript to Zeek.
  *
+ * The ``type_name`` argument can be a string that is produced by Zeek's
+ * ``type_name()`` or ``global_ids()`` functions. Note that it can not be
+ * an arbitrary type expression. For example, ``table[count] of string``
+ * will most likely, ``table[ count ] of string`` will fail. A type registry
+ * is used internally that depends on the behavior of Zeek's ``Type::Describe()``
+ * method.
+ *
+ * @example
+ * local mynets = zeek.as('set[subnet]', ["192.168.0.0/16"]);
+ *
  * @param {string} type_name The name of the Zeek type. For example, ``addr``.
  * @param {} [value] The value to convert to ``type_name``.
  *

@@ -87,17 +87,25 @@ class Instance {
                             Instance* instance);
 
   v8::Isolate* GetIsolate() { return isolate_; };
+
   const std::vector<std::filesystem::path>& GetFiles() { return files_; };
+
   v8::Local<v8::Value> Wrap(const zeek::ValPtr& vp, int attr_mask = 0) {
     return zeek_val_wrapper_->Wrap(vp, attr_mask);
   }
+
   v8::Local<v8::Value> WrapAsObject(const zeek::ValPtr& vp, int attr_mask = 0) {
     return zeek_val_wrapper_->WrapAsObject(vp, attr_mask);
   }
+
   bool Unwrap(v8::Local<v8::Object> obj, ZeekValWrap** wrap) {
     return zeek_val_wrapper_->Unwrap(GetIsolate(), obj, wrap);
   }
 
+  ZeekValWrapper::Result ToZeekVal(v8::Local<v8::Value> v8_val,
+                                   const zeek::TypePtr& type) {
+    return zeek_val_wrapper_->ToZeekVal(v8_val, type);
+  }
   // The "process" object.
   v8::Local<v8::Object> GetProcessObj() { return process_obj_.Get(GetIsolate()); }
 

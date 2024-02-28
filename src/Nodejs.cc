@@ -469,8 +469,8 @@ zeek::TypePtr try_name_to_basetype(const std::string& name) {
   for (int i = 0; i <= zeek::TYPE_ERROR; i++) {
     auto tag = static_cast<zeek::TypeTag>(i);
     if (name == zeek::type_name(tag)) {
-      return zeek::base_type(tag);
-      break;
+      if (const auto& t = zeek::base_type(tag); zeek::is_atomic_type(t))
+        return t;
     }
   }
   return nullptr;
@@ -486,12 +486,15 @@ v8::MaybeLocal<v8::Value> Instance::ZeekAs(v8::Local<v8::String> v8_name,
 
   if (!id)
     as_type = try_name_to_basetype(name);
-  else
+  else if (id->IsType())
     as_type = id->GetType();
 
+  if (!as_type)
+    as_type = zeek_type_registry_->Lookup(name);
+
   if (!as_type) {
-    isolate_->ThrowException(
-        v8_str(isolate_, zeek::util::fmt("'%s' is not a Zeek type", name.c_str())));
+    isolate_->ThrowException(v8_str(
+        isolate_, zeek::util::fmt("cannot find Zeek type for '%s'", name.c_str())));
     return {};
   }
 
@@ -919,6 +922,7 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
       &node::FreeEnvironment};
 
   zeek_val_wrapper_ = std::make_unique<ZeekValWrapper>(GetIsolate());
+  zeek_type_registry_ = std::make_unique<ZeekTypeRegistry>();
 
   node::AddLinkedBinding(node_environment_.get(), "zeekjs", RegisterModule, this);
 

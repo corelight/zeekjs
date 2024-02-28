@@ -4,12 +4,16 @@
 #include "Types.h"
 #include "ZeekCompat.h"
 
+#include "zeek/Desc.h"
 #include "zeek/IPAddr.h"
 #include "zeek/IntrusivePtr.h"
+#include "zeek/Traverse.h"
 #include "zeek/Type.h"
 #include "zeek/Val.h"
 #include "zeek/ZeekString.h"
 #include "zeek/module_util.h"
+
+using namespace plugin::Nodejs;
 
 namespace {
 
@@ -1301,4 +1305,55 @@ void ZeekValWrap::ZeekValWrap_WeakCallback(
   wrap->persistent_obj_.Reset();
 
   delete wrap;
+}
+
+namespace {
+
+// Collect all types
+class TypeCollector : public zeek::detail::TraversalCallback {
+ public:
+  zeek::detail::TraversalCode PreID(const zeek::detail::ID* id) override {
+    if (id->GetType())
+      id->GetType()->Traverse(this);
+    return zeek::detail::TC_CONTINUE;
+  }
+
+  zeek::detail::TraversalCode PreType(const zeek::Type* type) override {
+    if (seen.count(type) > 0)
+      return zeek::detail::TC_ABORTSTMT;
+    seen.insert(type);
+
+    // We don't need to track funcs.
+    if (type->Tag() == zeek::TYPE_FUNC)
+      return zeek::detail::TC_CONTINUE;
+
+    zeek::TypePtr t =
+        zeek::IntrusivePtr<zeek::Type>(zeek::NewRef{}, const_cast<zeek::Type*>(type));
+
+    odesc.Clear();
+    t->Describe(&odesc);
+    std::string key = odesc.Description();
+
+    if (type_map.count(key) == 0) {
+      type_map.insert({key, t});
+    }
+
+    return zeek::detail::TC_CONTINUE;
+  };
+
+  zeek::ODesc odesc;
+  std::map<std::string, zeek::TypePtr> type_map;
+  std::set<const zeek::Type*> seen;
+};
+
+}  // namespace
+
+ZeekTypeRegistry::ZeekTypeRegistry() {
+  TypeCollector type_collector;
+  zeek::detail::traverse_all(&type_collector);
+  type_map = std::move(type_collector.type_map);
+}
+
+zeek::TypePtr ZeekTypeRegistry::Lookup(const std::string& name) {
+  return type_map[name];
 }

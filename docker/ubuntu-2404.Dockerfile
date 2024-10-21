@@ -1,4 +1,4 @@
-FROM ubuntu:23.10
+FROM ubuntu:24.04
 
 RUN apt update && apt install -y --no-install-recommends \
     build-essential \
@@ -10,8 +10,8 @@ RUN apt update && apt install -y --no-install-recommends \
     libnode-dev \
     python3
 
-RUN echo 'deb http://download.opensuse.org/repositories/security:/zeek/xUbuntu_23.10/ /' | tee /etc/apt/sources.list.d/security:zeek.list
-RUN curl -fsSL https://download.opensuse.org/repositories/security:zeek/xUbuntu_23.10/Release.key | gpg --dearmor | tee /etc/apt/trusted.gpg.d/security_zeek.gpg > /dev/null
+RUN echo 'deb http://download.opensuse.org/repositories/security:/zeek/xUbuntu_24.04/ /' | tee /etc/apt/sources.list.d/security:zeek.list
+RUN curl -fsSL https://download.opensuse.org/repositories/security:zeek/xUbuntu_24.04/Release.key | gpg --dearmor | tee /etc/apt/trusted.gpg.d/security_zeek.gpg > /dev/null
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
 	zeek-btest \

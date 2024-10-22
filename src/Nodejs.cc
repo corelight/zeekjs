@@ -196,9 +196,6 @@ plugin::Corelight_ZeekJS::Js::HookHandlerResult HookHandler::operator()(
 
   return hh_result;
 }
-Instance::Instance()
-    : node_isolate_data_(nullptr, node::FreeIsolateData),
-      node_environment_(nullptr, node::FreeEnvironment) {}
 
 // Poor print function. Might make sense to hook it through to
 // Stmt::do_print_stmp
@@ -964,7 +961,10 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
 
   node_environment_ = {
       node::CreateEnvironment(node_isolate_data_.get(), context, args, exec_args),
-      &node::FreeEnvironment};
+      [this](node::Environment* env) {
+        v8::Isolate::Scope isolate_scope(GetIsolate());
+        node::FreeEnvironment(env);
+      }};
 
   zeek_val_wrapper_ = std::make_unique<ZeekValWrapper>(GetIsolate());
   zeek_type_registry_ = std::make_unique<ZeekTypeRegistry>();

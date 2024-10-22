@@ -1,5 +1,6 @@
 #pragma once
 #include <filesystem>
+#include <functional>
 #include <optional>
 #include <vector>
 
@@ -23,8 +24,6 @@ class EventHandler;
 // Class holding Node.js and V8 state.
 class Instance {
  public:
-  Instance();
-
   bool Init(plugin::Corelight_ZeekJS::Plugin* plugin,
             const std::string& main_script_source,
             const std::vector<std::filesystem::path>& files,
@@ -130,8 +129,8 @@ class Instance {
   std::shared_ptr<node::ArrayBufferAllocator> node_allocator_;
   // Not sure this is clever.
   std::unique_ptr<node::IsolateData, decltype(&node::FreeIsolateData)>
-      node_isolate_data_;
-  std::unique_ptr<node::Environment, decltype(&node::FreeEnvironment)>
+      node_isolate_data_ = {nullptr, nullptr};
+  std::unique_ptr<node::Environment, std::function<void(node::Environment*)>>
       node_environment_;
   uv_loop_t loop;
 

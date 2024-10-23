@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         distro:
-          - ubuntu-2310
+          - ubuntu-2404
           - fedora-39
           - fedora-39-nightly
           - fedora-40
@@ -30,7 +30,7 @@ jobs:
       run: make -C doc container-html
 
     - name: Archive html docs
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: html
         path: doc/_build/html

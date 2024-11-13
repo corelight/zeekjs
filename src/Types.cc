@@ -107,29 +107,28 @@ ZeekValWrapper::ZeekValWrapper(v8::Isolate* isolate) : isolate_(isolate) {
   record_template->SetInternalFieldCount(1);
   record_template->SetPrivate(GetWrapPrivateKey(isolate), v8::True(isolate),
                               v8::PropertyAttribute::DontEnum);
-  v8::NamedPropertyHandlerConfiguration record_conf = {nullptr};
-  record_conf.getter = ZeekRecordGetter;
-  record_conf.setter = ZeekRecordSetter;
-  record_conf.enumerator = ZeekRecordEnumerator;
-  record_conf.query = ZeekRecordQuery;
-  record_template->SetHandler(record_conf);
 
+  v8::NamedPropertyHandlerConfiguration record_conf =
+      v8::NamedPropertyHandlerConfiguration(ZeekRecordGetter, ZeekRecordSetter,
+                                            ZeekRecordQuery, nullptr /* deleter */,
+                                            ZeekRecordEnumerator);
+  record_template->SetHandler(record_conf);
   record_template_.Reset(isolate_, record_template);
 
   // Object template for tables
   v8::Local<v8::ObjectTemplate> table_template = v8::ObjectTemplate::New(isolate_);
   table_template->SetInternalFieldCount(1);
 
-  v8::NamedPropertyHandlerConfiguration table_conf = {nullptr};
-  table_conf.getter = ZeekTableGetter;
-  table_conf.setter = ZeekTableSetter;
-  table_conf.enumerator = ZeekTableEnumerator;
+  v8::NamedPropertyHandlerConfiguration table_conf =
+      v8::NamedPropertyHandlerConfiguration(ZeekTableGetter, ZeekTableSetter,
+                                            nullptr /* query */, nullptr /* deleter */,
+                                            ZeekTableEnumerator);
   table_template->SetHandler(table_conf);
 
   // This is insane
-  v8::IndexedPropertyHandlerConfiguration table_indexed_conf = {nullptr};
-  table_indexed_conf.getter = ZeekTableIndexGetter;
-  table_indexed_conf.setter = ZeekTableIndexSetter;
+  v8::IndexedPropertyHandlerConfiguration table_indexed_conf =
+      v8::IndexedPropertyHandlerConfiguration(ZeekTableIndexGetter,
+                                              ZeekTableIndexSetter);
   table_template->SetHandler(table_indexed_conf);
 
   table_template_.Reset(isolate, table_template);
@@ -162,21 +161,23 @@ ZeekValWrapper::ZeekValWrapper(v8::Isolate* isolate) : isolate_(isolate) {
         info.GetReturnValue().Set(info.This()->GetInternalField(2).As<v8::Value>());
       };
 
-  port_template->SetAccessor(v8_str_intern("toJSON"), toJSON_cb, nullptr,
-                             v8::Local<v8::Value>(), v8::AccessControl::DEFAULT,
-                             v8::PropertyAttribute(v8::PropertyAttribute::DontEnum |
-                                                   v8::PropertyAttribute::ReadOnly),
-                             v8::SideEffectType::kHasNoSideEffect);
+  port_template->SetNativeDataProperty(
+      v8_str_intern("toJSON"), toJSON_cb, nullptr, v8::Local<v8::Value>(),
+      v8::PropertyAttribute(v8::PropertyAttribute::DontEnum |
+                            v8::PropertyAttribute::ReadOnly),
+
+      v8::AccessControl::DEFAULT, v8::SideEffectType::kHasNoSideEffect);
 
   v8::AccessorGetterCallback port_cb =
       [](v8::Local<v8::String> property,
          const v8::PropertyCallbackInfo<v8::Value>& info) {
         info.GetReturnValue().Set(info.This()->GetInternalField(0).As<v8::Value>());
       };
-  port_template->SetAccessor(v8_str_intern("port"), port_cb, nullptr,
-                             v8::Local<v8::Value>(), v8::AccessControl::DEFAULT,
-                             v8::PropertyAttribute::ReadOnly,
-                             v8::SideEffectType::kHasNoSideEffect);
+
+  port_template->SetNativeDataProperty(
+      v8_str_intern("port"), port_cb, nullptr, v8::Local<v8::Value>(),
+      v8::PropertyAttribute::ReadOnly, v8::AccessControl::DEFAULT,
+      v8::SideEffectType::kHasNoSideEffect);
 
   v8::AccessorGetterCallback proto_cb =
       [](v8::Local<v8::String> property,
@@ -184,10 +185,11 @@ ZeekValWrapper::ZeekValWrapper(v8::Isolate* isolate) : isolate_(isolate) {
         info.GetIsolate();
         info.GetReturnValue().Set(info.This()->GetInternalField(1).As<v8::Value>());
       };
-  port_template->SetAccessor(v8_str_intern("proto"), proto_cb, nullptr,
-                             v8::Local<v8::Value>(), v8::AccessControl::DEFAULT,
-                             v8::PropertyAttribute::ReadOnly,
-                             v8::SideEffectType::kHasNoSideEffect);
+
+  port_template->SetNativeDataProperty(
+      v8_str_intern("proto"), proto_cb, nullptr, v8::Local<v8::Value>(),
+      v8::PropertyAttribute::ReadOnly, v8::AccessControl::DEFAULT,
+      v8::SideEffectType::kHasNoSideEffect);
   port_template_.Reset(isolate_, port_template);
 
   port_str_.Reset(isolate, v8_str_intern("port"));

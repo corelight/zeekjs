@@ -10,9 +10,9 @@ jobs:
       matrix:
         distro:
           - ubuntu-2404
-          - fedora-39
-          - fedora-39-nightly
           - fedora-40
+          - fedora-41
+          - fedora-41-nightly
           - debian-bookworm
           - debian-bookworm-lts
     steps:

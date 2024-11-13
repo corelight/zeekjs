@@ -742,11 +742,10 @@ void Instance::AddZeekObject(v8::Local<v8::Object> exports,
   v8::Local<v8::String> globals_str = v8_str_intern(isolate, "global_vars");
   v8::Local<v8::ObjectTemplate> zeek_globals_tmpl = v8::ObjectTemplate::New(isolate);
 
-  v8::NamedPropertyHandlerConfiguration global_vars_conf = {nullptr};
-  global_vars_conf.getter = ZeekGlobalVarsGetter;
-  global_vars_conf.enumerator = ZeekGlobalVarsEnumerator;
-  global_vars_conf.setter = ZeekGlobalVarsSetter;
-  global_vars_conf.data = zeek_obj;
+  v8::NamedPropertyHandlerConfiguration global_vars_conf =
+      v8::NamedPropertyHandlerConfiguration(ZeekGlobalVarsGetter, ZeekGlobalVarsSetter,
+                                            nullptr /* query */, nullptr /* deleter */,
+                                            ZeekGlobalVarsEnumerator, zeek_obj);
   zeek_globals_tmpl->SetHandler(global_vars_conf);
 
   v8::Local<v8::Object> zeek_global_vars_obj =

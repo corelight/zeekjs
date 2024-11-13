@@ -41,3 +41,10 @@ The [API documentation](https://zeekjs.readthedocs.io/en/latest/#api-reference) 
 
 The existing [tests](./tests) are a source of documentation, too, and there
 are a few [examples](./examples) in the repository as well.
+
+## Supported Node.js versions
+
+ZeekJS is regularly tested with Node.js versions that ship with
+Debian Bullseye, Ubuntu 24.04 and Fedora. The oldest version
+tested is currently 18.19.0 from Debian Bullseye. Older versions
+may work. We strive to support the latest Node.js LTS release.

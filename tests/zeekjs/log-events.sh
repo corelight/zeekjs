@@ -36,4 +36,10 @@ zeek.on('SSL::log_ssl', function(rec) {
 @ifdef ( Site::private_address_space_is_local )
 redef Site::private_address_space_is_local = F;
 @endif
+
+# Don't log ip_proto - use IP::protocol_names as indicator
+# if Conn::Info$ip_proto exists.
+@ifdef ( IP::protocol_names )
+@load policy/protocols/conn/disable-unknown-ip-proto-support
+@endif
 @TEST-END-FILE

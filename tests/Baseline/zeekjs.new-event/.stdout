@@ -8,7 +8,8 @@ new_connection [
         "orig_h": "172.20.10.3",
         "orig_p": 55767,
         "resp_h": "172.20.10.1",
-        "resp_p": 53
+        "resp_p": 53,
+        "proto": 17
       },
       "orig": {
         "size": 42,
@@ -46,7 +47,8 @@ dns_message [
         "orig_h": "172.20.10.3",
         "orig_p": 55767,
         "resp_h": "172.20.10.1",
-        "resp_p": 53
+        "resp_p": 53,
+        "proto": 17
       },
       "orig": {
         "size": 42,
@@ -112,7 +114,8 @@ dns_request [
         "orig_h": "172.20.10.3",
         "orig_p": 55767,
         "resp_h": "172.20.10.1",
-        "resp_p": 53
+        "resp_p": 53,
+        "proto": 17
       },
       "orig": {
         "size": 42,
@@ -135,8 +138,8 @@ dns_request [
       "service": [],
       "history": "D",
       "uid": "CHhAvVGS1DHFjwGM9",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "dns": {
@@ -146,7 +149,8 @@ dns_request [
           "orig_h": "172.20.10.3",
           "orig_p": 55767,
           "resp_h": "172.20.10.1",
-          "resp_p": 53
+          "resp_p": 53,
+          "proto": 17
         },
         "proto": "udp",
         "trans_id": 43556,
@@ -167,7 +171,8 @@ dns_request [
             "orig_h": "172.20.10.3",
             "orig_p": 55767,
             "resp_h": "172.20.10.1",
-            "resp_p": 53
+            "resp_p": 53,
+            "proto": 17
           },
           "proto": "udp",
           "trans_id": 43556,
@@ -229,7 +234,8 @@ dns_message [
         "orig_h": "172.20.10.3",
         "orig_p": 55767,
         "resp_h": "172.20.10.1",
-        "resp_p": 53
+        "resp_p": 53,
+        "proto": 17
       },
       "orig": {
         "size": 42,
@@ -254,8 +260,8 @@ dns_message [
       ],
       "history": "Dd",
       "uid": "CHhAvVGS1DHFjwGM9",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "dns": {
@@ -265,7 +271,8 @@ dns_message [
           "orig_h": "172.20.10.3",
           "orig_p": 55767,
           "resp_h": "172.20.10.1",
-          "resp_p": 53
+          "resp_p": 53,
+          "proto": 17
         },
         "proto": "udp",
         "trans_id": 43556,
@@ -291,7 +298,8 @@ dns_message [
             "orig_h": "172.20.10.3",
             "orig_p": 55767,
             "resp_h": "172.20.10.1",
-            "resp_p": 53
+            "resp_p": 53,
+            "proto": 17
           },
           "proto": "udp",
           "trans_id": 43556,
@@ -350,7 +358,8 @@ new_connection [
         "orig_h": "172.20.10.3",
         "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": 80
+        "resp_p": 80,
+        "proto": 6
       },
       "orig": {
         "size": 0,
@@ -388,7 +397,8 @@ http_request [
         "orig_h": "172.20.10.3",
         "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": 80
+        "resp_p": 80,
+        "proto": 6
       },
       "orig": {
         "size": 77,
@@ -444,7 +454,8 @@ http_header [
         "orig_h": "172.20.10.3",
         "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": 80
+        "resp_p": 80,
+        "proto": 6
       },
       "orig": {
         "size": 77,
@@ -469,8 +480,8 @@ http_header [
       ],
       "history": "ShAD",
       "uid": "ClEkJM2Vm5giqnMf4h",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -481,7 +492,8 @@ http_header [
           "orig_h": "172.20.10.3",
           "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": 80
+          "resp_p": 80,
+          "proto": 6
         },
         "trans_depth": 1,
         "method": "GET",
@@ -504,7 +516,8 @@ http_header [
               "orig_h": "172.20.10.3",
               "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": 80
+              "resp_p": 80,
+              "proto": 6
             },
             "trans_depth": 1,
             "method": "GET",
@@ -550,7 +563,8 @@ http_header [
         "orig_h": "172.20.10.3",
         "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": 80
+        "resp_p": 80,
+        "proto": 6
       },
       "orig": {
         "size": 77,
@@ -575,8 +589,8 @@ http_header [
       ],
       "history": "ShAD",
       "uid": "ClEkJM2Vm5giqnMf4h",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -587,7 +601,8 @@ http_header [
           "orig_h": "172.20.10.3",
           "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": 80
+          "resp_p": 80,
+          "proto": 6
         },
         "trans_depth": 1,
         "method": "GET",
@@ -611,7 +626,8 @@ http_header [
               "orig_h": "172.20.10.3",
               "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": 80
+              "resp_p": 80,
+              "proto": 6
             },
             "trans_depth": 1,
             "method": "GET",
@@ -658,7 +674,8 @@ http_header [
         "orig_h": "172.20.10.3",
         "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": 80
+        "resp_p": 80,
+        "proto": 6
       },
       "orig": {
         "size": 77,
@@ -683,8 +700,8 @@ http_header [
       ],
       "history": "ShAD",
       "uid": "ClEkJM2Vm5giqnMf4h",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -695,7 +712,8 @@ http_header [
           "orig_h": "172.20.10.3",
           "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": 80
+          "resp_p": 80,
+          "proto": 6
         },
         "trans_depth": 1,
         "method": "GET",
@@ -720,7 +738,8 @@ http_header [
               "orig_h": "172.20.10.3",
               "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": 80
+              "resp_p": 80,
+              "proto": 6
             },
             "trans_depth": 1,
             "method": "GET",
@@ -772,7 +791,8 @@ get_file_handle [
         "orig_h": "172.20.10.3",
         "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": 80
+        "resp_p": 80,
+        "proto": 6
       },
       "orig": {
         "size": 77,
@@ -797,8 +817,8 @@ get_file_handle [
       ],
       "history": "ShAD",
       "uid": "ClEkJM2Vm5giqnMf4h",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -809,7 +829,8 @@ get_file_handle [
           "orig_h": "172.20.10.3",
           "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": 80
+          "resp_p": 80,
+          "proto": 6
         },
         "trans_depth": 1,
         "method": "GET",
@@ -833,7 +854,8 @@ get_file_handle [
               "orig_h": "172.20.10.3",
               "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": 80
+              "resp_p": 80,
+              "proto": 6
             },
             "trans_depth": 1,
             "method": "GET",
@@ -868,7 +890,8 @@ http_message_done [
         "orig_h": "172.20.10.3",
         "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": 80
+        "resp_p": 80,
+        "proto": 6
       },
       "orig": {
         "size": 77,
@@ -893,8 +916,8 @@ http_message_done [
       ],
       "history": "ShAD",
       "uid": "ClEkJM2Vm5giqnMf4h",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -905,7 +928,8 @@ http_message_done [
           "orig_h": "172.20.10.3",
           "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": 80
+          "resp_p": 80,
+          "proto": 6
         },
         "trans_depth": 1,
         "method": "GET",
@@ -929,7 +953,8 @@ http_message_done [
               "orig_h": "172.20.10.3",
               "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": 80
+              "resp_p": 80,
+              "proto": 6
             },
             "trans_depth": 1,
             "method": "GET",
@@ -975,7 +1000,8 @@ http_header [
         "orig_h": "172.20.10.3",
         "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": 80
+        "resp_p": 80,
+        "proto": 6
       },
       "orig": {
         "size": 77,
@@ -1000,8 +1026,8 @@ http_header [
       ],
       "history": "ShADad",
       "uid": "ClEkJM2Vm5giqnMf4h",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -1012,7 +1038,8 @@ http_header [
           "orig_h": "172.20.10.3",
           "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": 80
+          "resp_p": 80,
+          "proto": 6
         },
         "trans_depth": 1,
         "method": "GET",
@@ -1040,7 +1067,8 @@ http_header [
               "orig_h": "172.20.10.3",
               "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": 80
+              "resp_p": 80,
+              "proto": 6
             },
             "trans_depth": 1,
             "method": "GET",
@@ -1091,7 +1119,8 @@ http_header [
         "orig_h": "172.20.10.3",
         "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": 80
+        "resp_p": 80,
+        "proto": 6
       },
       "orig": {
         "size": 77,
@@ -1116,8 +1145,8 @@ http_header [
       ],
       "history": "ShADad",
       "uid": "ClEkJM2Vm5giqnMf4h",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -1128,7 +1157,8 @@ http_header [
           "orig_h": "172.20.10.3",
           "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": 80
+          "resp_p": 80,
+          "proto": 6
         },
         "trans_depth": 1,
         "method": "GET",
@@ -1156,7 +1186,8 @@ http_header [
               "orig_h": "172.20.10.3",
               "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": 80
+              "resp_p": 80,
+              "proto": 6
             },
             "trans_depth": 1,
             "method": "GET",
@@ -1207,7 +1238,8 @@ http_header [
         "orig_h": "172.20.10.3",
         "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": 80
+        "resp_p": 80,
+        "proto": 6
       },
       "orig": {
         "size": 77,
@@ -1232,8 +1264,8 @@ http_header [
       ],
       "history": "ShADad",
       "uid": "ClEkJM2Vm5giqnMf4h",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -1244,7 +1276,8 @@ http_header [
           "orig_h": "172.20.10.3",
           "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": 80
+          "resp_p": 80,
+          "proto": 6
         },
         "trans_depth": 1,
         "method": "GET",
@@ -1272,7 +1305,8 @@ http_header [
               "orig_h": "172.20.10.3",
               "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": 80
+              "resp_p": 80,
+              "proto": 6
             },
             "trans_depth": 1,
             "method": "GET",
@@ -1323,7 +1357,8 @@ http_header [
         "orig_h": "172.20.10.3",
         "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": 80
+        "resp_p": 80,
+        "proto": 6
       },
       "orig": {
         "size": 77,
@@ -1348,8 +1383,8 @@ http_header [
       ],
       "history": "ShADad",
       "uid": "ClEkJM2Vm5giqnMf4h",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -1360,7 +1395,8 @@ http_header [
           "orig_h": "172.20.10.3",
           "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": 80
+          "resp_p": 80,
+          "proto": 6
         },
         "trans_depth": 1,
         "method": "GET",
@@ -1388,7 +1424,8 @@ http_header [
               "orig_h": "172.20.10.3",
               "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": 80
+              "resp_p": 80,
+              "proto": 6
             },
             "trans_depth": 1,
             "method": "GET",
@@ -1439,7 +1476,8 @@ http_header [
         "orig_h": "172.20.10.3",
         "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": 80
+        "resp_p": 80,
+        "proto": 6
       },
       "orig": {
         "size": 77,
@@ -1464,8 +1502,8 @@ http_header [
       ],
       "history": "ShADad",
       "uid": "ClEkJM2Vm5giqnMf4h",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -1476,7 +1514,8 @@ http_header [
           "orig_h": "172.20.10.3",
           "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": 80
+          "resp_p": 80,
+          "proto": 6
         },
         "trans_depth": 1,
         "method": "GET",
@@ -1504,7 +1543,8 @@ http_header [
               "orig_h": "172.20.10.3",
               "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": 80
+              "resp_p": 80,
+              "proto": 6
             },
             "trans_depth": 1,
             "method": "GET",
@@ -1555,7 +1595,8 @@ http_header [
         "orig_h": "172.20.10.3",
         "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": 80
+        "resp_p": 80,
+        "proto": 6
       },
       "orig": {
         "size": 77,
@@ -1580,8 +1621,8 @@ http_header [
       ],
       "history": "ShADad",
       "uid": "ClEkJM2Vm5giqnMf4h",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -1592,7 +1633,8 @@ http_header [
           "orig_h": "172.20.10.3",
           "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": 80
+          "resp_p": 80,
+          "proto": 6
         },
         "trans_depth": 1,
         "method": "GET",
@@ -1620,7 +1662,8 @@ http_header [
               "orig_h": "172.20.10.3",
               "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": 80
+              "resp_p": 80,
+              "proto": 6
             },
             "trans_depth": 1,
             "method": "GET",
@@ -1671,7 +1714,8 @@ http_header [
         "orig_h": "172.20.10.3",
         "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": 80
+        "resp_p": 80,
+        "proto": 6
       },
       "orig": {
         "size": 77,
@@ -1696,8 +1740,8 @@ http_header [
       ],
       "history": "ShADad",
       "uid": "ClEkJM2Vm5giqnMf4h",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -1708,7 +1752,8 @@ http_header [
           "orig_h": "172.20.10.3",
           "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": 80
+          "resp_p": 80,
+          "proto": 6
         },
         "trans_depth": 1,
         "method": "GET",
@@ -1736,7 +1781,8 @@ http_header [
               "orig_h": "172.20.10.3",
               "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": 80
+              "resp_p": 80,
+              "proto": 6
             },
             "trans_depth": 1,
             "method": "GET",
@@ -1787,7 +1833,8 @@ http_header [
         "orig_h": "172.20.10.3",
         "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": 80
+        "resp_p": 80,
+        "proto": 6
       },
       "orig": {
         "size": 77,
@@ -1812,8 +1859,8 @@ http_header [
       ],
       "history": "ShADad",
       "uid": "ClEkJM2Vm5giqnMf4h",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -1824,7 +1871,8 @@ http_header [
           "orig_h": "172.20.10.3",
           "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": 80
+          "resp_p": 80,
+          "proto": 6
         },
         "trans_depth": 1,
         "method": "GET",
@@ -1852,7 +1900,8 @@ http_header [
               "orig_h": "172.20.10.3",
               "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": 80
+              "resp_p": 80,
+              "proto": 6
             },
             "trans_depth": 1,
             "method": "GET",
@@ -1903,7 +1952,8 @@ http_header [
         "orig_h": "172.20.10.3",
         "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": 80
+        "resp_p": 80,
+        "proto": 6
       },
       "orig": {
         "size": 77,
@@ -1928,8 +1978,8 @@ http_header [
       ],
       "history": "ShADad",
       "uid": "ClEkJM2Vm5giqnMf4h",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -1940,7 +1990,8 @@ http_header [
           "orig_h": "172.20.10.3",
           "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": 80
+          "resp_p": 80,
+          "proto": 6
         },
         "trans_depth": 1,
         "method": "GET",
@@ -1968,7 +2019,8 @@ http_header [
               "orig_h": "172.20.10.3",
               "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": 80
+              "resp_p": 80,
+              "proto": 6
             },
             "trans_depth": 1,
             "method": "GET",
@@ -2019,7 +2071,8 @@ http_header [
         "orig_h": "172.20.10.3",
         "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": 80
+        "resp_p": 80,
+        "proto": 6
       },
       "orig": {
         "size": 77,
@@ -2044,8 +2097,8 @@ http_header [
       ],
       "history": "ShADad",
       "uid": "ClEkJM2Vm5giqnMf4h",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -2056,7 +2109,8 @@ http_header [
           "orig_h": "172.20.10.3",
           "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": 80
+          "resp_p": 80,
+          "proto": 6
         },
         "trans_depth": 1,
         "method": "GET",
@@ -2084,7 +2138,8 @@ http_header [
               "orig_h": "172.20.10.3",
               "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": 80
+              "resp_p": 80,
+              "proto": 6
             },
             "trans_depth": 1,
             "method": "GET",
@@ -2135,7 +2190,8 @@ http_header [
         "orig_h": "172.20.10.3",
         "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": 80
+        "resp_p": 80,
+        "proto": 6
       },
       "orig": {
         "size": 77,
@@ -2160,8 +2216,8 @@ http_header [
       ],
       "history": "ShADad",
       "uid": "ClEkJM2Vm5giqnMf4h",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -2172,7 +2228,8 @@ http_header [
           "orig_h": "172.20.10.3",
           "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": 80
+          "resp_p": 80,
+          "proto": 6
         },
         "trans_depth": 1,
         "method": "GET",
@@ -2200,7 +2257,8 @@ http_header [
               "orig_h": "172.20.10.3",
               "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": 80
+              "resp_p": 80,
+              "proto": 6
             },
             "trans_depth": 1,
             "method": "GET",
@@ -2251,7 +2309,8 @@ http_header [
         "orig_h": "172.20.10.3",
         "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": 80
+        "resp_p": 80,
+        "proto": 6
       },
       "orig": {
         "size": 77,
@@ -2276,8 +2335,8 @@ http_header [
       ],
       "history": "ShADad",
       "uid": "ClEkJM2Vm5giqnMf4h",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -2288,7 +2347,8 @@ http_header [
           "orig_h": "172.20.10.3",
           "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": 80
+          "resp_p": 80,
+          "proto": 6
         },
         "trans_depth": 1,
         "method": "GET",
@@ -2316,7 +2376,8 @@ http_header [
               "orig_h": "172.20.10.3",
               "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": 80
+              "resp_p": 80,
+              "proto": 6
             },
             "trans_depth": 1,
             "method": "GET",
@@ -2367,7 +2428,8 @@ http_header [
         "orig_h": "172.20.10.3",
         "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": 80
+        "resp_p": 80,
+        "proto": 6
       },
       "orig": {
         "size": 77,
@@ -2392,8 +2454,8 @@ http_header [
       ],
       "history": "ShADad",
       "uid": "ClEkJM2Vm5giqnMf4h",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -2404,7 +2466,8 @@ http_header [
           "orig_h": "172.20.10.3",
           "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": 80
+          "resp_p": 80,
+          "proto": 6
         },
         "trans_depth": 1,
         "method": "GET",
@@ -2432,7 +2495,8 @@ http_header [
               "orig_h": "172.20.10.3",
               "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": 80
+              "resp_p": 80,
+              "proto": 6
             },
             "trans_depth": 1,
             "method": "GET",
@@ -2487,7 +2551,8 @@ get_file_handle [
         "orig_h": "172.20.10.3",
         "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": 80
+        "resp_p": 80,
+        "proto": 6
       },
       "orig": {
         "size": 77,
@@ -2512,8 +2577,8 @@ get_file_handle [
       ],
       "history": "ShADad",
       "uid": "ClEkJM2Vm5giqnMf4h",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -2524,7 +2589,8 @@ get_file_handle [
           "orig_h": "172.20.10.3",
           "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": 80
+          "resp_p": 80,
+          "proto": 6
         },
         "trans_depth": 1,
         "method": "GET",
@@ -2551,7 +2617,8 @@ get_file_handle [
               "orig_h": "172.20.10.3",
               "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": 80
+              "resp_p": 80,
+              "proto": 6
             },
             "trans_depth": 1,
             "method": "GET",
@@ -2589,7 +2656,8 @@ http_message_done [
         "orig_h": "172.20.10.3",
         "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": 80
+        "resp_p": 80,
+        "proto": 6
       },
       "orig": {
         "size": 77,
@@ -2614,8 +2682,8 @@ http_message_done [
       ],
       "history": "ShADad",
       "uid": "ClEkJM2Vm5giqnMf4h",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -2626,7 +2694,8 @@ http_message_done [
           "orig_h": "172.20.10.3",
           "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": 80
+          "resp_p": 80,
+          "proto": 6
         },
         "trans_depth": 1,
         "method": "GET",
@@ -2653,7 +2722,8 @@ http_message_done [
               "orig_h": "172.20.10.3",
               "orig_p": 59588,
               "resp_h": "199.60.103.106",
-              "resp_p": 80
+              "resp_p": 80,
+              "proto": 6
             },
             "trans_depth": 1,
             "method": "GET",
@@ -2702,7 +2772,8 @@ new_connection [
         "orig_h": "172.20.10.3",
         "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": 443
+        "resp_p": 443,
+        "proto": 6
       },
       "orig": {
         "size": 0,
@@ -2740,7 +2811,8 @@ ssl_extension [
         "orig_h": "172.20.10.3",
         "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": 443
+        "resp_p": 443,
+        "proto": 6
       },
       "orig": {
         "size": 517,
@@ -2763,8 +2835,8 @@ ssl_extension [
       "service": [],
       "history": "ShAD",
       "uid": "C4J4Th3PJpwUYZZ6gc",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -2775,7 +2847,8 @@ ssl_extension [
           "orig_h": "172.20.10.3",
           "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": 443
+          "resp_p": 443,
+          "proto": 6
         },
         "server_name": "corelight.com",
         "resumed": false,
@@ -2812,7 +2885,8 @@ ssl_extension [
         "orig_h": "172.20.10.3",
         "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": 443
+        "resp_p": 443,
+        "proto": 6
       },
       "orig": {
         "size": 517,
@@ -2835,8 +2909,8 @@ ssl_extension [
       "service": [],
       "history": "ShAD",
       "uid": "C4J4Th3PJpwUYZZ6gc",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -2847,7 +2921,8 @@ ssl_extension [
           "orig_h": "172.20.10.3",
           "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": 443
+          "resp_p": 443,
+          "proto": 6
         },
         "server_name": "corelight.com",
         "resumed": false,
@@ -2884,7 +2959,8 @@ ssl_extension [
         "orig_h": "172.20.10.3",
         "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": 443
+        "resp_p": 443,
+        "proto": 6
       },
       "orig": {
         "size": 517,
@@ -2907,8 +2983,8 @@ ssl_extension [
       "service": [],
       "history": "ShAD",
       "uid": "C4J4Th3PJpwUYZZ6gc",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -2919,7 +2995,8 @@ ssl_extension [
           "orig_h": "172.20.10.3",
           "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": 443
+          "resp_p": 443,
+          "proto": 6
         },
         "server_name": "corelight.com",
         "resumed": false,
@@ -2956,7 +3033,8 @@ ssl_extension [
         "orig_h": "172.20.10.3",
         "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": 443
+        "resp_p": 443,
+        "proto": 6
       },
       "orig": {
         "size": 517,
@@ -2979,8 +3057,8 @@ ssl_extension [
       "service": [],
       "history": "ShAD",
       "uid": "C4J4Th3PJpwUYZZ6gc",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -2991,7 +3069,8 @@ ssl_extension [
           "orig_h": "172.20.10.3",
           "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": 443
+          "resp_p": 443,
+          "proto": 6
         },
         "server_name": "corelight.com",
         "resumed": false,
@@ -3028,7 +3107,8 @@ ssl_extension [
         "orig_h": "172.20.10.3",
         "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": 443
+        "resp_p": 443,
+        "proto": 6
       },
       "orig": {
         "size": 517,
@@ -3051,8 +3131,8 @@ ssl_extension [
       "service": [],
       "history": "ShAD",
       "uid": "C4J4Th3PJpwUYZZ6gc",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -3063,7 +3143,8 @@ ssl_extension [
           "orig_h": "172.20.10.3",
           "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": 443
+          "resp_p": 443,
+          "proto": 6
         },
         "server_name": "corelight.com",
         "resumed": false,
@@ -3100,7 +3181,8 @@ ssl_extension [
         "orig_h": "172.20.10.3",
         "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": 443
+        "resp_p": 443,
+        "proto": 6
       },
       "orig": {
         "size": 517,
@@ -3123,8 +3205,8 @@ ssl_extension [
       "service": [],
       "history": "ShAD",
       "uid": "C4J4Th3PJpwUYZZ6gc",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -3135,7 +3217,8 @@ ssl_extension [
           "orig_h": "172.20.10.3",
           "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": 443
+          "resp_p": 443,
+          "proto": 6
         },
         "server_name": "corelight.com",
         "resumed": false,
@@ -3172,7 +3255,8 @@ ssl_extension [
         "orig_h": "172.20.10.3",
         "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": 443
+        "resp_p": 443,
+        "proto": 6
       },
       "orig": {
         "size": 517,
@@ -3195,8 +3279,8 @@ ssl_extension [
       "service": [],
       "history": "ShAD",
       "uid": "C4J4Th3PJpwUYZZ6gc",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -3207,7 +3291,8 @@ ssl_extension [
           "orig_h": "172.20.10.3",
           "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": 443
+          "resp_p": 443,
+          "proto": 6
         },
         "server_name": "corelight.com",
         "resumed": false,
@@ -3244,7 +3329,8 @@ ssl_extension [
         "orig_h": "172.20.10.3",
         "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": 443
+        "resp_p": 443,
+        "proto": 6
       },
       "orig": {
         "size": 517,
@@ -3267,8 +3353,8 @@ ssl_extension [
       "service": [],
       "history": "ShAD",
       "uid": "C4J4Th3PJpwUYZZ6gc",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -3279,7 +3365,8 @@ ssl_extension [
           "orig_h": "172.20.10.3",
           "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": 443
+          "resp_p": 443,
+          "proto": 6
         },
         "server_name": "corelight.com",
         "resumed": false,
@@ -3316,7 +3403,8 @@ ssl_extension [
         "orig_h": "172.20.10.3",
         "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": 443
+        "resp_p": 443,
+        "proto": 6
       },
       "orig": {
         "size": 517,
@@ -3339,8 +3427,8 @@ ssl_extension [
       "service": [],
       "history": "ShAD",
       "uid": "C4J4Th3PJpwUYZZ6gc",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -3351,7 +3439,8 @@ ssl_extension [
           "orig_h": "172.20.10.3",
           "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": 443
+          "resp_p": 443,
+          "proto": 6
         },
         "server_name": "corelight.com",
         "resumed": false,
@@ -3388,7 +3477,8 @@ ssl_extension [
         "orig_h": "172.20.10.3",
         "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": 443
+        "resp_p": 443,
+        "proto": 6
       },
       "orig": {
         "size": 517,
@@ -3411,8 +3501,8 @@ ssl_extension [
       "service": [],
       "history": "ShAD",
       "uid": "C4J4Th3PJpwUYZZ6gc",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -3423,7 +3513,8 @@ ssl_extension [
           "orig_h": "172.20.10.3",
           "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": 443
+          "resp_p": 443,
+          "proto": 6
         },
         "server_name": "corelight.com",
         "resumed": false,
@@ -3460,7 +3551,8 @@ ssl_extension [
         "orig_h": "172.20.10.3",
         "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": 443
+        "resp_p": 443,
+        "proto": 6
       },
       "orig": {
         "size": 517,
@@ -3483,8 +3575,8 @@ ssl_extension [
       "service": [],
       "history": "ShAD",
       "uid": "C4J4Th3PJpwUYZZ6gc",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -3495,7 +3587,8 @@ ssl_extension [
           "orig_h": "172.20.10.3",
           "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": 443
+          "resp_p": 443,
+          "proto": 6
         },
         "server_name": "corelight.com",
         "resumed": false,
@@ -3532,7 +3625,8 @@ ssl_extension [
         "orig_h": "172.20.10.3",
         "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": 443
+        "resp_p": 443,
+        "proto": 6
       },
       "orig": {
         "size": 517,
@@ -3555,8 +3649,8 @@ ssl_extension [
       "service": [],
       "history": "ShAD",
       "uid": "C4J4Th3PJpwUYZZ6gc",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -3567,7 +3661,8 @@ ssl_extension [
           "orig_h": "172.20.10.3",
           "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": 443
+          "resp_p": 443,
+          "proto": 6
         },
         "server_name": "corelight.com",
         "resumed": false,
@@ -3604,7 +3699,8 @@ ssl_extension [
         "orig_h": "172.20.10.3",
         "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": 443
+        "resp_p": 443,
+        "proto": 6
       },
       "orig": {
         "size": 517,
@@ -3627,8 +3723,8 @@ ssl_extension [
       "service": [],
       "history": "ShAD",
       "uid": "C4J4Th3PJpwUYZZ6gc",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -3639,7 +3735,8 @@ ssl_extension [
           "orig_h": "172.20.10.3",
           "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": 443
+          "resp_p": 443,
+          "proto": 6
         },
         "server_name": "corelight.com",
         "resumed": false,
@@ -3676,7 +3773,8 @@ ssl_plaintext_data [
         "orig_h": "172.20.10.3",
         "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": 443
+        "resp_p": 443,
+        "proto": 6
       },
       "orig": {
         "size": 517,
@@ -3701,8 +3799,8 @@ ssl_plaintext_data [
       ],
       "history": "ShAD",
       "uid": "C4J4Th3PJpwUYZZ6gc",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -3713,7 +3811,8 @@ ssl_plaintext_data [
           "orig_h": "172.20.10.3",
           "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": 443
+          "resp_p": 443,
+          "proto": 6
         },
         "server_name": "corelight.com",
         "session_id": "05628f4ff03bc85cef6bd6b1a01b9419063cf7fc3c5f10fc7b18cfc4b8190e09",
@@ -3756,7 +3855,8 @@ ssl_extension [
         "orig_h": "172.20.10.3",
         "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": 443
+        "resp_p": 443,
+        "proto": 6
       },
       "orig": {
         "size": 517,
@@ -3781,8 +3881,8 @@ ssl_extension [
       ],
       "history": "ShADd",
       "uid": "C4J4Th3PJpwUYZZ6gc",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -3793,7 +3893,8 @@ ssl_extension [
           "orig_h": "172.20.10.3",
           "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": 443
+          "resp_p": 443,
+          "proto": 6
         },
         "curve": "x25519",
         "server_name": "corelight.com",
@@ -3833,7 +3934,8 @@ ssl_extension [
         "orig_h": "172.20.10.3",
         "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": 443
+        "resp_p": 443,
+        "proto": 6
       },
       "orig": {
         "size": 517,
@@ -3858,8 +3960,8 @@ ssl_extension [
       ],
       "history": "ShADd",
       "uid": "C4J4Th3PJpwUYZZ6gc",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -3870,7 +3972,8 @@ ssl_extension [
           "orig_h": "172.20.10.3",
           "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": 443
+          "resp_p": 443,
+          "proto": 6
         },
         "version_num": 772,
         "version": "TLSv13",
@@ -3912,7 +4015,8 @@ ssl_plaintext_data [
         "orig_h": "172.20.10.3",
         "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": 443
+        "resp_p": 443,
+        "proto": 6
       },
       "orig": {
         "size": 517,
@@ -3937,8 +4041,8 @@ ssl_plaintext_data [
       ],
       "history": "ShADd",
       "uid": "C4J4Th3PJpwUYZZ6gc",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -3949,7 +4053,8 @@ ssl_plaintext_data [
           "orig_h": "172.20.10.3",
           "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": 443
+          "resp_p": 443,
+          "proto": 6
         },
         "version_num": 772,
         "version": "TLSv13",
@@ -3996,7 +4101,8 @@ ssl_plaintext_data [
         "orig_h": "172.20.10.3",
         "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": 443
+        "resp_p": 443,
+        "proto": 6
       },
       "orig": {
         "size": 517,
@@ -4021,8 +4127,8 @@ ssl_plaintext_data [
       ],
       "history": "ShADd",
       "uid": "C4J4Th3PJpwUYZZ6gc",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -4033,7 +4139,8 @@ ssl_plaintext_data [
           "orig_h": "172.20.10.3",
           "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": 443
+          "resp_p": 443,
+          "proto": 6
         },
         "version_num": 772,
         "version": "TLSv13",
@@ -4080,7 +4187,8 @@ ssl_plaintext_data [
         "orig_h": "172.20.10.3",
         "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": 443
+        "resp_p": 443,
+        "proto": 6
       },
       "orig": {
         "size": 597,
@@ -4105,8 +4213,8 @@ ssl_plaintext_data [
       ],
       "history": "ShADd",
       "uid": "C4J4Th3PJpwUYZZ6gc",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -4117,7 +4225,8 @@ ssl_plaintext_data [
           "orig_h": "172.20.10.3",
           "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": 443
+          "resp_p": 443,
+          "proto": 6
         },
         "version_num": 772,
         "version": "TLSv13",
@@ -4164,7 +4273,8 @@ ssl_established [
         "orig_h": "172.20.10.3",
         "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": 443
+        "resp_p": 443,
+        "proto": 6
       },
       "orig": {
         "size": 597,
@@ -4189,8 +4299,8 @@ ssl_established [
       ],
       "history": "ShADd",
       "uid": "C4J4Th3PJpwUYZZ6gc",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -4201,7 +4311,8 @@ ssl_established [
           "orig_h": "172.20.10.3",
           "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": 443
+          "resp_p": 443,
+          "proto": 6
         },
         "version_num": 772,
         "version": "TLSv13",
@@ -4232,7 +4343,8 @@ connection_state_remove [
         "orig_h": "172.20.10.3",
         "orig_p": 55767,
         "resp_h": "172.20.10.1",
-        "resp_p": 53
+        "resp_p": 53,
+        "proto": 17
       },
       "orig": {
         "size": 42,
@@ -4257,8 +4369,8 @@ connection_state_remove [
       ],
       "history": "Dd",
       "uid": "CHhAvVGS1DHFjwGM9",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "dns_state": {},
@@ -4274,7 +4386,8 @@ connection_state_remove [
         "orig_h": "172.20.10.3",
         "orig_p": 45208,
         "resp_h": "199.60.103.106",
-        "resp_p": 443
+        "resp_p": 443,
+        "proto": 6
       },
       "orig": {
         "size": 842,
@@ -4299,8 +4412,8 @@ connection_state_remove [
       ],
       "history": "ShADdaFf",
       "uid": "C4J4Th3PJpwUYZZ6gc",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -4311,7 +4424,8 @@ connection_state_remove [
           "orig_h": "172.20.10.3",
           "orig_p": 45208,
           "resp_h": "199.60.103.106",
-          "resp_p": 443
+          "resp_p": 443,
+          "proto": 6
         },
         "version_num": 772,
         "version": "TLSv13",
@@ -4345,7 +4459,8 @@ get_file_handle [
         "orig_h": "172.20.10.3",
         "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": 80
+        "resp_p": 80,
+        "proto": 6
       },
       "orig": {
         "size": 77,
@@ -4370,8 +4485,8 @@ get_file_handle [
       ],
       "history": "ShADadFf",
       "uid": "ClEkJM2Vm5giqnMf4h",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -4382,7 +4497,8 @@ get_file_handle [
           "orig_h": "172.20.10.3",
           "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": 80
+          "resp_p": 80,
+          "proto": 6
         },
         "trans_depth": 1,
         "method": "GET",
@@ -4421,7 +4537,8 @@ connection_state_remove [
         "orig_h": "172.20.10.3",
         "orig_p": 59588,
         "resp_h": "199.60.103.106",
-        "resp_p": 80
+        "resp_p": 80,
+        "proto": 6
       },
       "orig": {
         "size": 77,
@@ -4446,8 +4563,8 @@ connection_state_remove [
       ],
       "history": "ShADadFf",
       "uid": "ClEkJM2Vm5giqnMf4h",
-      "service_violation": [],
       "removal_hooks": null,
+      "service_violation": [],
       "extract_orig": false,
       "extract_resp": false,
       "ftp_data_reuse": false,
@@ -4458,7 +4575,8 @@ connection_state_remove [
           "orig_h": "172.20.10.3",
           "orig_p": 59588,
           "resp_h": "199.60.103.106",
-          "resp_p": 80
+          "resp_p": 80,
+          "proto": 6
         },
         "trans_depth": 1,
         "method": "GET",

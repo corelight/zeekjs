@@ -51,14 +51,15 @@ find_path(V8_CONFIG_INCLUDE_DIR
 
 set(nodejs_known_names
     "libnode.so" "libnode.dylib"
-    "libnode.so.83" "libnode.83.dylib"
-    "libnode.so.93" "libnode.93.dylib"
-    "libnode.so.102" "libnode.102.dylib"
-    "libnode.so.108" "libnode.108.dylib"
-    "libnode.so.111" "libnode.111.dylib"
-    "libnode.so.115" "libnode.115.dylib"
-    "libnode.so.120" "libnode.120.dylib"
 )
+# Since we do not explicitly vet particularly Node releases we automatically
+# enable this code to find Node libraries with module versions in a certain
+# range.
+foreach(NODE_MODULE_VERSION 83 200)
+    list(APPEND nodejs_known_names
+        "libnode.so.${NODE_MODULE_VERSION}" "libnode.${NODE_MODULE_VERSION}.dylib"
+    )
+endforeach()
 
 if ( NODEJS_ROOT_DIR )
     find_library(NODEJS_LIBRARY

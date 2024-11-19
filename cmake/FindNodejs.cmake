@@ -55,7 +55,7 @@ set(nodejs_known_names
 # Since we do not explicitly vet particularly Node releases we automatically
 # enable this code to find Node libraries with module versions in a certain
 # range.
-foreach(NODE_MODULE_VERSION 83 200)
+foreach(NODE_MODULE_VERSION RANGE 83 200)
     list(APPEND nodejs_known_names
         "libnode.so.${NODE_MODULE_VERSION}" "libnode.${NODE_MODULE_VERSION}.dylib"
     )

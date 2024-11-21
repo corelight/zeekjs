@@ -15,8 +15,6 @@
 #include <zeek/iosource/Manager.h>
 #include <zeek/iosource/PktSrc.h>
 
-#include <filesystem>
-
 namespace plugin::Corelight_ZeekJS {
 Plugin plugin;
 }

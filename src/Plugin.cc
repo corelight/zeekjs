@@ -85,6 +85,12 @@ void Plugin::InitPostScript() {
       zeek::id::find_val<zeek::Val>("JavaScript::exit_on_uncaught_exceptions")
           ->AsBool();
 
+  options.owns_process_state =
+      zeek::id::find_val<zeek::Val>("JavaScript::owns_process_state")->AsBool();
+
+  options.owns_node_inspector =
+      zeek::id::find_val<zeek::Val>("JavaScript::owns_node_inspector")->AsBool();
+
   PLUGIN_DBG_LOG(plugin, "Hooked %ld .js files: Initializing!", options.files.size());
 
   nodejs = new plugin::Nodejs::Instance();

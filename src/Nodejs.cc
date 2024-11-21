@@ -953,12 +953,21 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
                                                 node_allocator_.get()),
                         &node::FreeIsolateData};
 
-  node_environment_ = {
-      node::CreateEnvironment(node_isolate_data_.get(), context, args, exec_args),
-      [this](node::Environment* env) {
-        v8::Isolate::Scope isolate_scope(GetIsolate());
-        node::FreeEnvironment(env);
-      }};
+  auto env_flags = node::EnvironmentFlags::kNoFlags;
+  if (options.owns_process_state)
+    env_flags = node::EnvironmentFlags::Flags{
+        env_flags | node::EnvironmentFlags::kOwnsProcessState};
+  if (options.owns_node_inspector)
+    env_flags = node::EnvironmentFlags::Flags{env_flags |
+                                              node::EnvironmentFlags::kOwnsInspector};
+
+  dprintf("CreateEnvironment: env_flags=%" PRIx64, env_flags);
+  node_environment_ = {node::CreateEnvironment(node_isolate_data_.get(), context, args,
+                                               exec_args, env_flags),
+                       [this](node::Environment* env) {
+                         v8::Isolate::Scope isolate_scope(GetIsolate());
+                         node::FreeEnvironment(env);
+                       }};
 
   zeek_val_wrapper_ = std::make_unique<ZeekValWrapper>(GetIsolate());
   zeek_type_registry_ = std::make_unique<ZeekTypeRegistry>();

@@ -28,6 +28,8 @@ struct InitOptions {
   size_t maximum_heap_size_in_bytes = 134217728;  // 128 MB
   bool exit_on_uncaught_exceptions = true;
   int thread_pool_size = 4;
+  bool owns_process_state = false;
+  bool owns_node_inspector = false;
 };
 
 // Class holding Node.js and V8 state.

@@ -14,7 +14,7 @@ RUN dnf install -y \
 ARG STAMP=1729535688
 
 # Use Fedora 40 packages until Fedora 41 is supported.
-RUN dnf config-manager addrepo --from-repofile=https://download.opensuse.org/repositories/security:zeek/Fedora_40/security:zeek.repo
+RUN dnf config-manager addrepo --from-repofile=https://download.opensuse.org/repositories/security:zeek/Fedora_41/security:zeek.repo
 
 RUN dnf install -y \
   zeek-btest \

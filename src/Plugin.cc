@@ -15,8 +15,6 @@
 #include <zeek/iosource/Manager.h>
 #include <zeek/iosource/PktSrc.h>
 
-#include <filesystem>
-
 namespace plugin::Corelight_ZeekJS {
 Plugin plugin;
 }
@@ -42,17 +40,19 @@ void Plugin::InitPreScript() {
 void Plugin::InitPostScript() {
   zeek::plugin::Plugin::InitPostScript();
 
+  plugin::Nodejs::InitOptions options{};
+  options.files = load_files;
+
   zeek::VectorValPtr files = zeek::id::find_val<zeek::VectorVal>("JavaScript::files");
-  std::vector<std::filesystem::path> std_files = load_files;
   for (unsigned int i = 0; i < files->Size(); i++) {
     const auto& vp = files->ValAt(i);
     zeek::StringValPtr filename = {zeek::NewRef{}, vp->AsStringVal()};
 
-    std_files.emplace_back(filename->ToStdString());
+    options.files.emplace_back(filename->ToStdString());
   }
 
   // If no Javascript files were hooked, no need to initialize Node/V8.
-  if (std_files.size() == 0) {
+  if (options.files.size() == 0) {
     DisableHook(zeek::plugin::HOOK_DRAIN_EVENTS);
     return;
   }
@@ -64,30 +64,36 @@ void Plugin::InitPostScript() {
       zeek::make_intrusive<zeek::detail::ListExpr>());
   fake_call_file_name.reserve(PATH_MAX);
 
-  // Okay, initialize Node.js
-  PLUGIN_DBG_LOG(plugin, "Hooked %ld .js files: Initializing!", std_files.size());
-  std::string main_script_source =
+  options.main_script_source =
       zeek::id::find_val<zeek::StringVal>("JavaScript::main_script_source")
           ->ToStdString();
 
-  size_t initial_heap_size_in_bytes =
+  options.initial_heap_size_in_bytes =
       zeek::id::find_val<zeek::Val>("JavaScript::initial_heap_size_in_bytes")
           ->AsCount();
-  size_t maximum_heap_size_in_bytes =
+
+  options.maximum_heap_size_in_bytes =
       zeek::id::find_val<zeek::Val>("JavaScript::maximum_heap_size_in_bytes")
           ->AsCount();
-  int thread_pool_size = static_cast<int>(
+
+  options.thread_pool_size = static_cast<int>(
       zeek::id::find_val<zeek::Val>("JavaScript::thread_pool_size")->AsCount());
 
-  bool exit_on_uncaught_exceptions =
+  options.exit_on_uncaught_exceptions =
       zeek::id::find_val<zeek::Val>("JavaScript::exit_on_uncaught_exceptions")
           ->AsBool();
 
+  options.owns_process_state =
+      zeek::id::find_val<zeek::Val>("JavaScript::owns_process_state")->AsBool();
+
+  options.owns_node_inspector =
+      zeek::id::find_val<zeek::Val>("JavaScript::owns_node_inspector")->AsBool();
+
+  PLUGIN_DBG_LOG(plugin, "Hooked %ld .js files: Initializing!", options.files.size());
+
   nodejs = new plugin::Nodejs::Instance();
 
-  if (!nodejs->Init(&plugin, main_script_source, std_files, initial_heap_size_in_bytes,
-                    maximum_heap_size_in_bytes, exit_on_uncaught_exceptions,
-                    thread_pool_size)) {
+  if (!nodejs->Init(&plugin, options)) {
     zeek::reporter->Error("Failed to initialize nodejs");
     return;
   }

@@ -60,4 +60,17 @@ export {
 	## if you see any Uncaught errors, this likely means the Javascript
 	## state is corrupt.
 	const exit_on_uncaught_exceptions: bool = T &redef;
+
+	## Allows to change process state (uid, title, cwd, ...).
+	##
+	## See Node.js EnvironmentFlags API documentation for details.
+	## https://github.com/nodejs/node/blob/v22.11.0/src/node.h#L627
+	const owns_process_state: bool = F &redef;
+
+	## If set to T, installs a SIGUSR1 handler and thread to
+	## start the Node.js / V8 inspector.
+	##
+	## See Node.js EnvironmentFlags API documentation for details.
+	## https://github.com/nodejs/node/blob/v22.11.0/src/node.h#L631
+	const owns_node_inspector: bool = F &redef;
 }

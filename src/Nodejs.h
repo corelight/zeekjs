@@ -21,16 +21,21 @@ namespace plugin::Nodejs {
 
 class EventHandler;
 
+struct InitOptions {
+  std::string main_script_source;
+  std::vector<std::filesystem::path> files;
+  size_t initial_heap_size_in_bytes = 67108864;   // 64 MB
+  size_t maximum_heap_size_in_bytes = 134217728;  // 128 MB
+  bool exit_on_uncaught_exceptions = true;
+  int thread_pool_size = 4;
+  bool owns_process_state = false;
+  bool owns_node_inspector = false;
+};
+
 // Class holding Node.js and V8 state.
 class Instance {
  public:
-  bool Init(plugin::Corelight_ZeekJS::Plugin* plugin,
-            const std::string& main_script_source,
-            const std::vector<std::filesystem::path>& files,
-            size_t initial_heap_size_in_bytes,
-            size_t maximum_heap_size_in_bytes,
-            bool exit_on_uncaught_exceptions,
-            int thread_pool_size);
+  bool Init(plugin::Corelight_ZeekJS::Plugin* plugin, const InitOptions& options);
 
   void BeforeExit();
   void Done();

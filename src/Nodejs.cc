@@ -2,8 +2,6 @@
 #include "IOLoop.h"
 
 #include <algorithm>
-#include <chrono>
-#include <filesystem>
 #include <memory>
 #include <string>
 #include <thread>
@@ -846,14 +844,9 @@ bool Instance::ExecuteAndWaitForInit(v8::Local<v8::Context> context,
 }
 
 bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
-                    const std::string& main_script_source,
-                    const std::vector<std::filesystem::path>& files,
-                    size_t initial_heap_size_in_bytes,
-                    size_t maximum_heap_size_in_bytes,
-                    bool exit_on_uncaught_exceptions,
-                    int thread_pool_size) {
+                    const InitOptions& options) {
   plugin_ = plugin;
-  files_ = files;
+  files_ = options.files;
 
   std::vector<std::string> args{"zeek"};
   std::vector<std::string> exec_args;
@@ -863,7 +856,7 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
   // uncaught exceptions. An uncaught exception in a timer
   // callback corrupts the async stack and setting this flag
   // prevents node exiting due to this.
-  if (!exit_on_uncaught_exceptions) {
+  if (!options.exit_on_uncaught_exceptions) {
     args.emplace_back("--no-force-async-hooks-checks");
     args.emplace_back("--trace-uncaught");
   }
@@ -889,7 +882,7 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
 
   dprintf("Node initialized. Compiled with %s", NODE_VERSION);
 
-  node_platform_ = node::MultiIsolatePlatform::Create(thread_pool_size);
+  node_platform_ = node::MultiIsolatePlatform::Create(options.thread_pool_size);
   v8::V8::InitializePlatform(node_platform_.get());
   v8::V8::Initialize();
   dprintf("V8 initialized. Version %s", v8::V8::GetVersion());
@@ -915,8 +908,8 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
   node_platform_->RegisterIsolate(isolate_, &loop);
 
   v8::ResourceConstraints constraints;
-  constraints.ConfigureDefaultsFromHeapSize(initial_heap_size_in_bytes,
-                                            maximum_heap_size_in_bytes);
+  constraints.ConfigureDefaultsFromHeapSize(options.initial_heap_size_in_bytes,
+                                            options.maximum_heap_size_in_bytes);
 
   v8::Isolate::CreateParams params;
   params.constraints = constraints;
@@ -926,7 +919,7 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
 
   node::IsolateSettings isolate_settings;
 
-  if (!exit_on_uncaught_exceptions) {
+  if (!options.exit_on_uncaught_exceptions) {
     // Register our own message listener for printing uncaught exceptions
     // rather than the Node.js one that terminates the process.
     isolate_settings.flags =
@@ -958,19 +951,28 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
                                                 node_allocator_.get()),
                         &node::FreeIsolateData};
 
-  node_environment_ = {
-      node::CreateEnvironment(node_isolate_data_.get(), context, args, exec_args),
-      [this](node::Environment* env) {
-        v8::Isolate::Scope isolate_scope(GetIsolate());
-        node::FreeEnvironment(env);
-      }};
+  auto env_flags = node::EnvironmentFlags::kNoFlags;
+  if (options.owns_process_state)
+    env_flags = node::EnvironmentFlags::Flags{
+        env_flags | node::EnvironmentFlags::kOwnsProcessState};
+  if (options.owns_node_inspector)
+    env_flags = node::EnvironmentFlags::Flags{env_flags |
+                                              node::EnvironmentFlags::kOwnsInspector};
+
+  dprintf("CreateEnvironment: env_flags=%" PRIx64, env_flags);
+  node_environment_ = {node::CreateEnvironment(node_isolate_data_.get(), context, args,
+                                               exec_args, env_flags),
+                       [this](node::Environment* env) {
+                         v8::Isolate::Scope isolate_scope(GetIsolate());
+                         node::FreeEnvironment(env);
+                       }};
 
   zeek_val_wrapper_ = std::make_unique<ZeekValWrapper>(GetIsolate());
   zeek_type_registry_ = std::make_unique<ZeekTypeRegistry>();
 
   node::AddLinkedBinding(node_environment_.get(), "zeekjs", RegisterModule, this);
 
-  if (!ExecuteAndWaitForInit(context, GetIsolate(), main_script_source))
+  if (!ExecuteAndWaitForInit(context, GetIsolate(), options.main_script_source))
     return false;
 
   auto process = v8::Local<v8::Object>::Cast(

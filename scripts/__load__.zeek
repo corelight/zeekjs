@@ -52,6 +52,9 @@ export {
 	const maximum_heap_size_in_bytes: count = 128 * 1024 * 1024 &redef;
 	const thread_pool_size: count = 4 &redef;
 
+	## JavaScript V8's default 64bit stack size is 984 KB.
+	const stack_size: count = 984 * 1024 &redef;
+
 	## Node.js default behavior is to exit a process on uncaught exceptions.
 	## Specifically exceptions in timer callbacks are problematic as a throwing
 	## timer callback may break subsequently scheduled timers.

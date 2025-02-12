@@ -847,6 +847,7 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
                     const InitOptions& options) {
   plugin_ = plugin;
   files_ = options.files;
+  stack_size_ = options.stack_size;
 
   std::vector<std::string> args{"zeek"};
   std::vector<std::string> exec_args;
@@ -1043,6 +1044,20 @@ bool Instance::IsAlive() {
   return uv_loop_alive(&loop) == 1;
 }
 
+// Reset the stack limit at event draining time. This reason we do
+// this is that Spicy uses fibers running on alternative stacks.
+//
+// This causes V8 using the wrong stack limits for checking for
+// stack overflows, reporting errors about exceeded callstacks:
+//
+//     Uncaught RangeError: Maximum call stack size exceeded
+//
+void Instance::SetStackLimit() {
+  size_t stack_size = stack_size_;
+  uintptr_t limit = reinterpret_cast<uintptr_t>(&stack_size) - stack_size;
+  GetIsolate()->SetStackLimit(limit);
+}
+
 struct UvHandle {
   void* h;
   uv_handle_type t;
@@ -1092,6 +1107,9 @@ static void collectUvHandles(uv_handle_t* h, void* arg) {
 void Instance::Process() {
   v8::Isolate* isolate = GetIsolate();
   v8::Isolate::Scope isolate_scope(isolate);
+
+  // Reset the stack limit used by JavaScript.
+  SetStackLimit();
 
   // XXX: This is hard to understand.
   int rounds = 0;

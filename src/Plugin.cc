@@ -79,6 +79,9 @@ void Plugin::InitPostScript() {
   options.thread_pool_size = static_cast<int>(
       zeek::id::find_val<zeek::Val>("JavaScript::thread_pool_size")->AsCount());
 
+  options.stack_size =
+      zeek::id::find_val<zeek::Val>("JavaScript::stack_size")->AsCount();
+
   options.exit_on_uncaught_exceptions =
       zeek::id::find_val<zeek::Val>("JavaScript::exit_on_uncaught_exceptions")
           ->AsBool();
@@ -141,12 +144,16 @@ int Plugin::HookLoadFile(const zeek::plugin::Plugin::LoadType,
 }
 
 void Plugin::HookDrainEvents() {
-  // Don't act on draining when a packet is being dispatched.
-  if (zeek::run_state::processing_start_time != 0.0)
-    return;
-
   if (!nodejs)
     return;
+
+  // Don't act on draining when a packet is being dispatched, but
+  // update the stack limit if the following event draining
+  // executes JavaScript.
+  if (zeek::run_state::processing_start_time != 0.0) {
+    nodejs->SetStackLimit();
+    return;
+  }
 
 #ifdef ZEEKJS_LOOP_DEBUG
   dprintf(
@@ -164,6 +171,8 @@ void Plugin::HookDrainEvents() {
   if (nodejs->WasJsCalled()) {
     nodejs->Process();
     nodejs->SetJsCalled(false);
+  } else {
+    nodejs->SetStackLimit();
   }
 
   // Decide if we should close the Node.js IO source in

@@ -26,8 +26,9 @@ struct InitOptions {
   std::vector<std::filesystem::path> files;
   size_t initial_heap_size_in_bytes = 67108864;   // 64 MB
   size_t maximum_heap_size_in_bytes = 134217728;  // 128 MB
-  bool exit_on_uncaught_exceptions = true;
   int thread_pool_size = 4;
+  size_t stack_size = 1007616;  // 984 KB
+  bool exit_on_uncaught_exceptions = true;
   bool owns_process_state = false;
   bool owns_node_inspector = false;
 };
@@ -53,6 +54,9 @@ class Instance {
 
   void SetJsCalled(bool js_called = true) { js_called_ = js_called; };
   bool WasJsCalled() { return js_called_; };
+
+  // Update the stack limit used by V8's isolate.
+  void SetStackLimit();
 
   //
   // Invoked from Javascript to register the given function as
@@ -151,6 +155,9 @@ class Instance {
 
   // Marker for HookDrainEvents() whether instance->Process() should be called.
   bool js_called_ = false;
+
+  // Stack size to configure the isolate before processing events.
+  size_t stack_size_ = 1007616;  // 984 KB
 
   // Handle to the Node.js "process" object. Used for top-level CallbackScope
   // invocations. This is the object that Node.js uses for CheckImmediate and

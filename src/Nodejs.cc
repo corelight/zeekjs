@@ -586,7 +586,6 @@ struct HandlerArgs {
 
     result.name = v8::Local<v8::String>::Cast(args[0]);
 
-    int priority = 0;
     int func_idx = 0;
 
     if (args.Length() == 2) {
@@ -940,7 +939,6 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
 
     auto message_listener = [](v8::Local<v8::Message> message,
                                v8::Local<v8::Value> error) -> void {
-      v8::Isolate* isolate = message->GetIsolate();
       PrintUncaughtException(message, error);
     };
     isolate_->AddMessageListener(message_listener);

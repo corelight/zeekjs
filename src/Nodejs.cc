@@ -1,7 +1,9 @@
 #include "Nodejs.h"
 #include "IOLoop.h"
 
+#include <pthread.h>
 #include <algorithm>
+#include <csignal>
 #include <memory>
 #include <string>
 #include <thread>
@@ -849,6 +851,16 @@ bool Instance::ExecuteAndWaitForInit(v8::Local<v8::Context> context,
       return false;
     }
   }
+
+  executor.Run([]() {
+    // See https://github.com/zeek/zeek/pull/4272, threads have
+    // SIGTERM blocked by default and so the terminate() bif
+    // will not work when executed by the executor thread
+    // unless we unblock SIGTERM.
+    sigset_t signals;
+    sigaddset(&signals, SIGTERM);
+    pthread_sigmask(SIG_UNBLOCK, &signals, nullptr);
+  });
 
   return true;
 }

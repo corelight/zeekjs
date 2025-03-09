@@ -1,5 +1,8 @@
 FROM fedora:41
 
+# Bust the cache
+ARG STAMP=1741531092
+
 # Dependencies required to compile and test ZeekJS on Fedora
 RUN dnf install -y \
   cmake \
@@ -10,10 +13,11 @@ RUN dnf install -y \
   which \
   clang-tools-extra
 
-# Bust the cache
-ARG STAMP=1729535688
+# Ensure the sqlite-libs package is available to avoid:
+# $ node --version
+# node: symbol lookup error: /lib64/libnode.so.127: undefined symbol: sqlite3session_attach
+RUN dnf update -y sqlite-libs
 
-# Use Fedora 40 packages until Fedora 41 is supported.
 RUN dnf config-manager addrepo --from-repofile=https://download.opensuse.org/repositories/security:zeek/Fedora_41/security:zeek.repo
 
 RUN dnf install -y \

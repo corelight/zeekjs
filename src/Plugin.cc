@@ -162,6 +162,11 @@ void Plugin::HookDrainEvents() {
   // and currently we're not processing a packet, run
   // Process() housekeeping now.
   if (nodejs->WasJsCalled()) {
+    // XXX: This call may not be needed anymore, it probably
+    //      papered over some previous shortcomings of how
+    //      JavaScript was invoked.
+    //
+    //      When commenting it out, all tests still succeed.
     nodejs->Process();
     nodejs->SetJsCalled(false);
   }
@@ -208,7 +213,7 @@ void Plugin::HookDrainEvents() {
   // Emit a beforeExit event that can be used by JavaScript to
   // schedule more work and keep the IO loop going.
   if (loop_io_source->IsOpen()) {
-    nodejs->BeforeExit();
+    nodejs->EmitProcessBeforeExit();
     if (nodejs->IsAlive()) {
       return;
     }

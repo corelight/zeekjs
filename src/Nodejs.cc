@@ -1,7 +1,9 @@
 #include "Nodejs.h"
 #include "IOLoop.h"
 
+#include <pthread.h>
 #include <algorithm>
+#include <csignal>
 #include <memory>
 #include <string>
 #include <thread>
@@ -131,11 +133,10 @@ void ZeekGlobalVarsSetter(v8::Local<v8::Name> property,
 // the result can be returned as v8::Local without dealing with
 // EscapableHandleScope and Escape().
 static v8::Local<v8::Value> callFunction(v8::Isolate* isolate,
+                                         v8::Local<v8::Context> context,
                                          Instance* instance,
                                          v8::Local<v8::Function> func,
                                          const zeek::Args& args) {
-  v8::Local<v8::Context> context = isolate->GetCurrentContext();
-
   // TODO: Who's the receiver if the function is bound? Shouldn't it be
   //       the object the function is bounded to?
   //       https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_objects/Function/bind
@@ -165,34 +166,46 @@ static v8::Local<v8::Value> callFunction(v8::Isolate* isolate,
 // Invoke the registered v8::Function for the given Event
 void plugin::Nodejs::EventHandler::operator()(
     const zeek::IntrusivePtr<zeek::Event> event) {
-  v8::Isolate::Scope isolate_scope(isolate_);
-  v8::HandleScope handle_scope(isolate_);
-  v8::Local<v8::Function> func = func_.Get(isolate_);
-  callFunction(isolate_, instance_, func, event->Args());
+  instance_->executor.Run([this, args = event->Args()]() -> void {
+    v8::Locker locker(isolate_);
+    v8::Isolate::Scope isolate_scope(isolate_);
+    v8::HandleScope handle_scope(isolate_);
+    auto context = instance_->context_.Get(isolate_);
+    v8::Context::Scope context_scope(context);
+    v8::Local<v8::Function> func = func_.Get(isolate_);
+    callFunction(isolate_, context, instance_, func, args);
+  });
 }
 
 // Invoke the registered v8::Function for a hook, returning a HookHandlerResult
 plugin::Corelight_ZeekJS::Js::HookHandlerResult HookHandler::operator()(
     const zeek::Args& args) {
-  v8::Isolate::Scope isolate_scope(isolate_);
-  v8::HandleScope handle_scope(isolate_);
-  v8::Local<v8::Function> func = func_.Get(isolate_);
-  plugin::Corelight_ZeekJS::Js::HookHandlerResult hh_result;
+  return instance_->executor.Run(
+      [this, args]() -> Corelight_ZeekJS::Js::HookHandlerResult {
+        v8::Locker locker(isolate_);
+        v8::Isolate::Scope isolate_scope(isolate_);
+        v8::HandleScope handle_scope(isolate_);
+        auto context = instance_->context_.Get(isolate_);
+        v8::Context::Scope context_scope(context);
+        v8::Local<v8::Function> func = func_.Get(isolate_);
+        plugin::Corelight_ZeekJS::Js::HookHandlerResult hh_result;
 
-  v8::Local<v8::Value> result = callFunction(isolate_, instance_, func, args);
+        v8::Local<v8::Value> result =
+            callFunction(isolate_, context, instance_, func, args);
 
 #ifdef DEBUG
-  v8::String::Utf8Value result_str(isolate_, result);
-  v8::String::Utf8Value result_type_str(isolate_, result->TypeOf(isolate_));
-  dprintf("Hook function returned %s: %s", *result_type_str, *result_str);
+        v8::String::Utf8Value result_str(isolate_, result);
+        v8::String::Utf8Value result_type_str(isolate_, result->TypeOf(isolate_));
+        dprintf("Hook function returned %s: %s", *result_type_str, *result_str);
 #endif
 
-  // When a hook explicitly returns false, use FLOW_BREAK to indicate
-  // to zeek that that this hook vetoed continuation of processing.
-  if (result->IsFalse())
-    hh_result.flow = zeek::detail::FLOW_BREAK;
+        // When a hook explicitly returns false, use FLOW_BREAK to indicate
+        // to zeek that that this hook vetoed continuation of processing.
+        if (result->IsFalse())
+          hh_result.flow = zeek::detail::FLOW_BREAK;
 
-  return hh_result;
+        return hh_result;
+      });
 }
 
 // Poor print function. Might make sense to hook it through to
@@ -575,7 +588,6 @@ struct HandlerArgs {
 
     result.name = v8::Local<v8::String>::Cast(args[0]);
 
-    int priority = 0;
     int func_idx = 0;
 
     if (args.Length() == 2) {
@@ -840,6 +852,16 @@ bool Instance::ExecuteAndWaitForInit(v8::Local<v8::Context> context,
     }
   }
 
+  executor.Run([]() {
+    // See https://github.com/zeek/zeek/pull/4272, threads have
+    // SIGTERM blocked by default and so the terminate() bif
+    // will not work when executed by the executor thread
+    // unless we unblock SIGTERM.
+    sigset_t signals;
+    sigaddset(&signals, SIGTERM);
+    pthread_sigmask(SIG_UNBLOCK, &signals, nullptr);
+  });
+
   return true;
 }
 
@@ -929,7 +951,6 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
 
     auto message_listener = [](v8::Local<v8::Message> message,
                                v8::Local<v8::Value> error) -> void {
-      v8::Isolate* isolate = message->GetIsolate();
       PrintUncaughtException(message, error);
     };
     isolate_->AddMessageListener(message_listener);
@@ -937,15 +958,19 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
 
   node::SetIsolateUpForNode(GetIsolate(), isolate_settings);
 
+  // Initialize multi-threaded usage of isolate.
+  v8::Locker locker(isolate_);
   v8::Isolate::Scope isolate_scope(GetIsolate());
   v8::HandleScope handle_scope(GetIsolate());
 
   // ObjectTemplate for our global
   v8::Local<v8::ObjectTemplate> global = v8::ObjectTemplate::New(GetIsolate());
 
-  // This is the global context we have. We enter it and that's it.
-  v8::Local<v8::Context> context = v8::Context::New(GetIsolate(), nullptr, global);
-  context->Enter();
+  // This is the global context used for Zeek. Store a persistent handle to
+  // it so it can be entered when switching threads.
+  context_.Reset(isolate_, v8::Context::New(GetIsolate(), nullptr, global));
+  auto context = context_.Get(isolate_);
+  v8::Context::Scope context_scope(context);
 
   node_isolate_data_ = {node::CreateIsolateData(isolate_, &loop, node_platform_.get(),
                                                 node_allocator_.get()),
@@ -963,6 +988,7 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
   node_environment_ = {node::CreateEnvironment(node_isolate_data_.get(), context, args,
                                                exec_args, env_flags),
                        [this](node::Environment* env) {
+                         v8::Locker locker(GetIsolate());
                          v8::Isolate::Scope isolate_scope(GetIsolate());
                          node::FreeEnvironment(env);
                        }};
@@ -983,12 +1009,23 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
 }
 
 // Emit process 'beforeExit'
-void Instance::BeforeExit() {
-  v8::Isolate* isolate = GetIsolate();
-  v8::Isolate::Scope isolate_scope(isolate);
-  node::EmitProcessBeforeExit(node_environment_.get()).Check();
+void Instance::EmitProcessBeforeExit() {
+  executor.Run([this]() {
+    v8::Isolate* isolate = GetIsolate();
+    v8::Locker locker(isolate);
+    v8::Isolate::Scope isolate_scope(isolate);
+    node::EmitProcessBeforeExit(node_environment_.get()).Check();
+  });
 }
 
+void Instance::EmitProcessExit() {
+  executor.Run([this]() {
+    v8::Isolate* isolate = GetIsolate();
+    v8::Locker locker(isolate);
+    v8::Isolate::Scope isolate_scope(isolate);
+    node::EmitProcessExit(node_environment_.get()).Check();
+  });
+}
 void Instance::Done() {
   using namespace std::chrono_literals;
 
@@ -1012,10 +1049,7 @@ void Instance::Done() {
       std::this_thread::sleep_for(1ms);
     }
 
-    // Emit process 'exit' event
-    v8::Isolate* isolate = GetIsolate();
-    v8::Isolate::Scope isolate_scope(isolate);
-    node::EmitProcessExit(node_environment_.get());
+    EmitProcessExit();
   }
 }
 
@@ -1089,7 +1123,7 @@ static void collectUvHandles(uv_handle_t* h, void* arg) {
 // the loop fd will not become ready/signaled when the TCP connection has
 // been established.
 //
-void Instance::Process() {
+void Instance::ProcessLocked() {
   v8::Isolate* isolate = GetIsolate();
   v8::Isolate::Scope isolate_scope(isolate);
 
@@ -1121,4 +1155,11 @@ void Instance::Process() {
 
   if (handles_changed)
     zeek_notifier_->Notify();
+}
+
+void Instance::Process() {
+  executor.Run([this]() {
+    v8::Locker locker(GetIsolate());
+    ProcessLocked();
+  });
 }

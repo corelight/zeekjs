@@ -8,6 +8,7 @@
 #include <node/v8.h>
 #include <uv.h>
 
+#include "Executor.h"
 #include "IOLoop.h"
 #include "Types.h"
 #include "ZeekJS.h"
@@ -37,7 +38,8 @@ class Instance {
  public:
   bool Init(plugin::Corelight_ZeekJS::Plugin* plugin, const InitOptions& options);
 
-  void BeforeExit();
+  void EmitProcessBeforeExit();
+  void EmitProcessExit();
   void Done();
 
   void SetZeekNotifier(plugin::Corelight_ZeekJS::IOLoop::PipeSource* n) {
@@ -47,6 +49,7 @@ class Instance {
   // Called by the thin JsLoopIOSource
   int GetLoopFd();
   void Process();
+  void ProcessLocked();
   void UpdateTime();
   double GetNextTimeout();
   bool IsAlive();
@@ -141,6 +144,8 @@ class Instance {
 
   v8::Isolate* isolate_;
 
+  v8::Persistent<v8::Context> context_;
+
   // Wrapping.
   std::unique_ptr<ZeekValWrapper> zeek_val_wrapper_;
 
@@ -156,6 +161,8 @@ class Instance {
   // invocations. This is the object that Node.js uses for CheckImmediate and
   // RunTimers, so lets do that, too.
   v8::Global<v8::Object> process_obj_;
+
+  Executor executor;
 };
 
 class EventHandler : public plugin::Corelight_ZeekJS::Js::EventHandler {

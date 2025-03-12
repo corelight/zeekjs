@@ -31,6 +31,7 @@ struct InitOptions {
   int thread_pool_size = 4;
   bool owns_process_state = false;
   bool owns_node_inspector = false;
+  int loop_timer_milliseconds = 10000;
 };
 
 // Class holding Node.js and V8 state.
@@ -53,6 +54,7 @@ class Instance {
   void UpdateTime();
   double GetNextTimeout();
   bool IsAlive();
+  void StopLoopTimer();
 
   void SetJsCalled(bool js_called = true) { js_called_ = js_called; };
   bool WasJsCalled() { return js_called_; };
@@ -141,6 +143,7 @@ class Instance {
   std::unique_ptr<node::Environment, std::function<void(node::Environment*)>>
       node_environment_;
   uv_loop_t loop;
+  uv_timer_t loop_timer;
 
   v8::Isolate* isolate_;
 

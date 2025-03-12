@@ -915,6 +915,12 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
     return false;
   }
 
+  r = uv_timer_init(&loop, &loop_timer);
+  if (r != 0) {
+    eprintf("uv_timer_init() failed: %s", uv_err_name(r));
+    return false;
+  }
+
   node_allocator_ = node::ArrayBufferAllocator::Create();
   if (!node_allocator_) {
     eprintf("%s", "Failed to create ArrayBufferAllocator");
@@ -996,6 +1002,11 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
   zeek_val_wrapper_ = std::make_unique<ZeekValWrapper>(GetIsolate());
   zeek_type_registry_ = std::make_unique<ZeekTypeRegistry>();
 
+  // Install a timer such that the UV IO loop always considers itself active.
+  uv_timer_start(
+      &loop_timer, [](uv_timer_t* h) { /* empty body */ },
+      options.loop_timer_milliseconds, options.loop_timer_milliseconds);
+
   node::AddLinkedBinding(node_environment_.get(), "zeekjs", RegisterModule, this);
 
   if (!ExecuteAndWaitForInit(context, GetIsolate(), options.main_script_source))
@@ -1075,6 +1086,11 @@ double Instance::GetNextTimeout() {
 
 bool Instance::IsAlive() {
   return uv_loop_alive(&loop) == 1;
+}
+
+void Instance::StopLoopTimer() {
+  if (uv_is_active((uv_handle_t*)&loop_timer))
+    uv_timer_stop(&loop_timer);
 }
 
 struct UvHandle {

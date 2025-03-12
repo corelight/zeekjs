@@ -198,11 +198,7 @@ void Plugin::HookDrainEvents() {
     return;
   }
 
-  // Is there a HTTP server or something running?
-  if (nodejs->IsAlive())
-    return;
-
-  // Other live IO source existing?
+  // Other IO source existing that keep Zeek's IO loop alive?
   if (zeek::iosource_mgr->Size() > 1)
     return;
 
@@ -210,7 +206,17 @@ void Plugin::HookDrainEvents() {
   if (zeek::event_mgr.Size() > 0)
     return;
 
-  // Emit a beforeExit event that can be used by JavaScript to
+  // If ZeekJS is the last live IO source, remove the loop timer.
+  // If the Node.js loop is still alive afterwards, there's
+  // something else active and we want to keep running.
+  nodejs->StopLoopTimer();
+
+  // If there is a HTTP server or something running that
+  // keeps the Node.js loop alive, do not yet shutdown.
+  if (nodejs->IsAlive())
+    return;
+
+  // Emit the beforeExit event that can be used by JavaScript to
   // schedule more work and keep the IO loop going.
   if (loop_io_source->IsOpen()) {
     nodejs->EmitProcessBeforeExit();
@@ -219,6 +225,7 @@ void Plugin::HookDrainEvents() {
     }
   }
 
+  // Remove the ZeekJS IO source now so that Zeek will terminate.
   loop_io_source->UpdateClosed(true);
 }
 

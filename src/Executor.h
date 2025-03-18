@@ -70,9 +70,9 @@ class Executor {
     std::promise<ret_type> r;
     auto result = r.get_future();
 
-    auto lc = std::packaged_task([r = std::move(r), f = std::move(f),
-                                  args =
-                                      std::make_tuple(std::move(args)...)]() mutable {
+    auto lc = std::packaged_task<void()>([r = std::move(r), f = std::move(f),
+                                          args = std::make_tuple(
+                                              std::move(args)...)]() mutable {
       if constexpr (std::is_same_v<ret_type, void>) {
         std::apply([f](auto&&... args) mutable { return f(args...); }, std::move(args));
         r.set_value();

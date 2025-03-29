@@ -137,6 +137,25 @@ int Plugin::HookLoadFile(const zeek::plugin::Plugin::LoadType,
     return 1;
   }
 
+  if (file.find(".ts", file.size() - 4) != std::string::npos) {
+    PLUGIN_DBG_LOG(plugin, "Hooked .ts file=%s (%s)", file.c_str(), resolved.c_str());
+    load_files.emplace_back(resolved);
+
+    const char* current_options = std::getenv("NODE_OPTIONS");
+    // Create the new value
+    std::string new_options;
+    if (current_options != nullptr) {
+      new_options = std::string(current_options) + " --experimental-transform-types";
+    } else {
+      new_options = "--experimental-transform-types";
+    }
+
+    // Set the environment variable with the new value
+    setenv("NODE_OPTIONS", new_options.c_str(), 1);
+
+    return 1;
+  }
+
   return -1;
 }
 

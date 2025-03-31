@@ -121,7 +121,7 @@ void Plugin::InitPostScript() {
   nodejs->Process();
 }
 
-// Take over files ending with .js
+// Take over files ending with javascript and typescript
 int Plugin::HookLoadFile(const zeek::plugin::Plugin::LoadType,
                          const std::string& file,
                          const std::string& resolved) {
@@ -133,6 +133,12 @@ int Plugin::HookLoadFile(const zeek::plugin::Plugin::LoadType,
 
   if (file.find(".cjs", file.size() - 4) != std::string::npos) {
     PLUGIN_DBG_LOG(plugin, "Hooked .cjs file=%s (%s)", file.c_str(), resolved.c_str());
+    load_files.emplace_back(resolved);
+    return 1;
+  }
+
+  if (file.find(".ts", file.size() - 3) != std::string::npos) {
+    PLUGIN_DBG_LOG(plugin, "Hooked .ts file=%s (%s)", file.c_str(), resolved.c_str());
     load_files.emplace_back(resolved);
     return 1;
   }

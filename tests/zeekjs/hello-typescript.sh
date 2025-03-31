@@ -1,4 +1,4 @@
-# @TEST-EXEC: zeek ./hello.ts
+# @TEST-EXEC: NODE_OPTIONS="--experimental-transform-types" zeek ./hello.ts
 # @TEST-EXEC: btest-diff .stdout
 # @TEST-GROUP: smoke
 

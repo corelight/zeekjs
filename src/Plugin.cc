@@ -251,11 +251,7 @@ class InvokeJsEventHandlerStmt : public zeek::detail::Stmt {
 
   zeek::ValPtr Exec(zeek::detail::Frame* f, zeek::detail::StmtFlowType& flow) override {
     flow = zeek::detail::FLOW_NEXT;
-    zeek::Args args = *f->GetFuncArgs();
-
-    zeek::IntrusivePtr<zeek::Event> e =
-        zeek::make_intrusive<zeek::Event>(zeek_event_handler, args);
-    (*js_event_handler)(e);
+    (*js_event_handler)(*f->GetFuncArgs());
 
     return nullptr;
   }

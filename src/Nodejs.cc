@@ -164,9 +164,8 @@ static v8::Local<v8::Value> callFunction(v8::Isolate* isolate,
 }
 
 // Invoke the registered v8::Function for the given Event
-void plugin::Nodejs::EventHandler::operator()(
-    const zeek::IntrusivePtr<zeek::Event> event) {
-  instance_->executor.Run([this, args = event->Args()]() -> void {
+void plugin::Nodejs::EventHandler::operator()(const zeek::Args& args) {
+  instance_->executor.Run([this, &args = args]() -> void {
     v8::Locker locker(isolate_);
     v8::Isolate::Scope isolate_scope(isolate_);
     v8::HandleScope handle_scope(isolate_);

@@ -3,7 +3,6 @@
 #include "Nodejs.h"
 #include "ZeekCompat.h"
 #include "config.h"
-#include "zeekjs.bif.h"
 
 #include <zeek/Expr.h>
 #include <zeek/Frame.h>

@@ -277,8 +277,7 @@ class InvokeJsHookHandlerStmt : public zeek::detail::Stmt {
       : zeek::detail::Stmt(compat::STMT_EXTERN), js_hook_handler(js_hh) {}
 
   zeek::ValPtr Exec(zeek::detail::Frame* f, zeek::detail::StmtFlowType& flow) override {
-    zeek::Args args = *f->GetFuncArgs();
-    plugin::Corelight_ZeekJS::Js::HookHandlerResult result = (*js_hook_handler)(args);
+    auto result = (*js_hook_handler)(*f->GetFuncArgs());
 
     if (result.flow != zeek::detail::FLOW_NEXT) {
       dprintf("hook result != FLOW_NEXT, overwriting with %d", result.flow);

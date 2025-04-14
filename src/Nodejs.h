@@ -175,7 +175,7 @@ class EventHandler : public plugin::Corelight_ZeekJS::Js::EventHandler {
     func_.Reset(isolate_, func);
   }
 
-  void operator()(const zeek::IntrusivePtr<zeek::Event> event) override;
+  void operator()(const zeek::Args& args) override;
 
  private:
   Instance* instance_;

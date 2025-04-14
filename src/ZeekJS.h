@@ -12,7 +12,7 @@ namespace plugin::Corelight_ZeekJS::Js {
  */
 class EventHandler {
  public:
-  virtual void operator()(const zeek::IntrusivePtr<zeek::Event> event) = 0;
+  virtual void operator()(const zeek::Args& args) = 0;
 };
 
 struct HookHandlerResult {

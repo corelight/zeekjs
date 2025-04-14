@@ -3,7 +3,6 @@
 #include "Nodejs.h"
 #include "ZeekCompat.h"
 #include "config.h"
-#include "zeekjs.bif.h"
 
 #include <zeek/Expr.h>
 #include <zeek/Frame.h>
@@ -251,11 +250,7 @@ class InvokeJsEventHandlerStmt : public zeek::detail::Stmt {
 
   zeek::ValPtr Exec(zeek::detail::Frame* f, zeek::detail::StmtFlowType& flow) override {
     flow = zeek::detail::FLOW_NEXT;
-    zeek::Args args = *f->GetFuncArgs();
-
-    zeek::IntrusivePtr<zeek::Event> e =
-        zeek::make_intrusive<zeek::Event>(zeek_event_handler, args);
-    (*js_event_handler)(e);
+    (*js_event_handler)(*f->GetFuncArgs());
 
     return nullptr;
   }
@@ -281,8 +276,7 @@ class InvokeJsHookHandlerStmt : public zeek::detail::Stmt {
       : zeek::detail::Stmt(compat::STMT_EXTERN), js_hook_handler(js_hh) {}
 
   zeek::ValPtr Exec(zeek::detail::Frame* f, zeek::detail::StmtFlowType& flow) override {
-    zeek::Args args = *f->GetFuncArgs();
-    plugin::Corelight_ZeekJS::Js::HookHandlerResult result = (*js_hook_handler)(args);
+    auto result = (*js_hook_handler)(*f->GetFuncArgs());
 
     if (result.flow != zeek::detail::FLOW_NEXT) {
       dprintf("hook result != FLOW_NEXT, overwriting with %d", result.flow);

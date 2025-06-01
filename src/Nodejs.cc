@@ -153,7 +153,7 @@ static v8::Local<v8::Value> callFunction(v8::Isolate* isolate,
     v8_args.push_back(instance->Wrap(arg));
 
   auto argc = static_cast<int>(args.size());
-  if (func->Call(context, receiver, argc, &v8_args[0]).ToLocal(&result))
+  if (func->Call(context, receiver, argc, v8_args.data()).ToLocal(&result))
     return result;
 
   // If we get here, we either exit due to an unhandled exception, or

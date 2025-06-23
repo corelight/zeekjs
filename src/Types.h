@@ -1,4 +1,5 @@
 #pragma once
+#include <node/node_version.h>
 #include <node/v8.h>
 
 #include "zeek/Type.h"
@@ -8,6 +9,20 @@
 
 const int ZEEKJS_ATTR_NONE = 0;
 const int ZEEKJS_ATTR_LOG = 1;
+
+// This block of #defines allows us to use all versions of Node to at least v24. Once we
+// stop supporting v22 and below, it can go away and the code can be adapted to use
+// v8::Intercepted directly. v22 supports the v8::Intercepted API but our btests crash
+// when using it with that version of node.
+#if (NODE_MAJOR_VERSION <= 22)
+#define ZEEKJS_V8_INTERCEPTED void
+#define ZEEKJS_V8_INTERCEPTED_NO
+#define ZEEKJS_V8_INTERCEPTED_YES
+#else
+#define ZEEKJS_V8_INTERCEPTED v8::Intercepted
+#define ZEEKJS_V8_INTERCEPTED_NO v8::Intercepted::kNo
+#define ZEEKJS_V8_INTERCEPTED_YES v8::Intercepted::kYes
+#endif
 
 namespace plugin::Nodejs {
 
@@ -59,26 +74,47 @@ class ZeekValWrapper {
   Result ToZeekVal(v8::Local<v8::Value> v8_val, const zeek::TypePtr& type);
 
   // Callbacks used for Zeek tables.
-  static void ZeekTableGetter(v8::Local<v8::Name> property,
-                              const v8::PropertyCallbackInfo<v8::Value>& info);
-  static void ZeekTableSetter(v8::Local<v8::Name> property,
-                              v8::Local<v8::Value> v8_val,
-                              const v8::PropertyCallbackInfo<v8::Value>& info);
-  static void ZeekTableIndexGetter(uint32_t index,
-                                   const v8::PropertyCallbackInfo<v8::Value>& info);
-  static void ZeekTableIndexSetter(uint32_t index,
-                                   v8::Local<v8::Value> v8_val,
-                                   const v8::PropertyCallbackInfo<v8::Value>& info);
+  static ZEEKJS_V8_INTERCEPTED ZeekTableGetter(
+      v8::Local<v8::Name> property,
+      const v8::PropertyCallbackInfo<v8::Value>& info);
+  static ZEEKJS_V8_INTERCEPTED ZeekTableSetter(
+      v8::Local<v8::Name> property,
+      v8::Local<v8::Value> v8_val,
+#if (NODE_MAJOR_VERSION <= 22)
+      const v8::PropertyCallbackInfo<v8::Value>& info);
+#else
+      const v8::PropertyCallbackInfo<void>& info);
+#endif
+  static ZEEKJS_V8_INTERCEPTED ZeekTableIndexGetter(
+      uint32_t index,
+      const v8::PropertyCallbackInfo<v8::Value>& info);
+  static ZEEKJS_V8_INTERCEPTED ZeekTableIndexSetter(
+      uint32_t index,
+      v8::Local<v8::Value> v8_val,
+#if (NODE_MAJOR_VERSION <= 22)
+      const v8::PropertyCallbackInfo<v8::Value>& info);
+#else
+      const v8::PropertyCallbackInfo<void>& info);
+#endif
+
   static void ZeekTableEnumerator(const v8::PropertyCallbackInfo<v8::Array>& info);
 
   // Callbacks used for Zeek records.
-  static void ZeekRecordGetter(v8::Local<v8::Name> property,
-                               const v8::PropertyCallbackInfo<v8::Value>& info);
-  static void ZeekRecordSetter(v8::Local<v8::Name> property,
-                               v8::Local<v8::Value> v8_val,
-                               const v8::PropertyCallbackInfo<v8::Value>& info);
-  static void ZeekRecordQuery(v8::Local<v8::Name> property,
-                              const v8::PropertyCallbackInfo<v8::Integer>& info);
+  static ZEEKJS_V8_INTERCEPTED ZeekRecordGetter(
+      v8::Local<v8::Name> property,
+      const v8::PropertyCallbackInfo<v8::Value>& info);
+  static ZEEKJS_V8_INTERCEPTED ZeekRecordSetter(
+      v8::Local<v8::Name> property,
+      v8::Local<v8::Value> v8_val,
+#if (NODE_MAJOR_VERSION <= 22)
+      const v8::PropertyCallbackInfo<v8::Value>& info);
+#else
+      const v8::PropertyCallbackInfo<void>& info);
+#endif
+  static ZEEKJS_V8_INTERCEPTED ZeekRecordQuery(
+      v8::Local<v8::Name> property,
+      const v8::PropertyCallbackInfo<v8::Integer>& info);
+
   static void ZeekRecordEnumerator(const v8::PropertyCallbackInfo<v8::Array>& info);
 
   // String conversion helpers

@@ -155,8 +155,13 @@ ZeekValWrapper::ZeekValWrapper(v8::Isolate* isolate) : isolate_(isolate) {
                         v8::SideEffectType::kHasNoSideEffect)
           .ToLocalChecked());
 
+#if (NODE_MAJOR_VERSION <= 22)
   v8::AccessorGetterCallback toJSON_cb =
       [](v8::Local<v8::String> property,
+#else
+  v8::AccessorNameGetterCallback toJSON_cb =
+      [](v8::Local<v8::Name> property,
+#endif
          const v8::PropertyCallbackInfo<v8::Value>& info) {
         info.GetReturnValue().Set(info.This()->GetInternalField(2).As<v8::Value>());
       };
@@ -165,31 +170,49 @@ ZeekValWrapper::ZeekValWrapper(v8::Isolate* isolate) : isolate_(isolate) {
       v8_str_intern("toJSON"), toJSON_cb, nullptr, v8::Local<v8::Value>(),
       v8::PropertyAttribute(v8::PropertyAttribute::DontEnum |
                             v8::PropertyAttribute::ReadOnly),
+#if (NODE_MAJOR_VERSION <= 22)
+      v8::AccessControl::DEFAULT,
+#endif
+      v8::SideEffectType::kHasNoSideEffect);
 
-      v8::AccessControl::DEFAULT, v8::SideEffectType::kHasNoSideEffect);
-
+#if (NODE_MAJOR_VERSION <= 22)
   v8::AccessorGetterCallback port_cb =
       [](v8::Local<v8::String> property,
+#else
+  v8::AccessorNameGetterCallback port_cb =
+      [](v8::Local<v8::Name> property,
+#endif
          const v8::PropertyCallbackInfo<v8::Value>& info) {
         info.GetReturnValue().Set(info.This()->GetInternalField(0).As<v8::Value>());
       };
 
-  port_template->SetNativeDataProperty(
-      v8_str_intern("port"), port_cb, nullptr, v8::Local<v8::Value>(),
-      v8::PropertyAttribute::ReadOnly, v8::AccessControl::DEFAULT,
-      v8::SideEffectType::kHasNoSideEffect);
+  port_template->SetNativeDataProperty(v8_str_intern("port"), port_cb, nullptr,
+                                       v8::Local<v8::Value>(),
+                                       v8::PropertyAttribute::ReadOnly,
+#if (NODE_MAJOR_VERSION <= 22)
+                                       v8::AccessControl::DEFAULT,
+#endif
+                                       v8::SideEffectType::kHasNoSideEffect);
 
+#if (NODE_MAJOR_VERSION <= 22)
   v8::AccessorGetterCallback proto_cb =
       [](v8::Local<v8::String> property,
+#else
+  v8::AccessorNameGetterCallback proto_cb =
+      [](v8::Local<v8::Name> property,
+#endif
          const v8::PropertyCallbackInfo<v8::Value>& info) {
         info.GetIsolate();
         info.GetReturnValue().Set(info.This()->GetInternalField(1).As<v8::Value>());
       };
 
-  port_template->SetNativeDataProperty(
-      v8_str_intern("proto"), proto_cb, nullptr, v8::Local<v8::Value>(),
-      v8::PropertyAttribute::ReadOnly, v8::AccessControl::DEFAULT,
-      v8::SideEffectType::kHasNoSideEffect);
+  port_template->SetNativeDataProperty(v8_str_intern("proto"), proto_cb, nullptr,
+                                       v8::Local<v8::Value>(),
+                                       v8::PropertyAttribute::ReadOnly,
+#if (NODE_MAJOR_VERSION <= 22)
+                                       v8::AccessControl::DEFAULT,
+#endif
+                                       v8::SideEffectType::kHasNoSideEffect);
   port_template_.Reset(isolate_, port_template);
 
   port_str_.Reset(isolate, v8_str_intern("port"));
@@ -909,14 +932,15 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
   return wrap_result;
 }
 
-void ZeekValWrapper::ZeekTableGetter(v8::Local<v8::Name> property,
-                                     const v8::PropertyCallbackInfo<v8::Value>& info) {
+ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekTableGetter(
+    v8::Local<v8::Name> property,
+    const v8::PropertyCallbackInfo<v8::Value>& info) {
   v8::Isolate* isolate = info.GetIsolate();
   v8::Local<v8::Object> receiver = info.This();
   auto wrap =
       static_cast<ZeekValWrap*>(receiver->GetAlignedPointerFromInternalField(0));
   if (wrap->GetVal()->GetType()->Tag() != zeek::TYPE_TABLE)
-    return;
+    return ZEEKJS_V8_INTERCEPTED_NO;
 
   auto tval = static_cast<zeek::TableVal*>(wrap->GetVal());
 
@@ -924,7 +948,7 @@ void ZeekValWrapper::ZeekTableGetter(v8::Local<v8::Name> property,
 
   if (!*arg) {
     dprintf("%s", "empty arg?");
-    return;
+    return ZEEKJS_V8_INTERCEPTED_NO;
   }
 
   zeek::TableTypePtr ttype = tval->GetType<zeek::TableType>();
@@ -937,28 +961,34 @@ void ZeekValWrapper::ZeekTableGetter(v8::Local<v8::Name> property,
         isolate,
         zeek::util::fmt("Unexpected number of index types: %lu", itypes.size())));
     isolate->ThrowException(error);
-    return;
+    return ZEEKJS_V8_INTERCEPTED_NO;
   }
 
   zeek::TypePtr index_type = itypes[0];
   ZeekValWrapper::Result index_result =
       wrap->GetWrapper()->ToZeekVal(property, index_type);
   if (!index_result.ok)
-    return;
+    return ZEEKJS_V8_INTERCEPTED_NO;
 
   zeek::ValPtr found_val = tval->Find(index_result.val);
   if (!found_val)
-    return;
+    return ZEEKJS_V8_INTERCEPTED_NO;
 
   dprintf("tval=%p ttype=%p itypes=%lu property=%s FOUND", tval, ttype.get(),
           itypes.size(), *arg);
 
   info.GetReturnValue().Set(wrap->GetWrapper()->Wrap(found_val));
+  return ZEEKJS_V8_INTERCEPTED_YES;
 }
 
-void ZeekValWrapper::ZeekTableSetter(v8::Local<v8::Name> property,
-                                     v8::Local<v8::Value> v8_val,
-                                     const v8::PropertyCallbackInfo<v8::Value>& info) {
+ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekTableSetter(
+    v8::Local<v8::Name> property,
+    v8::Local<v8::Value> v8_val,
+#if (NODE_MAJOR_VERSION <= 22)
+    const v8::PropertyCallbackInfo<v8::Value>& info) {
+#else
+    const v8::PropertyCallbackInfo<void>& info) {
+#endif
   v8::Isolate* isolate = info.GetIsolate();
   v8::Local<v8::Object> receiver = info.This();
   auto wrap =
@@ -976,7 +1006,7 @@ void ZeekValWrapper::ZeekTableSetter(v8::Local<v8::Name> property,
         isolate,
         zeek::util::fmt("Unexpected number of index types: %lu", itypes.size())));
     isolate->ThrowException(error);
-    return;
+    return ZEEKJS_V8_INTERCEPTED_NO;
   }
 
   zeek::TypePtr index_type = itypes[0];
@@ -986,7 +1016,7 @@ void ZeekValWrapper::ZeekTableSetter(v8::Local<v8::Name> property,
     v8::Local<v8::Value> error = v8::Exception::TypeError(::v8_str(
         isolate, zeek::util::fmt("Bad index: %s", property_wrap_result.error.c_str())));
     isolate->ThrowException(error);
-    return;
+    return ZEEKJS_V8_INTERCEPTED_NO;
   }
 
   ZeekValWrapper::Result value_wrap_result =
@@ -995,13 +1025,14 @@ void ZeekValWrapper::ZeekTableSetter(v8::Local<v8::Name> property,
     v8::Local<v8::Value> error = v8::Exception::TypeError(::v8_str(
         isolate, zeek::util::fmt("Bad value: %s", value_wrap_result.error.c_str())));
     isolate->ThrowException(error);
-    return;
+    return ZEEKJS_V8_INTERCEPTED_NO;
   }
 
   // Broker forward is on...
   tval->Assign(property_wrap_result.val, value_wrap_result.val);
 
   info.GetReturnValue().Set(v8_val);
+  return ZEEKJS_V8_INTERCEPTED_YES;
 }
 
 // This is slightly insane - when the Enumerator returns a Name that's
@@ -1009,7 +1040,7 @@ void ZeekValWrapper::ZeekTableSetter(v8::Local<v8::Name> property,
 //
 // Maybe that's not so insane, but that's why we have the below and
 // may convert from Javascript numbers to String keys in Zeek.
-void ZeekValWrapper::ZeekTableIndexGetter(
+ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekTableIndexGetter(
     uint32_t index,
     const v8::PropertyCallbackInfo<v8::Value>& info) {
   v8::Isolate* isolate = info.GetIsolate();
@@ -1027,7 +1058,7 @@ void ZeekValWrapper::ZeekTableIndexGetter(
         isolate,
         zeek::util::fmt("Unexpected number of index types: %lu", itypes.size())));
     isolate->ThrowException(error);
-    return;
+    return ZEEKJS_V8_INTERCEPTED_NO;
   }
 
   zeek::TypePtr index_type = itypes[0];
@@ -1045,21 +1076,26 @@ void ZeekValWrapper::ZeekTableIndexGetter(
         ::v8_str(isolate, zeek::util::fmt("unable to convert index %d to %s", index,
                                           zeek::type_name(index_type->Tag()))));
     isolate->ThrowException(error);
-    return;
+    return ZEEKJS_V8_INTERCEPTED_NO;
   }
 
   zeek::ValPtr val = tval->Find(index_result.val);
   if (!val) {
     eprintf("Failed to lookup value for index=%d", index);
-    return;
+    return ZEEKJS_V8_INTERCEPTED_NO;
   }
   info.GetReturnValue().Set(wrap->GetWrapper()->Wrap(val));
+  return ZEEKJS_V8_INTERCEPTED_YES;
 }
 
-void ZeekValWrapper::ZeekTableIndexSetter(
+ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekTableIndexSetter(
     uint32_t index,
     v8::Local<v8::Value> v8_val,
+#if (NODE_MAJOR_VERSION <= 22)
     const v8::PropertyCallbackInfo<v8::Value>& info) {
+#else
+    const v8::PropertyCallbackInfo<void>& info) {
+#endif
   v8::Isolate* isolate = info.GetIsolate();
   v8::Local<v8::Object> receiver = info.This();
   auto wrap =
@@ -1075,7 +1111,7 @@ void ZeekValWrapper::ZeekTableIndexSetter(
         isolate,
         zeek::util::fmt("Unexpected number of index types: %lu", itypes.size())));
     isolate->ThrowException(error);
-    return;
+    return ZEEKJS_V8_INTERCEPTED_NO;
   }
 
   zeek::TypePtr index_type = itypes[0];
@@ -1094,7 +1130,7 @@ void ZeekValWrapper::ZeekTableIndexSetter(
         ::v8_str(isolate, zeek::util::fmt("unable to convert index %d to %s", index,
                                           zeek::type_name(index_type->Tag()))));
     isolate->ThrowException(error);
-    return;
+    return ZEEKJS_V8_INTERCEPTED_NO;
   }
 
   ZeekValWrapper::Result value_wrap_result =
@@ -1103,13 +1139,14 @@ void ZeekValWrapper::ZeekTableIndexSetter(
     v8::Local<v8::Value> error = v8::Exception::TypeError(::v8_str(
         isolate, zeek::util::fmt("Bad value: %s", value_wrap_result.error.c_str())));
     isolate->ThrowException(error);
-    return;
+    return ZEEKJS_V8_INTERCEPTED_NO;
   }
 
   // Broker forward is on...
   tval->Assign(index_wrap_result.val, value_wrap_result.val);
 
   info.GetReturnValue().Set(v8_val);
+  return ZEEKJS_V8_INTERCEPTED_YES;
 }
 
 void ZeekValWrapper::ZeekTableEnumerator(
@@ -1174,14 +1211,15 @@ void ZeekValWrapper::ZeekTableEnumerator(
 }
 
 // Callback for looking up properties of a record.
-void ZeekValWrapper::ZeekRecordGetter(v8::Local<v8::Name> property,
-                                      const v8::PropertyCallbackInfo<v8::Value>& info) {
+ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekRecordGetter(
+    v8::Local<v8::Name> property,
+    const v8::PropertyCallbackInfo<v8::Value>& info) {
   v8::Local<v8::Object> receiver = info.This();
   auto wrap =
       static_cast<ZeekValWrap*>(receiver->GetAlignedPointerFromInternalField(0));
 
   if (wrap->GetVal()->GetType()->Tag() != zeek::TYPE_RECORD)
-    return;
+    return ZEEKJS_V8_INTERCEPTED_NO;
 
   auto rval = wrap->GetVal()->AsRecordVal();
   const auto& rt = rval->GetType<zeek::RecordType>();
@@ -1191,12 +1229,19 @@ void ZeekValWrapper::ZeekRecordGetter(v8::Local<v8::Name> property,
     zeek::ValPtr vp = rval->GetFieldOrDefault(offset);
     info.GetReturnValue().Set(wrap->GetWrapper()->Wrap(vp, wrap->GetAttrMask()));
   }
+
+  return ZEEKJS_V8_INTERCEPTED_YES;
 }
 
 // Callback for for setting properties on a record.
-void ZeekValWrapper::ZeekRecordSetter(v8::Local<v8::Name> property,
-                                      v8::Local<v8::Value> v8_val,
-                                      const v8::PropertyCallbackInfo<v8::Value>& info) {
+ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekRecordSetter(
+    v8::Local<v8::Name> property,
+    v8::Local<v8::Value> v8_val,
+#if (NODE_MAJOR_VERSION <= 22)
+    const v8::PropertyCallbackInfo<v8::Value>& info) {
+#else
+    const v8::PropertyCallbackInfo<void>& info) {
+#endif
   v8::Isolate* isolate = info.GetIsolate();
   v8::Local<v8::Object> receiver = info.This();
   auto wrap =
@@ -1211,7 +1256,7 @@ void ZeekValWrapper::ZeekRecordSetter(v8::Local<v8::Name> property,
         ::v8_str(isolate, zeek::util::fmt("field %s does not exist in record type %s",
                                           *arg, rt->GetName().c_str())));
     isolate->ThrowException(error);
-    return;
+    return ZEEKJS_V8_INTERCEPTED_NO;
   }
 
   zeek::TypePtr field_type = rt->GetFieldType(offset);
@@ -1230,11 +1275,12 @@ void ZeekValWrapper::ZeekRecordSetter(v8::Local<v8::Name> property,
     v8::Local<v8::Value> error =
         v8::Exception::TypeError(::v8_str(isolate, wrap_result.error.c_str()));
     isolate->ThrowException(error);
-    return;
+    return ZEEKJS_V8_INTERCEPTED_NO;
   }
 
   rval->Assign(offset, wrap_result.val);
   info.GetReturnValue().Set(v8_val);
+  return ZEEKJS_V8_INTERCEPTED_YES;
 }
 
 // Callback for enumerating the properties of a record.
@@ -1257,7 +1303,7 @@ void ZeekValWrapper::ZeekRecordEnumerator(
 }
 
 // Implement Query for Zeek records.
-void ZeekValWrapper::ZeekRecordQuery(
+ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekRecordQuery(
     v8::Local<v8::Name> property,
     const v8::PropertyCallbackInfo<v8::Integer>& info) {
   v8::Local<v8::Object> receiver = info.This();
@@ -1266,13 +1312,15 @@ void ZeekValWrapper::ZeekRecordQuery(
 
   const auto* val = wrap->GetVal();
   if (val->GetType()->Tag() != zeek::TYPE_RECORD)
-    return;
+    return ZEEKJS_V8_INTERCEPTED_NO;
 
   const auto& rt = val->GetType<zeek::RecordType>();
   auto offset = wrap->GetWrapper()->GetRecordFieldOffset(rt, property);
   if (offset >= 0) {
     info.GetReturnValue().Set(v8::PropertyAttribute::ReadOnly);
   }
+
+  return ZEEKJS_V8_INTERCEPTED_YES;
 }
 
 v8::Local<v8::String> ZeekValWrapper::v8_str_intern(const char* s) {

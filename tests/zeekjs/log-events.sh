@@ -1,6 +1,6 @@
 # @TEST-DOC: Basic testing of the common log_ events from the base scripts
 # Only run this test on the (dev) version. It's too difficult to maintain it otherwise.
-# @TEST-REQUIRES: zeek -e 'exit(Version::info$major >= 6 ? 0 : 1)'
+# @TEST-REQUIRES: zeek --version >&2 && zeek -e 'exit((Version::info$version_number >= 80000 && Version::info$commit >= 594) ? 0 : 1)'
 # @TEST-EXEC: zeek -r $TRACES/dns-http-https.pcap ./log-events.js ./local.zeek
 # @TEST-EXEC: btest-diff .stdout
 
@@ -41,5 +41,10 @@ redef Site::private_address_space_is_local = F;
 # if Conn::Info$ip_proto exists.
 @ifdef ( IP::protocol_names )
 @load policy/protocols/conn/disable-unknown-ip-proto-support
+@endif
+
+# Do not log conn_id's ctx field here
+@ifdef ( conn_id_ctx )
+redef record conn_id$ctx -= { &log };
 @endif
 @TEST-END-FILE

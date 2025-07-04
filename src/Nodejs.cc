@@ -31,8 +31,9 @@ static v8::Local<v8::String> v8_str(v8::Isolate* i, const char* s) {
 }
 
 // Callbacks for zeek.vars
-static void ZeekGlobalVarsGetter(v8::Local<v8::Name> property,
-                                 const v8::PropertyCallbackInfo<v8::Value>& info) {
+static ZEEKJS_V8_INTERCEPTED ZeekGlobalVarsGetter(
+    v8::Local<v8::Name> property,
+    const v8::PropertyCallbackInfo<v8::Value>& info) {
   v8::Isolate* isolate = info.GetIsolate();
 
   auto zeek_obj = v8::Local<v8::Object>::Cast(info.Data());
@@ -44,9 +45,10 @@ static void ZeekGlobalVarsGetter(v8::Local<v8::Name> property,
   if (*arg) {
     const zeek::detail::IDPtr& id = zeek::id::find(*arg);
     if (!id)
-      return;
+      return ZEEKJS_V8_INTERCEPTED_NO;
     info.GetReturnValue().Set(instance->Wrap(id->GetVal()));
   }
+  return ZEEKJS_V8_INTERCEPTED_YES;
 }
 
 static void ZeekGlobalVarsEnumerator(const v8::PropertyCallbackInfo<v8::Array>& info) {
@@ -81,9 +83,14 @@ static void ZeekGlobalVarsEnumerator(const v8::PropertyCallbackInfo<v8::Array>& 
   info.GetReturnValue().Set(array);
 }
 
-void ZeekGlobalVarsSetter(v8::Local<v8::Name> property,
-                          v8::Local<v8::Value> v8_val,
-                          const v8::PropertyCallbackInfo<v8::Value>& info) {
+ZEEKJS_V8_INTERCEPTED ZeekGlobalVarsSetter(
+    v8::Local<v8::Name> property,
+    v8::Local<v8::Value> v8_val,
+#if (NODE_MAJOR_VERSION <= 22)
+    const v8::PropertyCallbackInfo<v8::Value>& info) {
+#else
+    const v8::PropertyCallbackInfo<void>& info) {
+#endif
   v8::Isolate* isolate = info.GetIsolate();
   auto zeek_obj = v8::Local<v8::Object>::Cast(info.Data());
   auto field = v8::Local<v8::External>::Cast(zeek_obj->GetInternalField(0));
@@ -93,7 +100,7 @@ void ZeekGlobalVarsSetter(v8::Local<v8::Name> property,
   dprintf("Property... %s", *arg);
 
   if (!*arg)
-    return;
+    return ZEEKJS_V8_INTERCEPTED_NO;
 
   const zeek::detail::IDPtr& id = zeek::id::find(*arg);
 
@@ -113,7 +120,7 @@ void ZeekGlobalVarsSetter(v8::Local<v8::Name> property,
 
     std::string error = zeek::util::fmt("Cannot set %s: %s", what.c_str(), *arg);
     isolate->ThrowException(v8_str(isolate, error.c_str()));
-    return;
+    return ZEEKJS_V8_INTERCEPTED_NO;
   }
 
   ZeekValWrapper::Result wrap_result = instance->ToZeekVal(v8_val, id->GetType());
@@ -121,10 +128,11 @@ void ZeekGlobalVarsSetter(v8::Local<v8::Name> property,
     v8::Local<v8::Value> error = v8::Exception::TypeError(
         ::v8_str(isolate, zeek::util::fmt("Bad value: %s", wrap_result.error.c_str())));
     isolate->ThrowException(error);
-    return;
+    return ZEEKJS_V8_INTERCEPTED_NO;
   }
 
   id->SetVal(wrap_result.val);
+  return ZEEKJS_V8_INTERCEPTED_YES;
 }
 
 // Call a Javascript function with Zeek land arguments.

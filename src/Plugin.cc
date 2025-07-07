@@ -398,8 +398,7 @@ zeek::ValPtr Plugin::Invoke(const std::string& name,
   // Setup a fake call frame for Zeek.
   auto js_frame = zeek::detail::Frame(0, nullptr, &args);
   fake_call_file_name.assign(file_name, 0, PATH_MAX - 1);
-  auto location = zeek::detail::Location(fake_call_file_name.c_str(), line_number,
-                                         line_number, 0, 0);
+  auto location = compat::make_location(fake_call_file_name.c_str(), line_number);
 
   fake_call_expr->SetLocationInfo(&location);
   js_frame.SetCall(fake_call_expr.get());

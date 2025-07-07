@@ -9,6 +9,7 @@
 //                         SetLocationInfo(&detail::start_location,
 //                         &detail::end_location);
 
+#include <type_traits>
 #if __has_include(<zeek/zeek-version.h>)
 #include <zeek/zeek-version.h>
 #else
@@ -46,6 +47,21 @@ constexpr zeek::detail::StmtTag STMT_EXTERN = zeek::detail::STMT_ANY;
 #else
 constexpr zeek::detail::StmtTag STMT_EXTERN = zeek::detail::STMT_EXTERN;
 #endif
+
+// In 8.0-dev the Location constructor was changed, deal with that.
+template <typename L>
+L make_location(const char* name, int line_number) {
+  if constexpr (std::is_constructible_v<L, const char*, int, int, int, int>) {
+    return L(name, line_number, line_number, 0, 0);
+  } else {
+    return L(name, line_number, line_number);
+  }
+}
+
+// Make a detail::Location object for the given name and line.
+inline zeek::detail::Location make_location(const char* name, int line_number) {
+  return make_location<zeek::detail::Location>(name, line_number);
+}
 
 }  // namespace plugin::Corelight_ZeekJS::compat
 

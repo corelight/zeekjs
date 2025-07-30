@@ -45,6 +45,14 @@ zeek_plugin_bif(src/zeekjs.bif)
 zeek_plugin_dist_files(README CHANGES COPYING VERSION)
 zeek_plugin_end()
 
+# Compiling Nodejs.cc with -fsanitize=vptr (e.g. as part of ubsan) can trigger
+# "undefined reference to `typeinfo for v8::ArrayBuffer::Allocator'". Suppress
+# vptr sanitization selectively for this file if any sanitizers are in effect.
+# See: https://groups.google.com/g/v8-users/c/MJztlKiWFUc/m/z3_V-SMvAwAJ
+if ("${CMAKE_CXX_FLAGS}" MATCHES "-fsanitize=")
+    set_source_files_properties(src/Nodejs.cc PROPERTIES COMPILE_FLAGS -fno-sanitize=vptr)
+endif ()
+
 file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" VERSION LIMIT_COUNT 1)
 
 if ("${PROJECT_SOURCE_DIR}" STREQUAL "${CMAKE_SOURCE_DIR}")

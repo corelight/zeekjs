@@ -363,13 +363,21 @@ bool Plugin::RegisterJsHookHandler(const std::string& name,
   }
   zeek::Func* func = id->GetVal()->AsFunc();
 
+#if ZEEK_VERSION_NUMBER < 80000
   dprintf("Have a func=%p %s priority=%d", func, func->Name(), priority);
+#else
+  dprintf("Have a func=%p %s priority=%d", func, func->GetName().c_str(), priority);
+#endif
 
   zeek::detail::StmtPtr stmt = zeek::make_intrusive<InvokeJsHookHandlerStmt>(js_hh);
   std::vector<zeek::detail::IDPtr> inits;  // ? What are inits?
   func->AddBody(stmt, inits, 0, priority);
 
+#if ZEEK_VERSION_NUMBER < 80000
   PLUGIN_DBG_LOG(plugin, "Added body to %s", func->Name());
+#else
+  PLUGIN_DBG_LOG(plugin, "Added body to %s", func->GetName().c_str());
+#endif
   return true;
 }
 

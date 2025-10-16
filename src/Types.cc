@@ -3,6 +3,7 @@
 #include "Plugin.h"
 #include "Types.h"
 #include "ZeekCompat.h"
+#include "config.h"
 
 #include "zeek/Desc.h"
 #include "zeek/IPAddr.h"
@@ -83,7 +84,7 @@ v8::Local<v8::String> v8_str_extern(v8::Isolate* i,
                                     zeek::Obj* obj,
                                     const char* data,
                                     size_t length = 0) {
-#ifdef __clang_analyzer__
+#if defined(ZEEKJS_ASAN)
   // clang-tidy thinks the StringResource object is never freed,
   // hide the allocation from it.
   return v8_str(i, data);

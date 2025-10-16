@@ -3,3 +3,17 @@
 #define ZEEKJS_VERSION_MAJOR @VERSION_MAJOR@
 #define ZEEKJS_VERSION_MINOR @VERSION_MINOR@
 #define ZEEKJS_VERSION_PATCH @VERSION_PATCH@
+
+// Define a variable that tracks whether the address sanitizer is
+// enabled as part of the build. GCC uses __SANITIZE_ADDRESS__,
+// where Clang uses a feature flag. GCC defines __has_feature(),
+// but doesn't define the feature flag.
+#if defined(__SANITIZE_ADDRESS__)
+#define ZEEKJS_ASAN
+#endif
+
+#if defined(__has_feature)
+#if __has_feature(address_sanitizer)
+#define ZEEKJS_ASAN
+#endif
+#endif

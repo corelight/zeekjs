@@ -45,7 +45,9 @@ zeek.hook('zeek_init', function() {
 
 @TEST-START-FILE set.zeek
 export {
+@ifndef ( subnet_set )
   type subnet_set: set[subnet];
+@endif
   type subnet_addr_set: set[subnet, addr];
 }
 @TEST-END-FILE

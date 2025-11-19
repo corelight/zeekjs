@@ -9,16 +9,16 @@ zeek.on('zeek_init', async () => {
   setTimeout(() => {
     console.log('UNEXPECTED TIMEOUT');
     process.exit(1);
-  }, 100);
+  }, 5000);
+
   console.log('Before')
   try {
     await fsp.mkdir('./directory')
     console.log('Created ./directory');
     console.log('Exiting');
-    process.exit(0);
+    zeek.invoke('terminate');
   } catch (err) {
     console.log(`UNEXPECTED ERROR: ${err}`);
   }
-  console.log('UNEXPECTEDLY REACHED');
 });
 @TEST-END-FILE

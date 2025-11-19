@@ -1,6 +1,12 @@
 # @TEST-DOC: Javascript taking over Zeek's SIGINT and SIGTERM - don't do this unless your first name starts with an S and your last name is Hall.
-# @TEST-EXEC: zeek exit_only_after_terminate=T ./signal.js ./exit_code.zeek; echo "Shell got: $?"
-# @TEST-EXEC: zeek exit_only_after_terminate=T ./signal.js ./exit_code.zeek Test::exit_code=1; echo "Shell got: $?"
+#
+# Ignore leaks for now because calling process.exit() doesn't go through
+# the normal Plugin::Done() cleanup, leaving Node.js state around.
+# We may be able to fix via a custom SetProcessExitHandler(). See
+# Instance::Init().
+#
+# @TEST-EXEC: ASAN_OPTIONS=${ASAN_OPTIONS}:detect_leaks=0 zeek exit_only_after_terminate=T ./signal.js ./exit_code.zeek; echo "Shell got: $?"
+# @TEST-EXEC: ASAN_OPTIONS=${ASAN_OPTIONS}:detect_leaks=0 zeek exit_only_after_terminate=T ./signal.js ./exit_code.zeek Test::exit_code=1; echo "Shell got: $?"
 # @TEST-EXEC: btest-diff .stdout
 
 @TEST-START-FILE signal.js

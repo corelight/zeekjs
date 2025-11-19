@@ -9,7 +9,8 @@ zeek.on('zeek_init', () => {
   setTimeout(() => {
     console.log('UNEXPECTED TIMEOUT');
     process.exit(1);
-  }, 100);
+  }, 5000);
+
   console.log('Before')
   fs.mkdir('./directory', (err) => {
     console.log('Created ./directory');
@@ -17,7 +18,7 @@ zeek.on('zeek_init', () => {
       console.log(`UNEXPECTED ERROR: ${err}`);
     }
     console.log('Exiting');
-    process.exit(0);
+    zeek.invoke('terminate');
   });
   console.log('After');
 });

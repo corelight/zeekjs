@@ -138,10 +138,8 @@ class Instance {
   std::unique_ptr<node::MultiIsolatePlatform> node_platform_;
   std::shared_ptr<node::ArrayBufferAllocator> node_allocator_;
   // Not sure this is clever.
-  std::unique_ptr<node::IsolateData, decltype(&node::FreeIsolateData)>
-      node_isolate_data_ = {nullptr, nullptr};
-  std::unique_ptr<node::Environment, std::function<void(node::Environment*)>>
-      node_environment_;
+  node::IsolateData* node_isolate_data_ = nullptr;
+  node::Environment* node_environment_ = nullptr;
   uv_loop_t loop;
   uv_timer_t loop_timer;
 
@@ -165,7 +163,7 @@ class Instance {
   // RunTimers, so lets do that, too.
   v8::Global<v8::Object> process_obj_;
 
-  Executor executor;
+  std::unique_ptr<Executor> executor;
 };
 
 class EventHandler : public plugin::Corelight_ZeekJS::Js::EventHandler {

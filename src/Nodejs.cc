@@ -1065,6 +1065,15 @@ void Instance::Done() {
   if (node_environment_) {
     StopLoopTimer();
 
+    // Request garbage collection to ensure any string resources
+    // in the V8 heap that keep a reference to Zeek StringVals are
+    // freed such that the StringVals are also properly freed.
+    //
+    // We pass --expose-gc in Init() as args, so this is working
+    // here and otherwise raises.
+    GetIsolate()->RequestGarbageCollectionForTesting(
+        v8::Isolate::kFullGarbageCollection);
+
     // HACK: Add a small grace period waiting for the JavaScript IO loop
     // to complete during shutdown. E.g. if you send out an HTTP request
     // shortly before Zeek is shutting down, for example, using zeek -r <pcap>
@@ -1096,15 +1105,6 @@ void Instance::Done() {
 
     {
       v8::Locker locker(GetIsolate());
-
-      // Request garbage collection to ensure any string resources
-      // in the V8 heap that keep a reference to Zeek StringVals are
-      // freed such that the StringVals are also properly freed.
-      //
-      // We pass --expose-gc in Init() as args, so this is working
-      // here and otherwise raises.
-      GetIsolate()->RequestGarbageCollectionForTesting(
-          v8::Isolate::kFullGarbageCollection);
 
       node::FreeIsolateData(node_isolate_data_);
       node_isolate_data_ = nullptr;

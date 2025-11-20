@@ -22,8 +22,12 @@ zeek.hook('zeek_init', function() {
   c2c_t[2n] = 2n
   // This works because the index setter is called with an actual 3 as unsigned int.
   c2c_t['3'] = 3
-  // This works because the ToZeekVal() conversion to count looks for IsNumber(), but looses precision.
+  // This fails because assigning 4.2 to a count raises
+  try {
   c2c_t[4] = 4.2
+  } catch (error) {
+    zeek.print(`JS: expected error: ${error}`);
+  }
 
   // Yikes, fingers crossed.
   let sn2a_t = zeek.global_vars['sn2a_t'];

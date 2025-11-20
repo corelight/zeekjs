@@ -1,5 +1,5 @@
 # @TEST-DOC: Disable an analyzer from JS
-# @TEST-REQUIRES: zeek -e 'global_ids()["analyzer_confirmation"]'
+# @TEST-REQUIRES: zeek -e 'global_ids()["analyzer_confirmation_info"]'
 # @TEST-EXEC: zeek http.js -r $TRACES/http-pipelined-requests.pcap
 # @TEST-EXEC: btest-diff .stdout
 
@@ -7,11 +7,11 @@
 // Keep state of connection uids to its analyzers.
 var analyzers = {};
 
-zeek.on('analyzer_confirmation', (c, atype, aid) => {
-  console.log('analyzer_confirmation', c.uid, atype, aid);
-  if ( analyzers[c.uid] === undefined )
-    analyzers[c.uid] = {};
-  analyzers[c.uid][atype] = aid;
+zeek.on('analyzer_confirmation_info', (atype, info) => {
+  console.log('analyzer_confirmation', info.c.uid, atype, info.aid);
+  if ( analyzers[info.c.uid] === undefined )
+    analyzers[info.c.uid] = {};
+  analyzers[info.c.uid][atype] = info.aid;
 });
 
 zeek.on('http_request', (c, uri1, uri2, method) => {

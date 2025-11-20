@@ -17,9 +17,13 @@ zeek.on('zeek_init', () => {
 redef Site::private_address_space_is_local = F;
 @endif
 
+# More recent versions of Zeek have subnet_set in init-bare.zeek, avoid
+# double declaration.
+@ifndef ( subnet_set )
 export {
   type subnet_set: set[subnet];
 }
+@endif
 
 event zeek_done() {
   print fmt("ZEEK: zeek_done: Site::local_nets=%s", Site::local_nets);

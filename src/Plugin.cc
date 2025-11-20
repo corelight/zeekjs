@@ -94,6 +94,7 @@ void Plugin::InitPostScript() {
 
   if (!nodejs->Init(&plugin, options)) {
     zeek::reporter->Error("Failed to initialize nodejs");
+    nodejs->Done();
     return;
   }
 

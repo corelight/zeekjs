@@ -173,7 +173,7 @@ static v8::Local<v8::Value> callFunction(v8::Isolate* isolate,
 
 // Invoke the registered v8::Function for the given Event
 void plugin::Nodejs::EventHandler::operator()(const zeek::Args& args) {
-  instance_->executor.Run([this, &args = args]() -> void {
+  instance_->executor->Run([this, &args = args]() -> void {
     v8::Locker locker(isolate_);
     v8::Isolate::Scope isolate_scope(isolate_);
     v8::HandleScope handle_scope(isolate_);
@@ -187,7 +187,7 @@ void plugin::Nodejs::EventHandler::operator()(const zeek::Args& args) {
 // Invoke the registered v8::Function for a hook, returning a HookHandlerResult
 plugin::Corelight_ZeekJS::Js::HookHandlerResult HookHandler::operator()(
     const zeek::Args& args) {
-  return instance_->executor.Run(
+  return instance_->executor->Run(
       [this, args]() -> Corelight_ZeekJS::Js::HookHandlerResult {
         v8::Locker locker(isolate_);
         v8::Isolate::Scope isolate_scope(isolate_);
@@ -804,7 +804,7 @@ bool Instance::ExecuteAndWaitForInit(v8::Local<v8::Context> context,
                                      const std::string& main_script_source) {
   // Oookay, go run the main script
   v8::MaybeLocal<v8::Value> ret =
-      node::LoadEnvironment(node_environment_.get(), main_script_source.c_str());
+      node::LoadEnvironment(node_environment_, main_script_source.c_str());
 
   if (ret.IsEmpty()) {
     // TODO: Introspect the error a bit.
@@ -859,7 +859,7 @@ bool Instance::ExecuteAndWaitForInit(v8::Local<v8::Context> context,
     }
   }
 
-  executor.Run([]() {
+  executor->Run([]() {
     // See https://github.com/zeek/zeek/pull/4272, threads have
     // SIGTERM blocked by default and so the terminate() bif
     // will not work when executed by the executor thread
@@ -890,6 +890,12 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
     args.emplace_back("--trace-uncaught");
   }
 
+  // Always pass --expose-gc as argument so that we can request garbage
+  // collection during Done(). If a user uses this to trigger GC from
+  // JavaScript, that's their own responsibility. We use it to properly
+  // to unref Zeek values held by from the JavaScript heap (string resources).
+  args.emplace_back("--expose-gc");
+
 #if NODE_VERSION_AT_LEAST(18, 11, 0)
   auto flags = node::ProcessInitializationFlags::kLegacyInitializeNodeWithArgsBehavior;
 #if NODE_VERSION_AT_LEAST(20, 6, 0)
@@ -903,6 +909,8 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
 #else
   int r = node::InitializeNodeWithArgs(&args, &exec_args, &errors);
 #endif
+
+  executor = std::make_unique<Executor>();
 
   if (r != 0) {
     eprintf("Node initialization failed: %d", r);
@@ -985,9 +993,7 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
   auto context = context_.Get(isolate_);
   v8::Context::Scope context_scope(context);
 
-  node_isolate_data_ = {node::CreateIsolateData(isolate_, &loop, node_platform_.get(),
-                                                node_allocator_.get()),
-                        &node::FreeIsolateData};
+  node_isolate_data_ = node::CreateIsolateData(isolate_, &loop, node_platform_.get());
 
   auto env_flags = node::EnvironmentFlags::kNoFlags;
   if (options.owns_process_state)
@@ -998,13 +1004,8 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
                                               node::EnvironmentFlags::kOwnsInspector};
 
   dprintf("CreateEnvironment: env_flags=%" PRIx64, env_flags);
-  node_environment_ = {node::CreateEnvironment(node_isolate_data_.get(), context, args,
-                                               exec_args, env_flags),
-                       [this](node::Environment* env) {
-                         v8::Locker locker(GetIsolate());
-                         v8::Isolate::Scope isolate_scope(GetIsolate());
-                         node::FreeEnvironment(env);
-                       }};
+  node_environment_ =
+      node::CreateEnvironment(node_isolate_data_, context, args, exec_args, env_flags);
 
   zeek_val_wrapper_ = std::make_unique<ZeekValWrapper>(GetIsolate());
   zeek_type_registry_ = std::make_unique<ZeekTypeRegistry>();
@@ -1014,7 +1015,7 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
       &loop_timer, [](uv_timer_t* h) { /* empty body */ },
       options.loop_timer_milliseconds, options.loop_timer_milliseconds);
 
-  node::AddLinkedBinding(node_environment_.get(), "zeekjs", RegisterModule, this);
+  node::AddLinkedBinding(node_environment_, "zeekjs", RegisterModule, this);
 
   if (!ExecuteAndWaitForInit(context, GetIsolate(), options.main_script_source))
     return false;
@@ -1023,31 +1024,56 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
       context->Global()->Get(context, v8_str(isolate_, "process")).ToLocalChecked());
   process_obj_.Reset(isolate_, process);
 
+  // Register an exit handler.
+  auto process_exit_handler = [](node::Environment* env, int exit_code) {
+    // This is the handler running when process.exit() is called.
+    //
+    // For now we just call the default implementation, but in the future we
+    // could consider reacting such that we shutdown cleanly from
+    // HookDrainEvents(). Calling process.exit() from JavaScript scripts
+    // running in Zeek doesn't seem the most important use case.
+    node::DefaultProcessExitHandler(env, exit_code);
+  };
+
+  node::SetProcessExitHandler(node_environment_, process_exit_handler);
+
   return true;
 }
 
 // Emit process 'beforeExit'
 void Instance::EmitProcessBeforeExit() {
-  executor.Run([this]() {
+  executor->Run([this]() {
     v8::Isolate* isolate = GetIsolate();
     v8::Locker locker(isolate);
     v8::Isolate::Scope isolate_scope(isolate);
-    node::EmitProcessBeforeExit(node_environment_.get()).Check();
+    node::EmitProcessBeforeExit(node_environment_).Check();
   });
 }
 
 void Instance::EmitProcessExit() {
-  executor.Run([this]() {
+  executor->Run([this]() {
     v8::Isolate* isolate = GetIsolate();
     v8::Locker locker(isolate);
     v8::Isolate::Scope isolate_scope(isolate);
-    node::EmitProcessExit(node_environment_.get()).Check();
+    node::EmitProcessExit(node_environment_).Check();
   });
 }
+
 void Instance::Done() {
   using namespace std::chrono_literals;
 
   if (node_environment_) {
+    StopLoopTimer();
+
+    // Request garbage collection to ensure any string resources
+    // in the V8 heap that keep a reference to Zeek StringVals are
+    // freed such that the StringVals are also properly freed.
+    //
+    // We pass --expose-gc in Init() as args, so this is working
+    // here and otherwise raises.
+    GetIsolate()->RequestGarbageCollectionForTesting(
+        v8::Isolate::kFullGarbageCollection);
+
     // HACK: Add a small grace period waiting for the JavaScript IO loop
     // to complete during shutdown. E.g. if you send out an HTTP request
     // shortly before Zeek is shutting down, for example, using zeek -r <pcap>
@@ -1068,6 +1094,44 @@ void Instance::Done() {
     }
 
     EmitProcessExit();
+
+    // The following code is slightly inspired by CommonEnvironmentSetup
+    // which we should probably switch to in the future.
+
+    // Release everything that requires the isolate.
+    process_obj_.Reset();
+    zeek_val_wrapper_.reset();
+    executor.reset();
+
+    {
+      v8::Locker locker(GetIsolate());
+
+      node::FreeIsolateData(node_isolate_data_);
+      node_isolate_data_ = nullptr;
+
+      node::FreeEnvironment(node_environment_);
+      node_environment_ = nullptr;
+    }
+
+    // Again, inspired by the CommonEnvironmentSetup code.
+    bool fin = false;
+    node_platform_->AddIsolateFinishedCallback(
+        isolate_, [](void* data) { *static_cast<bool*>(data) = true; }, &fin);
+
+    node_platform_->UnregisterIsolate(isolate_);
+    isolate_->Dispose();
+    isolate_ = nullptr;
+
+    while (!fin)
+      uv_run(&loop, UV_RUN_ONCE);
+
+    // Log the error if there's one, but just continue.
+    if (int r = uv_loop_close(&loop); r != 0)
+      eprintf("uv_loop_close() failed: %d %s", r, uv_err_name(r));
+
+    v8::V8::Dispose();
+    v8::V8::DisposePlatform();
+    node::TearDownOncePerProcess();
   }
 }
 
@@ -1096,8 +1160,10 @@ bool Instance::IsAlive() {
 }
 
 void Instance::StopLoopTimer() {
-  if (uv_is_active((uv_handle_t*)&loop_timer))
+  if (uv_is_active((uv_handle_t*)&loop_timer)) {
     uv_timer_stop(&loop_timer);
+    uv_close((uv_handle_t*)&loop_timer, nullptr);
+  }
 }
 
 struct UvHandle {
@@ -1181,7 +1247,7 @@ void Instance::ProcessLocked() {
 }
 
 void Instance::Process() {
-  executor.Run([this]() {
+  executor->Run([this]() {
     v8::Locker locker(GetIsolate());
     ProcessLocked();
   });

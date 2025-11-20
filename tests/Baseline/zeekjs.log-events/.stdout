@@ -29,7 +29,9 @@ DNS::log_dns: {
     77,
     77
   ],
-  "rejected": false
+  "rejected": false,
+  "opcode": 0,
+  "opcode_name": "query"
 }
 HTTP::log_http: {
   "ts": 1630238734.007674,

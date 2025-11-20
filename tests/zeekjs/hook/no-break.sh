@@ -1,5 +1,5 @@
 # @TEST-DOC: Hook Log::log_stream_policy and return an explicit false to break (and stop creating http.log)
-# @TEST-REQUIRES: zeek -e 'global_ids()["Log::log_stream_policy"]'
+# @TEST-REQUIRES: zeek -e 'global_ids()["dns_dynamic_update"]'
 # @TEST-EXEC: zeek -r $TRACES/dns.pcap ./hook.js ./local.zeek
 # @TEST-EXEC: btest-diff .stdout
 # @TEST-EXEC: btest-diff conn.log

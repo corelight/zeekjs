@@ -1,6 +1,6 @@
 # @TEST-DOC: Basic testing of the common log_ events from the base scripts
 # Only run this test on the (dev) version. It's too difficult to maintain it otherwise.
-# @TEST-REQUIRES: zeek --version >&2 && zeek -e 'exit((Version::info$version_number >= 80000 && Version::info$commit >= 594) ? 0 : 1)'
+# @TEST-REQUIRES: zeek --version >&2 && zeek -e 'exit((Version::info$version_number >= 80100 && Version::info$commit >= 920) ? 0 : 1)'
 # @TEST-EXEC: zeek -r $TRACES/dns-http-https.pcap ./log-events.js ./local.zeek
 # @TEST-EXEC: btest-diff .stdout
 

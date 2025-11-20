@@ -117,7 +117,8 @@ dns_message [
       "num_queries": 1,
       "num_answers": 0,
       "num_auth": 0,
-      "num_addl": 1
+      "num_addl": 1,
+      "is_netbios": false
     }
   },
   {
@@ -198,6 +199,8 @@ dns_request [
         "RA": false,
         "Z": 0,
         "rejected": false,
+        "opcode": 0,
+        "opcode_name": "query",
         "saw_query": false,
         "saw_reply": false
       },
@@ -221,6 +224,8 @@ dns_request [
           "RA": false,
           "Z": 0,
           "rejected": false,
+          "opcode": 0,
+          "opcode_name": "query",
           "saw_query": false,
           "saw_reply": false
         }
@@ -245,7 +250,8 @@ dns_request [
       "num_queries": 1,
       "num_answers": 0,
       "num_auth": 0,
-      "num_addl": 1
+      "num_addl": 1,
+      "is_netbios": false
     }
   },
   {
@@ -345,6 +351,8 @@ dns_message [
         "RA": false,
         "Z": 0,
         "rejected": false,
+        "opcode": 0,
+        "opcode_name": "query",
         "saw_query": true,
         "saw_reply": false
       },
@@ -373,6 +381,8 @@ dns_message [
           "RA": false,
           "Z": 0,
           "rejected": false,
+          "opcode": 0,
+          "opcode_name": "query",
           "saw_query": true,
           "saw_reply": false
         }
@@ -401,7 +411,8 @@ dns_message [
       "num_queries": 1,
       "num_answers": 2,
       "num_auth": 0,
-      "num_addl": 1
+      "num_addl": 1,
+      "is_netbios": false
     }
   },
   {

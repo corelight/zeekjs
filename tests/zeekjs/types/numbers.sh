@@ -7,7 +7,7 @@
 // JS number to int.
 zeek.on('zeek_init', {priority: -10}, () => {
   zeek.event('want_int', ["-9223372036854775808", -(2**63)]);
-  zeek.event('want_int', ["-9007199254740992", -(2**53)]);
+  zeek.event('want_int', ["-9007199254740991", -(2**53 - 1)]);
   zeek.event('want_int', ["-4294967296", -(2**32)]);
   zeek.event('want_int', ["-2147483648", -(2**31)]);
   zeek.event('want_int', ["-1", -1]);
@@ -70,6 +70,8 @@ zeek.on('zeek_init', {priority: -30}, () => {
   zeek.event('want_count', ["42", 42]);
   zeek.event('want_count', ["42", 42n]);
 
+  zeek.event('want_count', ["9007199254740991", (2**53) - 1]);
+
   // This is a bit strange. 2**63 prints as 9223372036854776000, but then
   // you can convert it to a BigInt with more precision:
   //
@@ -90,6 +92,12 @@ zeek.on('zeek_init', {priority: -30}, () => {
 zeek.on('zeek_init', {priority: -40}, () => {
   try {
     zeek.event('want_count', ["XXX", -1]);
+  } catch (error) {
+    zeek.print(`expected error: ${error}`)
+  }
+
+  try {
+    zeek.event('want_count', ["XXX", -(2**53 - 1)]);
   } catch (error) {
     zeek.print(`expected error: ${error}`)
   }
@@ -143,8 +151,8 @@ zeek.on('zeek_init', {priority: -50}, () => {
   zeek.event('want_double', ["nan", NaN]);
   zeek.event('want_double', ["inf", Infinity]);
   zeek.event('want_double', ["42.0", 42.0]);
-  zeek.event('want_double', ["-9.007199254740992e+15", -(2**53)]);
-  zeek.event('want_double', ["9.007199254740992e+15", 2**53]);
+  zeek.event('want_double', ["-9.007199254740991e+15", -((2**53) - 1)]);
+  zeek.event('want_double', ["9.007199254740991e+15", 2**53 - 1]);
   zeek.event('want_double', ["-1.4757395258967641e+20", -(2**67)]);
   zeek.event('want_double', ["1.4757395258967641e+20", 2**67]);
 });

@@ -109,9 +109,17 @@ ZeekValWrapper::ZeekValWrapper(v8::Isolate* isolate) : isolate_(isolate) {
                               v8::PropertyAttribute::DontEnum);
 
   v8::NamedPropertyHandlerConfiguration record_conf =
-      v8::NamedPropertyHandlerConfiguration(ZeekRecordGetter, ZeekRecordSetter,
-                                            ZeekRecordQuery, nullptr /* deleter */,
-                                            ZeekRecordEnumerator);
+      v8::NamedPropertyHandlerConfiguration(
+          /*getter=*/ZeekRecordGetter,
+          /*setter=*/ZeekRecordSetter,
+          /*query=*/ZeekRecordQuery,
+          /*deleter=*/nullptr,
+          /*enumerator=*/ZeekRecordEnumerator,
+          /*definer=*/nullptr,
+          /*descriptor=*/nullptr,
+          /*data=*/v8::Local<v8::Value>(),
+          /*flags=*/v8::PropertyHandlerFlags::kHasNoSideEffect);
+
   record_template->SetHandler(record_conf);
   record_template_.Reset(isolate_, record_template);
 

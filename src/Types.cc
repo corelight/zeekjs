@@ -1226,6 +1226,12 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekRecordGetter(
   auto wrap =
       static_cast<ZeekValWrap*>(receiver->GetAlignedPointerFromInternalField(0));
 
+#ifdef DEBUG
+  v8::Isolate* isolate = info.GetIsolate();
+  v8::String::Utf8Value property_utf8(isolate, property);
+  dprintf("%s", *property_utf8);
+#endif
+
   if (wrap->GetVal()->GetType()->Tag() != zeek::TYPE_RECORD)
     return ZEEKJS_V8_INTERCEPTED_NO;
 
@@ -1317,6 +1323,12 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekRecordQuery(
   v8::Local<v8::Object> receiver = info.This();
   auto wrap =
       static_cast<ZeekValWrap*>(receiver->GetAlignedPointerFromInternalField(0));
+
+#ifdef DEBUG
+  v8::Isolate* isolate = info.GetIsolate();
+  v8::String::Utf8Value property_utf8(isolate, property);
+  dprintf("%s", *property_utf8);
+#endif
 
   const auto* val = wrap->GetVal();
   if (val->GetType()->Tag() != zeek::TYPE_RECORD)

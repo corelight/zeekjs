@@ -143,7 +143,7 @@ class Instance {
   uv_loop_t loop;
   uv_timer_t loop_timer;
 
-  v8::Isolate* isolate_;
+  v8::Isolate* isolate_ = nullptr;
 
   v8::Persistent<v8::Context> context_;
 
@@ -163,7 +163,7 @@ class Instance {
   // RunTimers, so lets do that, too.
   v8::Global<v8::Object> process_obj_;
 
-  std::unique_ptr<Executor> executor;
+  std::unique_ptr<Executor> executor_;
 };
 
 class EventHandler : public plugin::Corelight_ZeekJS::Js::EventHandler {

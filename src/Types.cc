@@ -106,7 +106,9 @@ ZeekValWrapper::ZeekValWrapper(v8::Isolate* isolate) : isolate_(isolate) {
   v8::Local<v8::ObjectTemplate> record_template = v8::ObjectTemplate::New(isolate_);
   record_template->SetInternalFieldCount(1);
   record_template->SetPrivate(GetWrapPrivateKey(isolate), v8::True(isolate),
-                              v8::PropertyAttribute::DontEnum);
+                              v8::PropertyAttribute(v8::PropertyAttribute::DontEnum |
+                                                    v8::PropertyAttribute::DontDelete |
+                                                    v8::PropertyAttribute::ReadOnly));
 
   v8::NamedPropertyHandlerConfiguration record_conf =
       v8::NamedPropertyHandlerConfiguration(

@@ -1239,10 +1239,11 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekRecordGetter(
   const auto& rt = rval->GetType<zeek::RecordType>();
 
   auto offset = wrap->GetWrapper()->GetRecordFieldOffset(rt, property);
-  if (offset >= 0) {
-    zeek::ValPtr vp = rval->GetFieldOrDefault(offset);
-    info.GetReturnValue().Set(wrap->GetWrapper()->Wrap(vp, wrap->GetAttrMask()));
-  }
+  if (offset < 0)
+    return ZEEKJS_V8_INTERCEPTED_NO;
+
+  zeek::ValPtr vp = rval->GetFieldOrDefault(offset);
+  info.GetReturnValue().Set(wrap->GetWrapper()->Wrap(vp, wrap->GetAttrMask()));
 
   return ZEEKJS_V8_INTERCEPTED_YES;
 }
@@ -1336,9 +1337,11 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekRecordQuery(
 
   const auto& rt = val->GetType<zeek::RecordType>();
   auto offset = wrap->GetWrapper()->GetRecordFieldOffset(rt, property);
-  if (offset >= 0) {
-    info.GetReturnValue().Set(v8::PropertyAttribute::ReadOnly);
-  }
+  if (offset < 0)
+    return ZEEKJS_V8_INTERCEPTED_NO;
+
+  info.GetReturnValue().Set(v8::PropertyAttribute::ReadOnly |
+                            v8::PropertyAttribute::DontDelete);
 
   return ZEEKJS_V8_INTERCEPTED_YES;
 }

@@ -107,12 +107,22 @@ ZeekValWrapper::ZeekValWrapper(v8::Isolate* isolate) : isolate_(isolate) {
   v8::Local<v8::ObjectTemplate> record_template = v8::ObjectTemplate::New(isolate_);
   record_template->SetInternalFieldCount(1);
   record_template->SetPrivate(GetWrapPrivateKey(isolate), v8::True(isolate),
-                              v8::PropertyAttribute::DontEnum);
+                              v8::PropertyAttribute(v8::PropertyAttribute::DontEnum |
+                                                    v8::PropertyAttribute::DontDelete |
+                                                    v8::PropertyAttribute::ReadOnly));
 
   v8::NamedPropertyHandlerConfiguration record_conf =
-      v8::NamedPropertyHandlerConfiguration(ZeekRecordGetter, ZeekRecordSetter,
-                                            ZeekRecordQuery, nullptr /* deleter */,
-                                            ZeekRecordEnumerator);
+      v8::NamedPropertyHandlerConfiguration(
+          /*getter=*/ZeekRecordGetter,
+          /*setter=*/ZeekRecordSetter,
+          /*query=*/ZeekRecordQuery,
+          /*deleter=*/nullptr,
+          /*enumerator=*/ZeekRecordEnumerator,
+          /*definer=*/nullptr,
+          /*descriptor=*/nullptr,
+          /*data=*/v8::Local<v8::Value>(),
+          /*flags=*/v8::PropertyHandlerFlags::kHasNoSideEffect);
+
   record_template->SetHandler(record_conf);
   record_template_.Reset(isolate_, record_template);
 
@@ -1297,6 +1307,12 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekRecordGetter(
   auto wrap =
       static_cast<ZeekValWrap*>(receiver->GetAlignedPointerFromInternalField(0));
 
+#ifdef DEBUG
+  v8::Isolate* isolate = info.GetIsolate();
+  v8::String::Utf8Value property_utf8(isolate, property);
+  dprintf("%s", *property_utf8);
+#endif
+
   if (wrap->GetVal()->GetType()->Tag() != zeek::TYPE_RECORD)
     return ZEEKJS_V8_INTERCEPTED_NO;
 
@@ -1304,10 +1320,11 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekRecordGetter(
   const auto& rt = rval->GetType<zeek::RecordType>();
 
   auto offset = wrap->GetWrapper()->GetRecordFieldOffset(rt, property);
-  if (offset >= 0) {
-    zeek::ValPtr vp = rval->GetFieldOrDefault(offset);
-    info.GetReturnValue().Set(wrap->GetWrapper()->Wrap(vp, wrap->GetAttrMask()));
-  }
+  if (offset < 0)
+    return ZEEKJS_V8_INTERCEPTED_NO;
+
+  zeek::ValPtr vp = rval->GetFieldOrDefault(offset);
+  info.GetReturnValue().Set(wrap->GetWrapper()->Wrap(vp, wrap->GetAttrMask()));
 
   return ZEEKJS_V8_INTERCEPTED_YES;
 }
@@ -1389,15 +1406,23 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekRecordQuery(
   auto wrap =
       static_cast<ZeekValWrap*>(receiver->GetAlignedPointerFromInternalField(0));
 
+#ifdef DEBUG
+  v8::Isolate* isolate = info.GetIsolate();
+  v8::String::Utf8Value property_utf8(isolate, property);
+  dprintf("%s", *property_utf8);
+#endif
+
   const auto* val = wrap->GetVal();
   if (val->GetType()->Tag() != zeek::TYPE_RECORD)
     return ZEEKJS_V8_INTERCEPTED_NO;
 
   const auto& rt = val->GetType<zeek::RecordType>();
   auto offset = wrap->GetWrapper()->GetRecordFieldOffset(rt, property);
-  if (offset >= 0) {
-    info.GetReturnValue().Set(v8::PropertyAttribute::ReadOnly);
-  }
+  if (offset < 0)
+    return ZEEKJS_V8_INTERCEPTED_NO;
+
+  info.GetReturnValue().Set(v8::PropertyAttribute::ReadOnly |
+                            v8::PropertyAttribute::DontDelete);
 
   return ZEEKJS_V8_INTERCEPTED_YES;
 }

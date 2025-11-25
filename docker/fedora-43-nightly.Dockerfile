@@ -1,7 +1,7 @@
-FROM fedora:41
+FROM fedora:43
 
 # Bust the cache
-ARG STAMP=1741531092
+ARG STAMP=1741531139
 
 # Dependencies required to compile and test ZeekJS on Fedora
 RUN dnf install -y \
@@ -9,7 +9,7 @@ RUN dnf install -y \
   diffutils \
   dnf-plugins-core \
   gcc-c++ \
-  nodejs-devel \
+  nodejs24-devel \
   which \
   clang-tools-extra
 
@@ -18,18 +18,17 @@ RUN dnf install -y \
 # node: symbol lookup error: /lib64/libnode.so.127: undefined symbol: sqlite3session_attach
 RUN dnf update -y sqlite-libs
 
-RUN dnf config-manager addrepo --from-repofile=https://download.opensuse.org/repositories/security:zeek/Fedora_41/security:zeek.repo
+RUN dnf config-manager addrepo --from-repofile=https://download.opensuse.org/repositories/security:zeek/Fedora_43/security:zeek.repo
 
 RUN dnf install -y \
-  zeek-btest \
-  zeek-core \
-  zeek-devel
+  zeek-nightly-btest \
+  zeek-nightly-core \
+  zeek-nightly-devel
 
-ENV PATH=/opt/zeek/bin:$PATH
+ENV PATH=/opt/zeek-nightly/bin:$PATH
 
 RUN btest --version
 RUN zeek --version
-RUN node --version
 
 # Run the build and compile
 WORKDIR /src

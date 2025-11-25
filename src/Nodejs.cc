@@ -173,7 +173,7 @@ static v8::Local<v8::Value> callFunction(v8::Isolate* isolate,
 
 // Invoke the registered v8::Function for the given Event
 void plugin::Nodejs::EventHandler::operator()(const zeek::Args& args) {
-  instance_->executor->Run([this, &args = args]() -> void {
+  instance_->executor_->Run([this, &args = args]() -> void {
     v8::Locker locker(isolate_);
     v8::Isolate::Scope isolate_scope(isolate_);
     v8::HandleScope handle_scope(isolate_);
@@ -187,7 +187,7 @@ void plugin::Nodejs::EventHandler::operator()(const zeek::Args& args) {
 // Invoke the registered v8::Function for a hook, returning a HookHandlerResult
 plugin::Corelight_ZeekJS::Js::HookHandlerResult HookHandler::operator()(
     const zeek::Args& args) {
-  return instance_->executor->Run(
+  return instance_->executor_->Run(
       [this, args]() -> Corelight_ZeekJS::Js::HookHandlerResult {
         v8::Locker locker(isolate_);
         v8::Isolate::Scope isolate_scope(isolate_);
@@ -859,7 +859,7 @@ bool Instance::ExecuteAndWaitForInit(v8::Local<v8::Context> context,
     }
   }
 
-  executor->Run([]() {
+  executor_->Run([]() {
     // See https://github.com/zeek/zeek/pull/4272, threads have
     // SIGTERM blocked by default and so the terminate() bif
     // will not work when executed by the executor thread
@@ -909,8 +909,6 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
 #else
   int r = node::InitializeNodeWithArgs(&args, &exec_args, &errors);
 #endif
-
-  executor = std::make_unique<Executor>();
 
   if (r != 0) {
     eprintf("Node initialization failed: %d", r);
@@ -1007,6 +1005,7 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
   node_environment_ =
       node::CreateEnvironment(node_isolate_data_, context, args, exec_args, env_flags);
 
+  executor_ = std::make_unique<Executor>();
   zeek_val_wrapper_ = std::make_unique<ZeekValWrapper>(GetIsolate());
   zeek_type_registry_ = std::make_unique<ZeekTypeRegistry>();
 
@@ -1017,8 +1016,18 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
 
   node::AddLinkedBinding(node_environment_, "zeekjs", RegisterModule, this);
 
-  if (!ExecuteAndWaitForInit(context, GetIsolate(), options.main_script_source))
+  if (!ExecuteAndWaitForInit(context, GetIsolate(), options.main_script_source)) {
+    node::FreeIsolateData(node_isolate_data_);
+    node_isolate_data_ = nullptr;
+
+    node::FreeEnvironment(node_environment_);
+    node_environment_ = nullptr;
+
+    executor_.reset();
+    zeek_val_wrapper_.reset();
+    zeek_type_registry_.reset();
     return false;
+  }
 
   auto process = v8::Local<v8::Object>::Cast(
       context->Global()->Get(context, v8_str(isolate_, "process")).ToLocalChecked());
@@ -1042,7 +1051,7 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
 
 // Emit process 'beforeExit'
 void Instance::EmitProcessBeforeExit() {
-  executor->Run([this]() {
+  executor_->Run([this]() {
     v8::Isolate* isolate = GetIsolate();
     v8::Locker locker(isolate);
     v8::Isolate::Scope isolate_scope(isolate);
@@ -1051,7 +1060,7 @@ void Instance::EmitProcessBeforeExit() {
 }
 
 void Instance::EmitProcessExit() {
-  executor->Run([this]() {
+  executor_->Run([this]() {
     v8::Isolate* isolate = GetIsolate();
     v8::Locker locker(isolate);
     v8::Isolate::Scope isolate_scope(isolate);
@@ -1071,37 +1080,42 @@ void Instance::Done() {
     //
     // We pass --expose-gc in Init() as args, so this is working
     // here and otherwise raises.
-    GetIsolate()->RequestGarbageCollectionForTesting(
-        v8::Isolate::kFullGarbageCollection);
+    executor_->Run([this]() {
+      v8::Locker locker(GetIsolate());
 
-    // HACK: Add a small grace period waiting for the JavaScript IO loop
-    // to complete during shutdown. E.g. if you send out an HTTP request
-    // shortly before Zeek is shutting down, for example, using zeek -r <pcap>
-    // and pushing out HTTP requests for every log, this should allow to
-    // process any outstanding responses. On the flip-side, it will prolong
-    // the shutdown when things like active sockets or pipes exist. If a user
-    // closes/cleans them at zeek_done() time, that would speed-up shutdown.
-    //
-    // TODO: This should probably be configurable rather than 200msec
-    //       hard-coded...
-    for (int i = 0; i < 200; i++) {
-      Process();
-      if (!IsAlive()) {
-        dprintf("uv_loop not alive anymore on iteration %d", i);
-        break;
+      GetIsolate()->RequestGarbageCollectionForTesting(
+          v8::Isolate::kFullGarbageCollection);
+
+      // HACK: Add a small grace period waiting for the JavaScript IO loop
+      // to complete during shutdown. E.g. if you send out an HTTP request
+      // shortly before Zeek is shutting down, for example, using zeek -r <pcap>
+      // and pushing out HTTP requests for every log, this should allow to
+      // process any outstanding responses. On the flip-side, it will prolong
+      // the shutdown when things like active sockets or pipes exist. If a user
+      // closes/cleans them at zeek_done() time, that would speed-up shutdown.
+      //
+      // TODO: This should probably be configurable rather than 200msec
+      //       hard-coded...
+      for (int i = 0; i < 200; i++) {
+        ProcessLocked();
+        if (!IsAlive()) {
+          dprintf("uv_loop not alive anymore on iteration %d", i);
+          break;
+        }
+        std::this_thread::sleep_for(1ms);
       }
-      std::this_thread::sleep_for(1ms);
-    }
 
-    EmitProcessExit();
+      EmitProcessExit();
+    });
 
     // The following code is slightly inspired by CommonEnvironmentSetup
     // which we should probably switch to in the future.
 
     // Release everything that requires the isolate.
-    process_obj_.Reset();
+    executor_.reset();
     zeek_val_wrapper_.reset();
-    executor.reset();
+    zeek_type_registry_.reset();
+    process_obj_.Reset();
 
     {
       v8::Locker locker(GetIsolate());
@@ -1247,7 +1261,7 @@ void Instance::ProcessLocked() {
 }
 
 void Instance::Process() {
-  executor->Run([this]() {
+  executor_->Run([this]() {
     v8::Locker locker(GetIsolate());
     ProcessLocked();
   });

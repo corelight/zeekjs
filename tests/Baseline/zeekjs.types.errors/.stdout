@@ -12,14 +12,14 @@ Caught it: property ts for record type EventReceiver::MyRecord cannot be null
 ts can not be converted to timestamp
 Caught it: Error for field ts: Unable to convert JS value 'not a timestamp' of type string to Zeek type time
 can not convert to count
-Caught it: Unable to convert JS value 'scramble' of type string to Zeek type count
+Caught it: 'scramble' not a number or bigint or out of range for count
 pass an object instead of an array
 Caught it: Expected JS type array for Zeek type vector
 pass a string instead of an array
 Caught it: Expected JS type array for Zeek type vector
 pass a string inside an array instead of a count
-Caught it: Error with array element at index 0: Unable to convert JS value 'scramble' of type string to Zeek type count
+Caught it: Error with array element at index 0: 'scramble' not a number or bigint or out of range for count
 pass an object inside an array instead of a count
-Caught it: Error with array element at index 0: Unable to convert JS value '[object Object]' of type object to Zeek type count
+Caught it: Error with array element at index 0: '[object Object]' not a number or bigint or out of range for count
 pass an object as second element inside an array instead of a count
-Caught it: Error with array element at index 1: Unable to convert JS value '[object Object]' of type object to Zeek type count
+Caught it: Error with array element at index 1: '[object Object]' not a number or bigint or out of range for count

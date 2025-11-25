@@ -1,3 +1,4 @@
+#include <cmath>
 #include <limits>
 
 #include "Plugin.h"
@@ -669,20 +670,98 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
     }
   } else if (type_tag == zeek::TYPE_COUNT) {
     if (v8_val->IsNumber()) {
-      v8::MaybeLocal<v8::Uint32> result = v8_val->ToUint32(context);
-      wrap_result.val = zeek::val_mgr->Count(result.ToLocalChecked()->Value());
-      return wrap_result;
+      double result = v8_val->NumberValue(context).ToChecked();
+
+      if (std::isfinite(result) &&
+          result <= static_cast<double>(std::numeric_limits<zeek_uint_t>::max()) &&
+          result >= 0.0) {
+        // Cast to zeek_uint_t, then cast once more to double and
+        // compare to the original input. If there was any loss,
+        // fail the conversion.
+        auto zeek_uint_result = static_cast<zeek_uint_t>(result);
+        auto double_result = static_cast<double>(zeek_uint_result);
+
+        if (double_result == result) {
+          wrap_result.val = zeek::val_mgr->Count(zeek_uint_result);
+          return wrap_result;
+        } else {
+          v8::String::Utf8Value val_utf8(isolate_, v8_val);
+          wrap_result.ok = false;
+          wrap_result.error =
+              zeek::util::fmt("precision loss going from %s to count", *val_utf8);
+          return wrap_result;
+        }
+      }
     } else if (v8_val->IsBigInt()) {
-      v8::MaybeLocal<v8::BigInt> result = v8_val->ToBigInt(context);
-      wrap_result.val = zeek::val_mgr->Count(result.ToLocalChecked()->Uint64Value());
-      return wrap_result;
+      bool lossless = true;
+      auto bigint = v8_val->ToBigInt(context).ToLocalChecked();
+      zeek_uint_t result = bigint->Uint64Value(&lossless);
+
+      if (lossless) {
+        wrap_result.val = zeek::val_mgr->Count(result);
+        return wrap_result;
+      } else {
+        v8::String::Utf8Value val_utf8(isolate_, v8_val);
+        wrap_result.ok = false;
+        wrap_result.error =
+            zeek::util::fmt("precision loss going from %s to count", *val_utf8);
+        return wrap_result;
+      }
     }
+
+    // Generic error
+    wrap_result.ok = false;
+    v8::String::Utf8Value val_utf8(isolate_, v8_val);
+    wrap_result.error = zeek::util::fmt(
+        "'%s' not a number or bigint or out of range for count", *val_utf8);
+    return wrap_result;
   } else if (type_tag == zeek::TYPE_INT) {
     if (v8_val->IsNumber()) {
-      v8::MaybeLocal<v8::Int32> result = v8_val->ToInt32(context);
-      wrap_result.val = zeek::val_mgr->Int(result.ToLocalChecked()->Value());
-      return wrap_result;
+      double result = v8_val->NumberValue(context).ToChecked();
+
+      if (std::isfinite(result) &&
+          result <= static_cast<double>(std::numeric_limits<zeek_int_t>::max()) &&
+          result >= static_cast<double>(std::numeric_limits<zeek_int_t>::min())) {
+        // Cast to zeek_int_t, then cast once more to double and
+        // compare to the original input. If there was any loss,
+        // fail the conversion.
+        auto zeek_int_result = static_cast<zeek_int_t>(result);
+        auto double_result = static_cast<double>(zeek_int_result);
+
+        if (double_result == result) {
+          wrap_result.val = zeek::val_mgr->Int(zeek_int_result);
+          return wrap_result;
+        } else {
+          v8::String::Utf8Value val_utf8(isolate_, v8_val);
+          wrap_result.ok = false;
+          wrap_result.error =
+              zeek::util::fmt("precision loss going from %s to int", *val_utf8);
+          return wrap_result;
+        }
+      }
+    } else if (v8_val->IsBigInt()) {
+      // Try BigInt to int for convenience, but fail if it is too large.
+      bool lossless = true;
+      auto bigint = v8_val->ToBigInt(context).ToLocalChecked();
+      zeek_int_t result = bigint->Int64Value(&lossless);
+
+      if (lossless) {
+        wrap_result.val = zeek::val_mgr->Count(result);
+        return wrap_result;
+      } else {
+        v8::String::Utf8Value val_utf8(isolate_, v8_val);
+        wrap_result.ok = false;
+        wrap_result.error =
+            zeek::util::fmt("precision loss going from %s to int", *val_utf8);
+        return wrap_result;
+      }
     }
+
+    wrap_result.ok = false;
+    v8::String::Utf8Value val_utf8(isolate_, v8_val);
+    wrap_result.error = zeek::util::fmt(
+        "'%s' not a number or bigint or out of range for int", *val_utf8);
+    return wrap_result;
   } else if (type_tag == zeek::TYPE_DOUBLE) {
     if (v8_val->IsNumber()) {
       v8::Maybe<double> result = v8_val->NumberValue(context);

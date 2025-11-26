@@ -15,7 +15,7 @@ zeek.on('zeek_init', {priority: -10}, () => {
   zeek.event('want_int', ["42", 42]);
   zeek.event('want_int', ["2147483647", 2**31 - 1]);
   zeek.event('want_int', ["9007199254740991", (2**53) - 1]);
-  // 2**63-1 as BigInt can be represented as a Zeek int
+  zeek.event('want_int', ["9223372036854775807", (2**63) - 1]);
   zeek.event('want_int', ["9223372036854775807", BigInt(2**63) - 1n]);
 });
 
@@ -23,14 +23,6 @@ zeek.on('zeek_init', {priority: -20}, () => {
   // Fractional part is an error.
   try {
     zeek.event('want_int', ["XXX", 42.5]);
-  } catch (error) {
-    zeek.print(`expected error: ${error}`)
-  }
-
-  // This doesn't work because (2**63 - 1) in JavaScript is 2**63 which
-  // ends up being negative after casting.
-  try {
-    zeek.event('want_int', ["XXX", (2**63) - 1]);
   } catch (error) {
     zeek.print(`expected error: ${error}`)
   }
@@ -80,9 +72,10 @@ zeek.on('zeek_init', {priority: -30}, () => {
   //   > BigInt(x)
   //   9223372036854775808n
   //
-  // That is likely something V8 specific and might be confusing, but
-  // for now accept it.
+  // This is because 2**63 is exactly representable with IEEE754
+  // with an exponent of 63 and a mantissa of 1.0
   zeek.event('want_count', ["9223372036854775808", 2**63]);
+  zeek.event('want_count', ["9223372036854775808", 9223372036854775808]);
 
   // Actually test the 2**64 -1 as BigInt.
   zeek.event('want_count', ["18446744073709551615", BigInt(2**64) - 1n]);

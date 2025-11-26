@@ -680,27 +680,35 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
     }
   } else if (type_tag == zeek::TYPE_COUNT) {
     if (v8_val->IsNumber()) {
-      double result = v8_val->NumberValue(context).ToChecked();
+      double dresult = v8_val->NumberValue(context).ToChecked();
 
-      if (std::isfinite(result) &&
-          result <= static_cast<double>(std::numeric_limits<zeek_uint_t>::max()) &&
-          result >= 0.0) {
-        // Cast to zeek_uint_t, then cast once more to double and
-        // compare to the original input. If there was any loss,
-        // fail the conversion.
-        auto zeek_uint_result = static_cast<zeek_uint_t>(result);
-        auto double_result = static_cast<double>(zeek_uint_result);
-
-        if (double_result == result) {
-          wrap_result.val = zeek::val_mgr->Count(zeek_uint_result);
-          return wrap_result;
+      // If this is a positive number, convert it to a double, then cast
+      // to a zeek_uint_t for the val manager. Convert the unsigned
+      // int to a double before to see if we get the same result,
+      // otherwise report precision loss.
+      //
+      // NOTE: This is subtracting 2048 from zeek_uint_t's max value
+      // to avoid platform specific differences when casting between
+      // zeek_uint_t and double on Linux vs OSX when close at the limit.
+      //
+      // If you understand, patches certainly welcome to remove the 2048!
+      if (std::isfinite(dresult) &&
+          dresult <=
+              static_cast<double>(std::numeric_limits<zeek_uint_t>::max() - 2048) &&
+          dresult >= 0.0) {
+        auto result = static_cast<zeek_uint_t>(dresult);
+        auto diresult = static_cast<double>(result);
+        // No fractional part?
+        if (dresult == diresult) {
+          wrap_result.val = zeek::val_mgr->Count(result);
         } else {
           v8::String::Utf8Value val_utf8(isolate_, v8_val);
           wrap_result.ok = false;
           wrap_result.error =
               zeek::util::fmt("precision loss going from %s to count", *val_utf8);
-          return wrap_result;
         }
+
+        return wrap_result;
       }
     } else if (v8_val->IsBigInt()) {
       bool lossless = true;
@@ -727,27 +735,27 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
     return wrap_result;
   } else if (type_tag == zeek::TYPE_INT) {
     if (v8_val->IsNumber()) {
-      double result = v8_val->NumberValue(context).ToChecked();
+      double dresult = v8_val->NumberValue(context).ToChecked();
 
-      if (std::isfinite(result) &&
-          result <= static_cast<double>(std::numeric_limits<zeek_int_t>::max()) &&
-          result >= static_cast<double>(std::numeric_limits<zeek_int_t>::min())) {
+      if (std::isfinite(dresult) &&
+          dresult <= static_cast<double>(std::numeric_limits<zeek_int_t>::max()) &&
+          dresult >= static_cast<double>(std::numeric_limits<zeek_int_t>::min())) {
         // Cast to zeek_int_t, then cast once more to double and
         // compare to the original input. If there was any loss,
         // fail the conversion.
-        auto zeek_int_result = static_cast<zeek_int_t>(result);
-        auto double_result = static_cast<double>(zeek_int_result);
+        zeek_int_t result = v8_val->IntegerValue(context).ToChecked();
+        auto diresult = static_cast<double>(result);
 
-        if (double_result == result) {
-          wrap_result.val = zeek::val_mgr->Int(zeek_int_result);
-          return wrap_result;
+        if (dresult == diresult) {
+          wrap_result.val = zeek::val_mgr->Int(result);
         } else {
           v8::String::Utf8Value val_utf8(isolate_, v8_val);
           wrap_result.ok = false;
           wrap_result.error =
               zeek::util::fmt("precision loss going from %s to int", *val_utf8);
-          return wrap_result;
         }
+
+        return wrap_result;
       }
     } else if (v8_val->IsBigInt()) {
       // Try BigInt to int for convenience, but fail if it is too large.
@@ -757,14 +765,14 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
 
       if (lossless) {
         wrap_result.val = zeek::val_mgr->Count(result);
-        return wrap_result;
       } else {
         v8::String::Utf8Value val_utf8(isolate_, v8_val);
         wrap_result.ok = false;
         wrap_result.error =
             zeek::util::fmt("precision loss going from %s to int", *val_utf8);
-        return wrap_result;
       }
+
+      return wrap_result;
     }
 
     wrap_result.ok = false;

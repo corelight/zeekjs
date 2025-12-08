@@ -987,8 +987,8 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
 
   // This is the global context used for Zeek. Store a persistent handle to
   // it so it can be entered when switching threads.
-  context_.Reset(isolate_, v8::Context::New(GetIsolate(), nullptr, global));
-  auto context = context_.Get(isolate_);
+  auto context = node::NewContext(GetIsolate(), global);
+  context_.Reset(GetIsolate(), context);
   v8::Context::Scope context_scope(context);
 
   node_isolate_data_ = node::CreateIsolateData(isolate_, &loop, node_platform_.get());
@@ -1017,15 +1017,16 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
   node::AddLinkedBinding(node_environment_, "zeekjs", RegisterModule, this);
 
   if (!ExecuteAndWaitForInit(context, GetIsolate(), options.main_script_source)) {
-    node::FreeIsolateData(node_isolate_data_);
-    node_isolate_data_ = nullptr;
-
     node::FreeEnvironment(node_environment_);
     node_environment_ = nullptr;
+
+    node::FreeIsolateData(node_isolate_data_);
+    node_isolate_data_ = nullptr;
 
     executor_.reset();
     zeek_val_wrapper_.reset();
     zeek_type_registry_.reset();
+
     return false;
   }
 
@@ -1082,6 +1083,7 @@ void Instance::Done() {
     // here and otherwise raises.
     executor_->Run([this]() {
       v8::Locker locker(GetIsolate());
+      v8::Isolate::Scope isolate_scope(GetIsolate());
 
       GetIsolate()->RequestGarbageCollectionForTesting(
           v8::Isolate::kFullGarbageCollection);
@@ -1118,14 +1120,28 @@ void Instance::Done() {
     process_obj_.Reset();
 
     {
-      v8::Locker locker(GetIsolate());
-
-      node::FreeIsolateData(node_isolate_data_);
-      node_isolate_data_ = nullptr;
+      // FreeEnvironment() expects a properly set context. Because all
+      // JavaScript execution is happening on the executor thread that,
+      // we properly enter isolate and context here on the main thread
+      // for cleanup. Not doing so caused crashes on OSX during shutdown
+      // previously. Reference: zeek/zeek#5072.
+      //
+      // If this ever crashes again, start with checking the node/api/environment.cc
+      // source code in the Node.js repo.
+      auto* isolate = GetIsolate();
+      v8::Locker locker(isolate);
+      v8::Isolate::Scope isolate_scope(isolate);
+      v8::HandleScope handle_scope(isolate);
+      v8::Context::Scope context_scope(context_.Get(isolate));
 
       node::FreeEnvironment(node_environment_);
       node_environment_ = nullptr;
+
+      node::FreeIsolateData(node_isolate_data_);
+      node_isolate_data_ = nullptr;
     }
+
+    context_.Reset();
 
     // Again, inspired by the CommonEnvironmentSetup code.
     bool fin = false;

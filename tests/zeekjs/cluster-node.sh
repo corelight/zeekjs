@@ -17,4 +17,7 @@ redef Cluster::nodes = {
   ["worker-01"] = [$node_type=Cluster::WORKER, $ip=127.0.0.1],
 };
 
+# User Broker backend for newer Zeek versions.
+redef Cluster::backend = Cluster::CLUSTER_BACKEND_BROKER;
+
 @TEST-END-FILE

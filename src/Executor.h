@@ -97,20 +97,26 @@ class Executor {
    */
   void Loop() {
     while (true) {
+      std::packaged_task<void()> task;
+
+      // Wait for a task in the queue.
       {
         std::unique_lock lk{mtx};
 
         while (queue.empty() && !stop)
           cv.wait(lk);
 
-        while (!queue.empty()) {
-          queue.front()();  // run the task
-          queue.pop();      // consumes the task
-        }
-
-        if (stop)
+        if (stop && queue.empty())
           break;
+
+        if (!queue.empty()) {
+          task = std::move(queue.front());  // fetch the task
+          queue.pop();                      // consumes the task
+        }
       }
+
+      // If we get here, we picked up a task, run it.
+      task();
     }
   }
 

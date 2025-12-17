@@ -173,7 +173,7 @@ static v8::Local<v8::Value> callFunction(v8::Isolate* isolate,
 
 // Invoke the registered v8::Function for the given Event
 void plugin::Nodejs::EventHandler::operator()(const zeek::Args& args) {
-  instance_->executor_->Run([this, &args = args]() -> void {
+  instance_->executor_->Run([this, &args]() -> void {
     v8::Locker locker(isolate_);
     v8::Isolate::Scope isolate_scope(isolate_);
     v8::HandleScope handle_scope(isolate_);
@@ -188,7 +188,7 @@ void plugin::Nodejs::EventHandler::operator()(const zeek::Args& args) {
 plugin::Corelight_ZeekJS::Js::HookHandlerResult HookHandler::operator()(
     const zeek::Args& args) {
   return instance_->executor_->Run(
-      [this, args]() -> Corelight_ZeekJS::Js::HookHandlerResult {
+      [this, &args]() -> Corelight_ZeekJS::Js::HookHandlerResult {
         v8::Locker locker(isolate_);
         v8::Isolate::Scope isolate_scope(isolate_);
         v8::HandleScope handle_scope(isolate_);

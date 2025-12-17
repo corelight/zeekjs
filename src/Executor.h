@@ -1,11 +1,11 @@
 #pragma once
 
+#include <cassert>
 #include <condition_variable>
 #include <future>
 #include <mutex>
 #include <queue>
 #include <thread>
-#include <tuple>
 #include <type_traits>
 #include <utility>
 
@@ -36,19 +36,18 @@ class Executor {
    * Runs the given function and arguments in the thread
    * started by this executor and waits for the result.
    */
-  template <typename Func, typename... Args>
-  auto Run(Func f, Args&&... args) {
-    using ret_type = std::invoke_result_t<Func, Args...>;
+  template <typename Func>
+  auto Run(Func f) {
+    using ret_type = std::invoke_result_t<Func>;
 
     // If Run() is invoked by the internal executor thread,
-    // just execute f(args...) directly, otherwise this
+    // just execute f() directly, otherwise this
     // results in a dead lock.
     if (std::this_thread::get_id() == t.get_id()) {
-      return f(std::forward<Args>(args)...);
+      return f();
     }
 
-    auto r = Submit(std::forward<Func>(f), std::forward<Args>(args)...);
-
+    auto r = Submit(std::forward<Func>(f));
     r.wait();
 
     if constexpr (std::is_same_v<ret_type, void>) {
@@ -63,25 +62,23 @@ class Executor {
    * Submit a function its arguments for execution by the executor,
    * returning a future.
    */
-  template <typename Func, typename... Args>
-  auto Submit(Func f, Args&&... args) {
-    using ret_type = std::invoke_result_t<Func, Args...>;
+  template <typename Func>
+  auto Submit(Func f) {
+    using ret_type = std::invoke_result_t<Func>;
 
     std::promise<ret_type> r;
     auto result = r.get_future();
 
-    auto lc = std::packaged_task<void()>([r = std::move(r), f = std::move(f),
-                                          args = std::make_tuple(
-                                              std::move(args)...)]() mutable {
-      if constexpr (std::is_same_v<ret_type, void>) {
-        std::apply([f](auto&&... args) mutable { return f(args...); }, std::move(args));
-        r.set_value();
-      } else {
-        auto invoked =
-            std::apply([f](auto&&... args) { return f(args...); }, std::move(args));
-        r.set_value(invoked);
-      }
-    });
+    auto lc =
+        std::packaged_task<void()>([r = std::move(r), f = std::move(f)]() mutable {
+          if constexpr (std::is_same_v<ret_type, void>) {
+            f();
+            r.set_value();
+          } else {
+            auto invoked = f();
+            r.set_value(invoked);
+          }
+        });
 
     {
       std::unique_lock lk{mtx};
@@ -106,13 +103,13 @@ class Executor {
         while (queue.empty() && !stop)
           cv.wait(lk);
 
+        assert(stop || !queue.empty());
+
         if (stop && queue.empty())
           break;
 
-        if (!queue.empty()) {
-          task = std::move(queue.front());  // fetch the task
-          queue.pop();                      // consumes the task
-        }
+        task = std::move(queue.front());  // fetch the task
+        queue.pop();                      // consumes the task
       }
 
       // If we get here, we picked up a task, run it.

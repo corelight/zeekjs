@@ -29,10 +29,9 @@ zeek.hook('zeek_init', function() {
     zeek.print(`JS: expected error: ${error}`);
   }
 
-  // Yikes, fingers crossed.
+  // Get a reference to the sn2a table and set some entries.
   let sn2a_t = zeek.global_vars['sn2a_t'];
   sn2a_t['192.168.0.0/24'] = '192.168.0.1';
-  sn2a_t['[::ffff:192.168.1.0]/24'] = '192.168.1.1';
   sn2a_t['[2001:db8::]/64'] = '2001:db8::1';
 
   let s2vr_t = zeek.global_vars['s2vr_t'];

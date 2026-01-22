@@ -92,7 +92,7 @@ if ( NODEJS_INCLUDE_DIR )
     # or node/config-<arch>.gypi.
     file(GLOB NODE_CONFIG_GYPIS "${NODEJS_INCLUDE_DIR}/node/config*gypi")
     foreach ( GYPI ${NODE_CONFIG_GYPIS} )
-        file(STRINGS "${GYPI}" HAVE_SHARED_LIB_UV REGEX "node_shared_libuv.*:.*'true'")
+        file(STRINGS "${GYPI}" HAVE_SHARED_LIB_UV REGEX "node_shared_libuv.*:.*true")
         if ( HAVE_SHARED_LIB_UV )
             find_package(LibUV REQUIRED)
             break ()

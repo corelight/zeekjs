@@ -309,10 +309,14 @@ bool Plugin::RegisterAsScriptFuncBody(zeek::EventHandlerPtr zeek_eh,
   zeek::FuncPtr func = zeek_eh->GetFunc();
   zeek::detail::StmtPtr stmt =
       zeek::make_intrusive<InvokeJsEventHandlerStmt>(zeek_eh.Ptr(), js_eh);
-  std::vector<zeek::detail::IDPtr> inits;  // ? What are inits?
 
   // 0 framesize
+#if ZEEK_VERSION_NUMBER < 82000
+  std::vector<zeek::detail::IDPtr> inits;  // ? What are inits?
   func->AddBody(stmt, inits, 0, priority);
+#else
+  func->AddBody({.stmts = std::move(stmt)}, {}, 0, priority);
+#endif
 
   return true;
 }
@@ -371,8 +375,13 @@ bool Plugin::RegisterJsHookHandler(const std::string& name,
 #endif
 
   zeek::detail::StmtPtr stmt = zeek::make_intrusive<InvokeJsHookHandlerStmt>(js_hh);
+
+#if ZEEK_VERSION_NUMBER < 82000
   std::vector<zeek::detail::IDPtr> inits;  // ? What are inits?
   func->AddBody(stmt, inits, 0, priority);
+#else
+  func->AddBody({.stmts = std::move(stmt)}, {}, 0, priority);
+#endif
 
 #if ZEEK_VERSION_NUMBER < 80000
   PLUGIN_DBG_LOG(plugin, "Added body to %s", func->Name());

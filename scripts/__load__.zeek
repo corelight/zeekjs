@@ -7,7 +7,7 @@ export {
 	## This comes fairly straight from the embedding guide to support using
 	## require() with filesystem paths in the process working directory.
 	##
-	## https://docs.w3cub.com/node~14_lts/embedding
+	## https://nodejs.org/api/embedding.html
 	##
 	const main_script_source: string = cat(
 		"const module_mod = require('module')\n",

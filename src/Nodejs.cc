@@ -34,7 +34,7 @@ static v8::Local<v8::String> v8_str(v8::Isolate* i, const char* s) {
 static ZEEKJS_V8_INTERCEPTED ZeekGlobalVarsGetter(
     v8::Local<v8::Name> property,
     const v8::PropertyCallbackInfo<v8::Value>& info) {
-  v8::Isolate* isolate = info.GetIsolate();
+  v8::Isolate* isolate = v8::Isolate::GetCurrent();
 
   auto zeek_obj = v8::Local<v8::Object>::Cast(info.Data());
   auto field = v8::Local<v8::External>::Cast(zeek_obj->GetInternalField(0));
@@ -794,7 +794,7 @@ static void RegisterModule(v8::Local<v8::Object> exports,
                            v8::Local<v8::Context> context,
                            void* priv) {
   auto instance = static_cast<Instance*>(priv);
-  v8::Isolate* isolate = context->GetIsolate();
+  v8::Isolate* isolate = v8::Isolate::GetCurrent();
 
   Instance::AddZeekObject(exports, isolate, context, instance);
 };

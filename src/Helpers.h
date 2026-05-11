@@ -9,7 +9,7 @@ namespace plugin::Nodejs {
 
 // Inspiration from node_errors.cc
 void PrintUncaughtException(v8::Local<v8::Message> msg, v8::Local<v8::Value> exc) {
-  v8::Isolate* isolate = msg->GetIsolate();
+  v8::Isolate* isolate = v8::Isolate::GetCurrent();
   v8::Local<v8::Context> context = isolate->GetCurrentContext();
 
   v8::String::Utf8Value exc_value(isolate,

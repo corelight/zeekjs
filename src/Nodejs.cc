@@ -794,7 +794,7 @@ static void RegisterModule(v8::Local<v8::Object> exports,
                            v8::Local<v8::Context> context,
                            void* priv) {
   auto instance = static_cast<Instance*>(priv);
-  v8::Isolate* isolate = context->GetIsolate();
+  v8::Isolate* isolate = v8::Isolate::GetCurrent();
 
   Instance::AddZeekObject(exports, isolate, context, instance);
 };

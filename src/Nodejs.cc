@@ -794,7 +794,7 @@ static void RegisterModule(v8::Local<v8::Object> exports,
                            v8::Local<v8::Context> context,
                            void* priv) {
   auto instance = static_cast<Instance*>(priv);
-  v8::Isolate* isolate = context->GetIsolate();
+  v8::Isolate* isolate = v8::Isolate::GetCurrent();
 
   Instance::AddZeekObject(exports, isolate, context, instance);
 };
@@ -960,20 +960,12 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
 
   node::IsolateSettings isolate_settings;
 
-  if (!options.exit_on_uncaught_exceptions) {
-    // Register our own message listener for printing uncaught exceptions
-    // rather than the Node.js one that terminates the process.
+  // Skip adding Node.js's message listener, we do that later once
+  // the isolate is locked, but only when we don't want to exit on
+  // uncaught exceptions.
+  if (!options.exit_on_uncaught_exceptions)
     isolate_settings.flags =
         isolate_settings.flags & ~node::MESSAGE_LISTENER_WITH_ERROR_LEVEL;
-
-    GetIsolate()->SetCaptureStackTraceForUncaughtExceptions(true);
-
-    auto message_listener = [](v8::Local<v8::Message> message,
-                               v8::Local<v8::Value> error) -> void {
-      PrintUncaughtException(message, error);
-    };
-    isolate_->AddMessageListener(message_listener);
-  }
 
   node::SetIsolateUpForNode(GetIsolate(), isolate_settings);
 
@@ -981,6 +973,18 @@ bool Instance::Init(plugin::Corelight_ZeekJS::Plugin* plugin,
   v8::Locker locker(isolate_);
   v8::Isolate::Scope isolate_scope(GetIsolate());
   v8::HandleScope handle_scope(GetIsolate());
+
+  // Now that the isolate is locked, add the custom message listener.
+  if (!options.exit_on_uncaught_exceptions) {
+    GetIsolate()->SetCaptureStackTraceForUncaughtExceptions(true);
+
+    auto message_listener = [](v8::Local<v8::Message> message,
+                               v8::Local<v8::Value> error) -> void {
+      PrintUncaughtException(message, error);
+    };
+
+    isolate_->AddMessageListener(message_listener);
+  }
 
   // ObjectTemplate for our global
   v8::Local<v8::ObjectTemplate> global = v8::ObjectTemplate::New(GetIsolate());

@@ -97,6 +97,41 @@ v8::Local<v8::String> v8_str_extern(v8::Isolate* i,
 #endif
 }
 
+// Setting of internal fields was changed around v26, use a
+// wrapper to access the internal field. This is used to store
+// a pointer to a ZeekValWrap instance within a v8::Object.
+//
+// There's a few SetInternalFieldCount(1) calls in this file that
+// are required to make this work.
+//
+
+#if (NODE_MAJOR_VERSION >= 26)
+// The new API needs this, seems we can just choose one. Max value is 16!
+constexpr v8::EmbedderDataTypeTag kZeekEmbedderDataTypeTag = 1;
+#endif
+
+// Set the given wrap pointer in a ZeekJS specific internal field of
+// the given object.
+void SetZeekValWrap(v8::Local<v8::Object> obj, ZeekValWrap* wrap) {
+#if (NODE_MAJOR_VERSION < 26)
+  obj->SetAlignedPointerInInternalField(0, wrap);
+#else
+  obj->SetAlignedPointerInInternalField(0, wrap, kZeekEmbedderDataTypeTag);
+#endif
+}
+
+// Read the ZeekValWrap* pointer stored in the ZeekJS specific
+// internal field of the given object obj.
+[[nodiscard]] ZeekValWrap* GetZeekValWrap(v8::Local<v8::Object> obj) {
+  void* wrap = nullptr;
+#if (NODE_MAJOR_VERSION < 26)
+  wrap = obj->GetAlignedPointerFromInternalField(0);
+#else
+  wrap = obj->GetAlignedPointerFromInternalField(0, kZeekEmbedderDataTypeTag);
+#endif
+  return static_cast<ZeekValWrap*>(wrap);
+}
+
 }  // namespace
 
 ZeekValWrapper::ZeekValWrapper(v8::Isolate* isolate) : isolate_(isolate) {
@@ -565,7 +600,7 @@ bool ZeekValWrapper::Unwrap(v8::Isolate* isolate,
   if (!obj->HasPrivate(context, GetWrapPrivateKey(isolate)).ToChecked())
     return false;
 
-  *wrap = static_cast<ZeekValWrap*>(obj->GetAlignedPointerFromInternalField(0));
+  *wrap = GetZeekValWrap(obj);
 
   return true;
 }
@@ -1050,8 +1085,7 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekTableGetter(
 #else
   v8::Local<v8::Object> receiver = info.HolderV2();
 #endif
-  auto wrap =
-      static_cast<ZeekValWrap*>(receiver->GetAlignedPointerFromInternalField(0));
+  auto* wrap = GetZeekValWrap(receiver);
   if (wrap->GetVal()->GetType()->Tag() != zeek::TYPE_TABLE)
     return ZEEKJS_V8_INTERCEPTED_NO;
 
@@ -1108,8 +1142,7 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekTableSetter(
 #else
   v8::Local<v8::Object> receiver = info.HolderV2();
 #endif
-  auto wrap =
-      static_cast<ZeekValWrap*>(receiver->GetAlignedPointerFromInternalField(0));
+  auto* wrap = GetZeekValWrap(receiver);
   auto tval = static_cast<zeek::TableVal*>(wrap->GetVal());
 
   zeek::TableTypePtr ttype = tval->GetType<zeek::TableType>();
@@ -1148,7 +1181,6 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekTableSetter(
   // Broker forward is on...
   tval->Assign(property_wrap_result.val, value_wrap_result.val);
 
-  info.GetReturnValue().Set(v8_val);
   return ZEEKJS_V8_INTERCEPTED_YES;
 }
 
@@ -1166,8 +1198,7 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekTableIndexGetter(
 #else
   v8::Local<v8::Object> receiver = info.HolderV2();
 #endif
-  auto wrap =
-      static_cast<ZeekValWrap*>(receiver->GetAlignedPointerFromInternalField(0));
+  auto* wrap = GetZeekValWrap(receiver);
   auto tval = static_cast<zeek::TableVal*>(wrap->GetVal());
 
   dprintf("ZeekTableIndexGetter: tval=%p index=%d", tval, index);
@@ -1223,8 +1254,7 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekTableIndexSetter(
 #else
   v8::Local<v8::Object> receiver = info.HolderV2();
 #endif
-  auto wrap =
-      static_cast<ZeekValWrap*>(receiver->GetAlignedPointerFromInternalField(0));
+  auto* wrap = GetZeekValWrap(receiver);
   auto tval = static_cast<zeek::TableVal*>(wrap->GetVal());
 
   dprintf("tval=%p index=%d", tval, index);
@@ -1270,7 +1300,6 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekTableIndexSetter(
   // Broker forward is on...
   tval->Assign(index_wrap_result.val, value_wrap_result.val);
 
-  info.GetReturnValue().Set(v8_val);
   return ZEEKJS_V8_INTERCEPTED_YES;
 }
 
@@ -1283,8 +1312,7 @@ void ZeekValWrapper::ZeekTableEnumerator(
 #else
   v8::Local<v8::Object> receiver = info.HolderV2();
 #endif
-  auto wrap =
-      static_cast<ZeekValWrap*>(receiver->GetAlignedPointerFromInternalField(0));
+  auto* wrap = GetZeekValWrap(receiver);
   auto tval = static_cast<zeek::TableVal*>(wrap->GetVal());
 
   // Easy v8::Array constructor takes int, print an error and return.
@@ -1348,8 +1376,7 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekRecordGetter(
 #else
   v8::Local<v8::Object> receiver = info.HolderV2();
 #endif
-  auto wrap =
-      static_cast<ZeekValWrap*>(receiver->GetAlignedPointerFromInternalField(0));
+  auto* wrap = GetZeekValWrap(receiver);
 
 #ifdef DEBUG
   v8::Isolate* isolate = info.GetIsolate();
@@ -1388,8 +1415,7 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekRecordSetter(
 #else
   v8::Local<v8::Object> receiver = info.HolderV2();
 #endif
-  auto wrap =
-      static_cast<ZeekValWrap*>(receiver->GetAlignedPointerFromInternalField(0));
+  auto* wrap = GetZeekValWrap(receiver);
   auto rval = static_cast<zeek::RecordVal*>(wrap->GetVal());
   const auto& rt = rval->GetType<zeek::RecordType>();
 
@@ -1423,7 +1449,7 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekRecordSetter(
   }
 
   rval->Assign(offset, wrap_result.val);
-  info.GetReturnValue().Set(v8_val);
+
   return ZEEKJS_V8_INTERCEPTED_YES;
 }
 
@@ -1435,8 +1461,7 @@ void ZeekValWrapper::ZeekRecordEnumerator(
 #else
   v8::Local<v8::Object> receiver = info.HolderV2();
 #endif
-  auto wrap =
-      static_cast<ZeekValWrap*>(receiver->GetAlignedPointerFromInternalField(0));
+  auto* wrap = GetZeekValWrap(receiver);
 
   const auto* val = wrap->GetVal();
   if (val->GetType()->Tag() != zeek::TYPE_RECORD) {
@@ -1459,8 +1484,7 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekRecordQuery(
 #else
   v8::Local<v8::Object> receiver = info.HolderV2();
 #endif
-  auto wrap =
-      static_cast<ZeekValWrap*>(receiver->GetAlignedPointerFromInternalField(0));
+  auto* wrap = GetZeekValWrap(receiver);
 
 #ifdef DEBUG
   v8::Isolate* isolate = info.GetIsolate();
@@ -1504,7 +1528,7 @@ ZeekValWrap::ZeekValWrap(v8::Isolate* isolate,
                          zeek::Val* vp,
                          int attr_mask)
     : wrapper_(wrapper), vp_(vp), attr_mask_(attr_mask) {
-  record_obj->SetAlignedPointerInInternalField(0, this);
+  SetZeekValWrap(record_obj, this);
   persistent_obj_.Reset(isolate, record_obj);
   persistent_obj_.SetWeak(this, ZeekValWrap_WeakCallback,
                           v8::WeakCallbackType::kParameter);

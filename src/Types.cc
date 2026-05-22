@@ -132,6 +132,15 @@ void SetZeekValWrap(v8::Local<v8::Object> obj, ZeekValWrap* wrap) {
   return static_cast<ZeekValWrap*>(wrap);
 }
 
+template <typename T>
+v8::Local<v8::Object> GetReceiver(const v8::PropertyCallbackInfo<T>& info) {
+#if (NODE_MAJOR_VERSION < 26)
+  return info.This();
+#else
+  return info.HolderV2();
+#endif
+}
+
 }  // namespace
 
 ZeekValWrapper::ZeekValWrapper(v8::Isolate* isolate) : isolate_(isolate) {
@@ -209,11 +218,8 @@ ZeekValWrapper::ZeekValWrapper(v8::Isolate* isolate) : isolate_(isolate) {
       [](v8::Local<v8::Name> property,
 #endif
          const v8::PropertyCallbackInfo<v8::Value>& info) {
-#if (NODE_MAJOR_VERSION < 26)
-        info.GetReturnValue().Set(info.This()->GetInternalField(2).As<v8::Value>());
-#else
-        info.GetReturnValue().Set(info.HolderV2()->GetInternalField(2).As<v8::Value>());
-#endif
+        v8::Local<v8::Object> receiver = GetReceiver(info);
+        info.GetReturnValue().Set(receiver->GetInternalField(2).As<v8::Value>());
       };
 
   port_template->SetNativeDataProperty(
@@ -233,11 +239,8 @@ ZeekValWrapper::ZeekValWrapper(v8::Isolate* isolate) : isolate_(isolate) {
       [](v8::Local<v8::Name> property,
 #endif
          const v8::PropertyCallbackInfo<v8::Value>& info) {
-#if (NODE_MAJOR_VERSION < 26)
-        info.GetReturnValue().Set(info.This()->GetInternalField(0).As<v8::Value>());
-#else
-        info.GetReturnValue().Set(info.HolderV2()->GetInternalField(0).As<v8::Value>());
-#endif
+        v8::Local<v8::Object> receiver = GetReceiver(info);
+        info.GetReturnValue().Set(receiver->GetInternalField(0).As<v8::Value>());
       };
 
   port_template->SetNativeDataProperty(v8_str_intern("port"), port_cb, nullptr,
@@ -257,11 +260,8 @@ ZeekValWrapper::ZeekValWrapper(v8::Isolate* isolate) : isolate_(isolate) {
 #endif
          const v8::PropertyCallbackInfo<v8::Value>& info) {
         info.GetIsolate();
-#if (NODE_MAJOR_VERSION < 26)
-        info.GetReturnValue().Set(info.This()->GetInternalField(1).As<v8::Value>());
-#else
-        info.GetReturnValue().Set(info.HolderV2()->GetInternalField(1).As<v8::Value>());
-#endif
+        v8::Local<v8::Object> receiver = GetReceiver(info);
+        info.GetReturnValue().Set(receiver->GetInternalField(1).As<v8::Value>());
       };
 
   port_template->SetNativeDataProperty(v8_str_intern("proto"), proto_cb, nullptr,
@@ -1080,11 +1080,7 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekTableGetter(
     v8::Local<v8::Name> property,
     const v8::PropertyCallbackInfo<v8::Value>& info) {
   v8::Isolate* isolate = info.GetIsolate();
-#if (NODE_MAJOR_VERSION < 26)
-  v8::Local<v8::Object> receiver = info.This();
-#else
-  v8::Local<v8::Object> receiver = info.HolderV2();
-#endif
+  v8::Local<v8::Object> receiver = GetReceiver(info);
   auto* wrap = GetZeekValWrap(receiver);
   if (wrap->GetVal()->GetType()->Tag() != zeek::TYPE_TABLE)
     return ZEEKJS_V8_INTERCEPTED_NO;
@@ -1137,11 +1133,7 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekTableSetter(
     const v8::PropertyCallbackInfo<void>& info) {
 #endif
   v8::Isolate* isolate = info.GetIsolate();
-#if (NODE_MAJOR_VERSION < 26)
-  v8::Local<v8::Object> receiver = info.This();
-#else
-  v8::Local<v8::Object> receiver = info.HolderV2();
-#endif
+  v8::Local<v8::Object> receiver = GetReceiver(info);
   auto* wrap = GetZeekValWrap(receiver);
   auto tval = static_cast<zeek::TableVal*>(wrap->GetVal());
 
@@ -1193,11 +1185,7 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekTableIndexGetter(
     uint32_t index,
     const v8::PropertyCallbackInfo<v8::Value>& info) {
   v8::Isolate* isolate = info.GetIsolate();
-#if (NODE_MAJOR_VERSION < 26)
-  v8::Local<v8::Object> receiver = info.This();
-#else
-  v8::Local<v8::Object> receiver = info.HolderV2();
-#endif
+  v8::Local<v8::Object> receiver = GetReceiver(info);
   auto* wrap = GetZeekValWrap(receiver);
   auto tval = static_cast<zeek::TableVal*>(wrap->GetVal());
 
@@ -1249,11 +1237,7 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekTableIndexSetter(
     const v8::PropertyCallbackInfo<void>& info) {
 #endif
   v8::Isolate* isolate = info.GetIsolate();
-#if (NODE_MAJOR_VERSION < 26)
-  v8::Local<v8::Object> receiver = info.This();
-#else
-  v8::Local<v8::Object> receiver = info.HolderV2();
-#endif
+  v8::Local<v8::Object> receiver = GetReceiver(info);
   auto* wrap = GetZeekValWrap(receiver);
   auto tval = static_cast<zeek::TableVal*>(wrap->GetVal());
 
@@ -1307,11 +1291,7 @@ void ZeekValWrapper::ZeekTableEnumerator(
     const v8::PropertyCallbackInfo<v8::Array>& info) {
   v8::Isolate* isolate = info.GetIsolate();
   v8::Local<v8::Context> context = isolate->GetCurrentContext();
-#if (NODE_MAJOR_VERSION < 26)
-  v8::Local<v8::Object> receiver = info.This();
-#else
-  v8::Local<v8::Object> receiver = info.HolderV2();
-#endif
+  v8::Local<v8::Object> receiver = GetReceiver(info);
   auto* wrap = GetZeekValWrap(receiver);
   auto tval = static_cast<zeek::TableVal*>(wrap->GetVal());
 
@@ -1371,11 +1351,7 @@ void ZeekValWrapper::ZeekTableEnumerator(
 ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekRecordGetter(
     v8::Local<v8::Name> property,
     const v8::PropertyCallbackInfo<v8::Value>& info) {
-#if (NODE_MAJOR_VERSION < 26)
-  v8::Local<v8::Object> receiver = info.This();
-#else
-  v8::Local<v8::Object> receiver = info.HolderV2();
-#endif
+  v8::Local<v8::Object> receiver = GetReceiver(info);
   auto* wrap = GetZeekValWrap(receiver);
 
 #ifdef DEBUG
@@ -1410,11 +1386,7 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekRecordSetter(
     const v8::PropertyCallbackInfo<void>& info) {
 #endif
   v8::Isolate* isolate = info.GetIsolate();
-#if (NODE_MAJOR_VERSION < 26)
-  v8::Local<v8::Object> receiver = info.This();
-#else
-  v8::Local<v8::Object> receiver = info.HolderV2();
-#endif
+  v8::Local<v8::Object> receiver = GetReceiver(info);
   auto* wrap = GetZeekValWrap(receiver);
   auto rval = static_cast<zeek::RecordVal*>(wrap->GetVal());
   const auto& rt = rval->GetType<zeek::RecordType>();
@@ -1456,11 +1428,7 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekRecordSetter(
 // Callback for enumerating the properties of a record.
 void ZeekValWrapper::ZeekRecordEnumerator(
     const v8::PropertyCallbackInfo<v8::Array>& info) {
-#if (NODE_MAJOR_VERSION < 26)
-  v8::Local<v8::Object> receiver = info.This();
-#else
-  v8::Local<v8::Object> receiver = info.HolderV2();
-#endif
+  v8::Local<v8::Object> receiver = GetReceiver(info);
   auto* wrap = GetZeekValWrap(receiver);
 
   const auto* val = wrap->GetVal();
@@ -1479,11 +1447,7 @@ void ZeekValWrapper::ZeekRecordEnumerator(
 ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekRecordQuery(
     v8::Local<v8::Name> property,
     const v8::PropertyCallbackInfo<v8::Integer>& info) {
-#if (NODE_MAJOR_VERSION < 26)
-  v8::Local<v8::Object> receiver = info.This();
-#else
-  v8::Local<v8::Object> receiver = info.HolderV2();
-#endif
+  v8::Local<v8::Object> receiver = GetReceiver(info);
   auto* wrap = GetZeekValWrap(receiver);
 
 #ifdef DEBUG

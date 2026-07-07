@@ -1,4 +1,4 @@
-Pygments==2.16.1
+Pygments==2.20.0
 Sphinx==7.2.6
 docutils==0.20.1
 sphinx-js==3.2.2

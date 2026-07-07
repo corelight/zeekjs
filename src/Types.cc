@@ -1,4 +1,5 @@
 #include <cmath>
+#include <format>
 #include <limits>
 
 #include "Plugin.h"
@@ -72,6 +73,10 @@ v8::Local<v8::String> v8_str_intern(v8::Isolate* i, const char* s) {
 
 v8::Local<v8::String> v8_str(v8::Isolate* i, const char* s) {
   return v8::String::NewFromUtf8(i, s).ToLocalChecked();
+}
+
+v8::Local<v8::String> v8_str(v8::Isolate* i, const std::string& s) {
+  return v8::String::NewFromUtf8(i, s.c_str()).ToLocalChecked();
 }
 
 v8::Local<v8::String> v8_bytes_str(v8::Isolate* i, const char* data, int length) {
@@ -636,8 +641,9 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
 
       // Give up if the tag disagreed.
       wrap_result.ok = false;
-      wrap_result.error = zeek::util::fmt("ZeekValWrap pass-through bad tags: %d != %d",
-                                          vp->GetType()->Tag(), type_tag);
+      wrap_result.error = std::format("ZeekValWrap pass-through bad tags: {} != {}",
+                                      static_cast<int>(vp->GetType()->Tag()),
+                                      static_cast<int>(type_tag));
       return wrap_result;
     }
   }
@@ -752,7 +758,7 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
           v8::String::Utf8Value val_utf8(isolate_, v8_val);
           wrap_result.ok = false;
           wrap_result.error =
-              zeek::util::fmt("precision loss going from %s to count", *val_utf8);
+              std::format("precision loss going from {} to count", *val_utf8);
         }
 
         return wrap_result;
@@ -769,7 +775,7 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
         v8::String::Utf8Value val_utf8(isolate_, v8_val);
         wrap_result.ok = false;
         wrap_result.error =
-            zeek::util::fmt("precision loss going from %s to count", *val_utf8);
+            std::format("precision loss going from {} to count", *val_utf8);
         return wrap_result;
       }
     }
@@ -777,8 +783,8 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
     // Generic error
     wrap_result.ok = false;
     v8::String::Utf8Value val_utf8(isolate_, v8_val);
-    wrap_result.error = zeek::util::fmt(
-        "'%s' not a number or bigint or out of range for count", *val_utf8);
+    wrap_result.error =
+        std::format("'{}' not a number or bigint or out of range for count", *val_utf8);
     return wrap_result;
   } else if (type_tag == zeek::TYPE_INT) {
     if (v8_val->IsNumber()) {
@@ -799,7 +805,7 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
           v8::String::Utf8Value val_utf8(isolate_, v8_val);
           wrap_result.ok = false;
           wrap_result.error =
-              zeek::util::fmt("precision loss going from %s to int", *val_utf8);
+              std::format("precision loss going from {} to int", *val_utf8);
         }
 
         return wrap_result;
@@ -816,7 +822,7 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
         v8::String::Utf8Value val_utf8(isolate_, v8_val);
         wrap_result.ok = false;
         wrap_result.error =
-            zeek::util::fmt("precision loss going from %s to int", *val_utf8);
+            std::format("precision loss going from {} to int", *val_utf8);
       }
 
       return wrap_result;
@@ -824,8 +830,8 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
 
     wrap_result.ok = false;
     v8::String::Utf8Value val_utf8(isolate_, v8_val);
-    wrap_result.error = zeek::util::fmt(
-        "'%s' not a number or bigint or out of range for int", *val_utf8);
+    wrap_result.error =
+        std::format("'{}' not a number or bigint or out of range for int", *val_utf8);
     return wrap_result;
   } else if (type_tag == zeek::TYPE_DOUBLE) {
     if (v8_val->IsNumber()) {
@@ -894,9 +900,8 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
             ToZeekVal(v8_element_value, type->Yield());
         if (!element_result.ok) {
           wrap_result.ok = false;
-          wrap_result.error +=
-              zeek::util::fmt("Error with array element at index %u: %s", i,
-                              element_result.error.c_str());
+          wrap_result.error += std::format("Error with array element at index {}: {}",
+                                           i, element_result.error);
           return wrap_result;
         }
 
@@ -920,8 +925,8 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
     // No support for compund indices.
     if (itypes.size() != 1) {
       wrap_result.ok = false;
-      wrap_result.error = zeek::util::fmt("Unsupported index size %lu for type %s",
-                                          itypes.size(), type->GetName().c_str());
+      wrap_result.error = std::format("Unsupported index size {} for type {}",
+                                      itypes.size(), type->GetName().c_str());
       return wrap_result;
     }
 
@@ -941,9 +946,8 @@ ZeekValWrapper::Result ZeekValWrapper::ToZeekVal(v8::Local<v8::Value> v8_val,
 
           if (!index_result.ok) {
             wrap_result.ok = false;
-            wrap_result.error =
-                zeek::util::fmt("Error with array element at index %u: %s", i,
-                                index_result.error.c_str());
+            wrap_result.error = std::format("Error with array element at index {}: {}",
+                                            i, index_result.error);
             return wrap_result;
           }
           table_val->Assign(index_result.val, zeek::Val::nil);
@@ -1101,8 +1105,7 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekTableGetter(
 
   if (itypes.size() != 1) {
     v8::Local<v8::Value> error = v8::Exception::TypeError(::v8_str(
-        isolate,
-        zeek::util::fmt("Unexpected number of index types: %lu", itypes.size())));
+        isolate, std::format("Unexpected number of index types: {}", itypes.size())));
     isolate->ThrowException(error);
     return ZEEKJS_V8_INTERCEPTED_NO;
   }
@@ -1145,8 +1148,7 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekTableSetter(
 
   if (itypes.size() != 1) {
     v8::Local<v8::Value> error = v8::Exception::TypeError(::v8_str(
-        isolate,
-        zeek::util::fmt("Unexpected number of index types: %lu", itypes.size())));
+        isolate, std::format("Unexpected number of index types: {}", itypes.size())));
     isolate->ThrowException(error);
     return ZEEKJS_V8_INTERCEPTED_NO;
   }
@@ -1155,8 +1157,8 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekTableSetter(
   ZeekValWrapper::Result property_wrap_result =
       wrap->GetWrapper()->ToZeekVal(property, index_type);
   if (!property_wrap_result.ok) {
-    v8::Local<v8::Value> error = v8::Exception::TypeError(::v8_str(
-        isolate, zeek::util::fmt("Bad index: %s", property_wrap_result.error.c_str())));
+    v8::Local<v8::Value> error = v8::Exception::TypeError(
+        ::v8_str(isolate, std::format("Bad index: {}", property_wrap_result.error)));
     isolate->ThrowException(error);
     return ZEEKJS_V8_INTERCEPTED_NO;
   }
@@ -1164,8 +1166,8 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekTableSetter(
   ZeekValWrapper::Result value_wrap_result =
       wrap->GetWrapper()->ToZeekVal(v8_val, ttype->Yield());
   if (!value_wrap_result.ok) {
-    v8::Local<v8::Value> error = v8::Exception::TypeError(::v8_str(
-        isolate, zeek::util::fmt("Bad value: %s", value_wrap_result.error.c_str())));
+    v8::Local<v8::Value> error = v8::Exception::TypeError(
+        ::v8_str(isolate, std::format("Bad value: {}", value_wrap_result.error)));
     isolate->ThrowException(error);
     return ZEEKJS_V8_INTERCEPTED_NO;
   }
@@ -1195,8 +1197,7 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekTableIndexGetter(
   const auto& itypes = ttype->GetIndexTypes();
   if (itypes.size() != 1) {
     v8::Local<v8::Value> error = v8::Exception::TypeError(::v8_str(
-        isolate,
-        zeek::util::fmt("Unexpected number of index types: %lu", itypes.size())));
+        isolate, std::format("Unexpected number of index types: {}", itypes.size())));
     isolate->ThrowException(error);
     return ZEEKJS_V8_INTERCEPTED_NO;
   }
@@ -1213,8 +1214,8 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekTableIndexGetter(
       wrap->GetWrapper()->ToZeekVal(v8_index, index_type);
   if (!index_result.ok) {
     v8::Local<v8::Value> error = v8::Exception::TypeError(
-        ::v8_str(isolate, zeek::util::fmt("unable to convert index %d to %s", index,
-                                          zeek::type_name(index_type->Tag()))));
+        ::v8_str(isolate, std::format("unable to convert index {} to {}", index,
+                                      zeek::type_name(index_type->Tag()))));
     isolate->ThrowException(error);
     return ZEEKJS_V8_INTERCEPTED_NO;
   }
@@ -1247,8 +1248,7 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekTableIndexSetter(
   const auto& itypes = ttype->GetIndexTypes();
   if (itypes.size() != 1) {
     v8::Local<v8::Value> error = v8::Exception::TypeError(::v8_str(
-        isolate,
-        zeek::util::fmt("Unexpected number of index types: %lu", itypes.size())));
+        isolate, std::format("Unexpected number of index types: {}", itypes.size())));
     isolate->ThrowException(error);
     return ZEEKJS_V8_INTERCEPTED_NO;
   }
@@ -1266,8 +1266,8 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekTableIndexSetter(
       wrap->GetWrapper()->ToZeekVal(v8_index, index_type);
   if (!index_wrap_result.ok) {
     v8::Local<v8::Value> error = v8::Exception::TypeError(
-        ::v8_str(isolate, zeek::util::fmt("unable to convert index %d to %s", index,
-                                          zeek::type_name(index_type->Tag()))));
+        ::v8_str(isolate, std::format("unable to convert index {} to {}", index,
+                                      zeek::type_name(index_type->Tag()))));
     isolate->ThrowException(error);
     return ZEEKJS_V8_INTERCEPTED_NO;
   }
@@ -1275,8 +1275,8 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekTableIndexSetter(
   ZeekValWrapper::Result value_wrap_result =
       wrap->GetWrapper()->ToZeekVal(v8_val, ttype->Yield());
   if (!value_wrap_result.ok) {
-    v8::Local<v8::Value> error = v8::Exception::TypeError(::v8_str(
-        isolate, zeek::util::fmt("Bad value: %s", value_wrap_result.error.c_str())));
+    v8::Local<v8::Value> error = v8::Exception::TypeError(
+        ::v8_str(isolate, std::format("Bad value: {}", value_wrap_result.error)));
     isolate->ThrowException(error);
     return ZEEKJS_V8_INTERCEPTED_NO;
   }
@@ -1394,9 +1394,9 @@ ZEEKJS_V8_INTERCEPTED ZeekValWrapper::ZeekRecordSetter(
   auto offset = wrap->GetWrapper()->GetRecordFieldOffset(rt, property);
   if (offset < 0) {
     v8::String::Utf8Value arg(isolate, property);
-    v8::Local<v8::Value> error = v8::Exception::TypeError(
-        ::v8_str(isolate, zeek::util::fmt("field %s does not exist in record type %s",
-                                          *arg, rt->GetName().c_str())));
+    v8::Local<v8::Value> error = v8::Exception::TypeError(::v8_str(
+        isolate,
+        std::format("field {} does not exist in record type {}", *arg, rt->GetName())));
     isolate->ThrowException(error);
     return ZEEKJS_V8_INTERCEPTED_NO;
   }

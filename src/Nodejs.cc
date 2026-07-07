@@ -4,6 +4,7 @@
 #include <pthread.h>
 #include <algorithm>
 #include <csignal>
+#include <format>
 #include <memory>
 #include <string>
 #include <thread>
@@ -28,6 +29,10 @@ static v8::Local<v8::String> v8_str_intern(v8::Isolate* i, const char* s) {
 
 static v8::Local<v8::String> v8_str(v8::Isolate* i, const char* s) {
   return v8::String::NewFromUtf8(i, s).ToLocalChecked();
+}
+
+static v8::Local<v8::String> v8_str(v8::Isolate* i, const std::string& s) {
+  return v8::String::NewFromUtf8(i, s.c_str()).ToLocalChecked();
 }
 
 // Callbacks for zeek.vars
@@ -118,7 +123,7 @@ ZEEKJS_V8_INTERCEPTED ZeekGlobalVarsSetter(
     else if (!id->GetType())
       what = "without type";
 
-    std::string error = zeek::util::fmt("Cannot set %s: %s", what.c_str(), *arg);
+    std::string error = std::format("Cannot set {}: {}", what, *arg);
     isolate->ThrowException(v8_str(isolate, error.c_str()));
     return ZEEKJS_V8_INTERCEPTED_NO;
   }
@@ -126,7 +131,7 @@ ZEEKJS_V8_INTERCEPTED ZeekGlobalVarsSetter(
   ZeekValWrapper::Result wrap_result = instance->ToZeekVal(v8_val, id->GetType());
   if (!wrap_result.ok) {
     v8::Local<v8::Value> error = v8::Exception::TypeError(
-        ::v8_str(isolate, zeek::util::fmt("Bad value: %s", wrap_result.error.c_str())));
+        ::v8_str(isolate, std::format("Bad value: {}", wrap_result.error)));
     isolate->ThrowException(error);
     return ZEEKJS_V8_INTERCEPTED_NO;
   }
@@ -410,9 +415,9 @@ std::optional<zeek::Args> Instance::v8_to_zeek_args(const zeek::FuncType* ft,
 
   if ((uint32_t)v8_args->Length() < required_params ||
       v8_args->Length() > total_params) {
-    std::string error = zeek::util::fmt(
-        "Wrong number of parameters. %d provided, %d required, %d total",
-        v8_args->Length(), required_params, total_params);
+    std::string error =
+        std::format("Wrong number of parameters. {} provided, {} required, {} total",
+                    v8_args->Length(), required_params, total_params);
     isolate_->ThrowException(v8_str(isolate_, error.c_str()));
     return std::nullopt;
   }
@@ -469,7 +474,7 @@ v8::Local<v8::Value> Instance::ZeekInvoke(v8::Local<v8::String> v8_name,
   const zeek::detail::IDPtr& id = zeek::id::find(*name_str);
   if (!id) {
     isolate_->ThrowException(
-        v8_str(isolate_, zeek::util::fmt("Unknown function: %s", *name_str)));
+        v8_str(isolate_, std::format("Unknown function: {}", *name_str)));
     return v8::Undefined(isolate_);
   }
 
@@ -554,8 +559,8 @@ v8::MaybeLocal<v8::Value> Instance::ZeekAs(v8::Local<v8::String> v8_name,
     as_type = zeek_type_registry_->Lookup(name);
 
   if (!as_type) {
-    isolate_->ThrowException(v8_str(
-        isolate_, zeek::util::fmt("cannot find Zeek type for '%s'", name.c_str())));
+    isolate_->ThrowException(
+        v8_str(isolate_, std::format("cannot find Zeek type for '{}'", name)));
     return {};
   }
 

@@ -12,8 +12,8 @@ list(GET version_numbers 0 VERSION_MAJOR)
 list(GET version_numbers 1 VERSION_MINOR)
 list(GET version_numbers 2 VERSION_PATCH)
 
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/config.h.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/config.h" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.h"
+               @ONLY)
 
 include(ZeekPlugin)
 
@@ -38,7 +38,25 @@ zeek_plugin_link_library("${NODEJS_LIBRARIES}")
 #
 if ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 9))
     zeek_plugin_link_library(stdc++fs)
-endif()
+endif ()
+
+# Ensure std::format() works.
+include(CheckCXXSourceCompiles)
+check_cxx_source_compiles(
+    "
+    #include <format>
+    #include <string>
+
+    int main() {
+        std::string s = std::format(\"Hello, {}!\", 42);
+        return s.empty() ? 1 : 0;
+    }
+"
+    HAS_STD_FORMAT)
+
+if (NOT HAS_STD_FORMAT)
+    message(FATAL_ERROR "missing std::format() support")
+endif ()
 
 zeek_plugin_cc(src/IOLoop.cc src/Nodejs.cc src/Plugin.cc src/Types.cc)
 zeek_plugin_bif(src/zeekjs.bif)
